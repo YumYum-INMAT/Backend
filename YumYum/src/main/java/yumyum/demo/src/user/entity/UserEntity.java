@@ -50,7 +50,8 @@ public class UserEntity extends BaseEntity {
 
 
     @Builder
-    public UserEntity(Long id, String email, String password, String nickName, Integer age, Character gender, String profileImgUrl, Set<Authority> authorities) {
+    public UserEntity(Long id, String email, String password, String nickName, Integer age,
+                      Character gender, String profileImgUrl, Set<Authority> authorities) {
         this.id = id;
         this.email = email;
         this.password = password;
