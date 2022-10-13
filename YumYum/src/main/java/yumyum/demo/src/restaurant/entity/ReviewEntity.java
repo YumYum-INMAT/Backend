@@ -1,5 +1,7 @@
 package yumyum.demo.src.restaurant.entity;
 
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
@@ -29,12 +31,14 @@ public class ReviewEntity extends BaseEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    @Column(nullable = false, columnDefinition = "default 1")
+    @Column(nullable = false, columnDefinition = "int default 1")
     private Integer ratingStar;
 
+    @Column
     private String imgUrl;
 
-    @Column(nullable = false, columnDefinition = "varchar(100)")
+    @Column(nullable = false, length = 100)
     private String contents;
+
 
 }

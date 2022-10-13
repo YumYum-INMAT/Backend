@@ -32,10 +32,10 @@ public class PostEntity extends BaseEntity {
     @Column(nullable = false, columnDefinition = "varchar(200)")
     private String contents;
 
-    @Column(nullable = false, columnDefinition = "default 0")
+    @Column(nullable = false, columnDefinition = "int default 0")
     private Integer countLike;
 
-    @Column(nullable = false, columnDefinition = "default 0")
+    @Column(nullable = false, columnDefinition = "int default 0")
     private Integer countComment;
 
 }

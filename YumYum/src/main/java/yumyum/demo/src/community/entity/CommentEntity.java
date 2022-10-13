@@ -32,12 +32,12 @@ public class CommentEntity extends BaseEntity {
     private Long parent_id;
 
     @Column(nullable = false)
-    private Integer level;
+    private Integer commentLevel;
 
     @Column(nullable = false)
     private Integer groupNumber;
 
-    @Column(nullable = false, columnDefinition = "default 0")
+    @Column(nullable = false, columnDefinition = "int default 0")
     private Integer countLike;
 
 }

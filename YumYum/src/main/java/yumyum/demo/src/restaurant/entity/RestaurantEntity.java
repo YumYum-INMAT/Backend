@@ -39,36 +39,36 @@ public class RestaurantEntity extends BaseEntity {
     @Column(nullable = false, columnDefinition = "decimal(18,10)")
     private Double longitude;
 
-    @Column(nullable = false, columnDefinition = "default 0")
+    @Column(nullable = false, columnDefinition = "int default 0")
     private Integer countHeart;
 
     @Column(nullable = false, columnDefinition = "decimal(2,1) default 0")
     private Double averageStar;
 
-    @Column(nullable = false, columnDefinition = "default 0")
+    @Column(nullable = false, columnDefinition = "int default 0")
     private Integer countReview;
 
-    @Column(nullable = false, columnDefinition = "default 0")
+    @Column(nullable = false, columnDefinition = "int default 0")
     private Integer sumStar;
 
     @Column(nullable = false)
     private Integer averagePrice;
 
-    @Column(nullable = false, columnDefinition = "default 1")
+    @Column(nullable = false, columnDefinition = "int default 1")
     private Integer complexity;
 
-    @Column(nullable = false, columnDefinition = "varchar(5) default 'FOOD'")
-    private String type;
+    @Column(nullable = false, columnDefinition = "varchar(6) default 'FOOD'")
+    private String restaurantType;
 
-    @OneToMany(mappedBy = "restaurant")
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<RestaurantMenuEntity> restaurantMenuEntities = new ArrayList<>();
 
-    @OneToMany(mappedBy = "restaurant")
+    @OneToMany(mappedBy = "restaurant",cascade = CascadeType.ALL)
     private List<ReviewEntity> reviewEntities = new ArrayList<>();
 
     @Builder
     public RestaurantEntity(Long id, String restaurantName, String imgUrl, String contactNumber,
-                            String address, Double latitude, Double longitude, String type) {
+                            String address, Double latitude, Double longitude, String restaurantType) {
         this.id = id;
         this.restaurantName = restaurantName;
         this.imgUrl = imgUrl;
@@ -76,7 +76,7 @@ public class RestaurantEntity extends BaseEntity {
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.type = type;
+        this.restaurantType = restaurantType;
     }
 
     /**

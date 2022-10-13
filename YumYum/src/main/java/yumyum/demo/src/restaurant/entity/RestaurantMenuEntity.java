@@ -29,7 +29,7 @@ public class RestaurantMenuEntity extends BaseEntity {
     @Column(nullable = false, columnDefinition = "varchar(30)")
     private String menuName;
 
-    @Column(nullable = false, columnDefinition = "default 0")
+    @Column(nullable = false, columnDefinition = "int default 0")
     private Integer price;
 
 }

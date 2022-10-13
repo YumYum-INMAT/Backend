@@ -10,7 +10,7 @@ import javax.persistence.*;
 
 @Entity
 @Getter
-@Table(name = "comment")
+@Table(name = "commentLike")
 @NoArgsConstructor
 @DynamicInsert
 public class CommentLikeEntity extends BaseEntity {
