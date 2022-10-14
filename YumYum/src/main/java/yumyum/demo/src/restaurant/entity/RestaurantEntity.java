@@ -55,7 +55,7 @@ public class RestaurantEntity extends BaseEntity {
     private Integer averagePrice;
 
     @Column(nullable = false, columnDefinition = "int default 1")
-    private Integer complexity;
+    private Integer complexity; //1:여유, 2:보통, 3:복잡
 
     @Column(nullable = false, columnDefinition = "varchar(6) default 'FOOD'")
     private String restaurantType;
@@ -118,6 +118,10 @@ public class RestaurantEntity extends BaseEntity {
         this.averagePrice = sumPrice / size;
     }
 
+    //복잡도 수정
+    public void setComplexity(int level) {
+        this.complexity = level;
+    }
 
 
 

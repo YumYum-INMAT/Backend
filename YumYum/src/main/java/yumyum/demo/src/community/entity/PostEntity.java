@@ -38,4 +38,29 @@ public class PostEntity extends BaseEntity {
     @Column(nullable = false, columnDefinition = "int default 0")
     private Integer countComment;
 
+    /**
+     * 비즈니스 로직
+     */
+
+    //좋아요 수 증가
+    public void increaseCountLike() {
+        this.countLike++;
+    }
+
+    //좋아요 수 감소
+    public void decreaseCountLike() {
+        this.countLike--;
+    }
+
+    //댓글 수 증가
+    public void increaseCountComment() {
+        this.countComment++;
+    }
+
+    //댓글 수 감소
+    public void decreaseCountComment() {
+        this.countComment--;
+    }
+
+
 }
