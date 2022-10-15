@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
 import yumyum.demo.jwt.TokenProvider;
+import yumyum.demo.src.user.dto.LoginDto;
 import yumyum.demo.src.user.dto.UserDto;
 import yumyum.demo.src.user.entity.Authority;
 import yumyum.demo.src.user.entity.UserEntity;
@@ -17,6 +18,7 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_EMAIL;
+import static yumyum.demo.config.BaseResponseStatus.FAILED_TO_LOGIN;
 
 @Service
 @RequiredArgsConstructor
@@ -60,4 +62,19 @@ public class UserService {
         return userRepository.findOneWithAuthoritiesByEmail(email);
     }
 
+    //이메일 존재 여부 체크
+    public void checkEmail(String email) throws BaseException {
+        if(userRepository.findByEmail(email).isEmpty()) {
+            throw new BaseException(FAILED_TO_LOGIN);
+        }
+    }
+
+    public void checkPassword(String email, String password) throws BaseException {
+        UserEntity user = userRepository.findByEmail(email).get();
+
+        if(!passwordEncoder.matches(password, user.getPassword())) {
+            throw new BaseException(FAILED_TO_LOGIN);
+        }
+
+    }
 }

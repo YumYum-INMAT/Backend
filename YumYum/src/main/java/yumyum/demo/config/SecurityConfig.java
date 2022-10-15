@@ -52,8 +52,8 @@ public class SecurityConfig {
                 //토큰이 없어도 사용가능한 URI에 대한 처리
                 .and()
                 .authorizeRequests()
-                .antMatchers("/api/authenticate").permitAll()
                 .antMatchers("/users/signup").permitAll()
+                .antMatchers("/users/login").permitAll()
                 .anyRequest().authenticated();
 
 
