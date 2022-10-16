@@ -26,14 +26,11 @@ public enum BaseResponseStatus {
     USERS_EMPTY_USER_ID(false, 2010, "유저 아이디 값을 확인해주세요."),
 
     // [POST] /users
-    POST_USERS_EMPTY_PHONENUMBER(false,2030,"휴대폰 번호를 입력해주세요."),
-    POST_USERS_INVALID_PHONENUMBER(false,2031,"잘못된 휴대폰 번호입니다."),
+    POST_USERS_EMPTY_EMAIL(false,2020,"이메일을 입력해주세요."),
+    POST_USERS_INVALID_EMAIL(false,2021,"잘못된 이메일 형식입니다."),
 
-    POST_USERS_EMPTY_NAME(false,2040,"이름을 입력해주세요."),
-    POST_USERS_OVER_LENGTH_NAME(false,2041,"이름은 최대 20자까지 입력해주세요."),
-
-    POST_USERS_EMPTY_PASSWORD(false,2050,"비밀 번호를 입력해주세요."),
-    POST_USERS_INVALID_PASSWORD(false,2051,"비밀 번호는 특수문자 포함 6자 이상 20자리 이하입니다."),
+    POST_USERS_EMPTY_PASSWORD(false,2030,"비밀 번호를 입력해주세요."),
+    POST_USERS_INVALID_PASSWORD(false,2031,"비밀 번호는 특수문자 포함 8자 이상 20자리 이하입니다."),
 
     POST_USERS_EMPTY_BIRTHDAY(false,2060,"생일을 입력해주세요."),
     POST_USERS_INVALID_BIRTHDAY(false,2061,"잘못된 생일 형식입니다."),
