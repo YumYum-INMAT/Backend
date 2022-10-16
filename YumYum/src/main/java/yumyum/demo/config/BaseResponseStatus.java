@@ -31,16 +31,21 @@ public enum BaseResponseStatus {
 
     POST_USERS_EMPTY_PASSWORD(false,2030,"비밀 번호를 입력해주세요."),
     POST_USERS_INVALID_PASSWORD(false,2031,"비밀 번호는 특수문자 포함 8자 이상 20자리 이하입니다."),
+    
+    POST_USERS_EMPTY_NICKNAME(false,2040,"닉네임을 입력해주세요."),
+    POST_USERS_INVALID_NICKNAME(false,2042,"닉네임은 한글 최소 2자, 최대 8자까지 사용 가능합니다."),
+    
+    POST_USERS_EMPTY_AGE(false,2050,"나이를 입력해주세요."),
+    POST_USERS_INVALID_AGE(false,2051,"올바른 나이를 입력해주세요."),
+
+    POST_USERS_EMPTY_GENDER(false,2060,"성별을 입력해주세요."),
+    POST_USERS_INVALID_GENDER(false,2061,"올바른 성별을 입력해주세요."),
 
     POST_USERS_EMPTY_BIRTHDAY(false,2060,"생일을 입력해주세요."),
     POST_USERS_INVALID_BIRTHDAY(false,2061,"잘못된 생일 형식입니다."),
 
     POST_USERS_EMPTY_PRIVACY(false,2070,"개인정보 약관 동의가 필요합니다."),
     POST_USERS_INVALID_PRIVACY(false,2071,"잘못된 개인정보 약관 동의입니다."),
-
-    POST_USERS_EMPTY_NICKNAME(false,2080,"사용자 이름을 입력해주세요."),
-    POST_USERS_OVER_LENGTH_NICKNAME(false,2081,"사용자 이름은 최대 20자까지 입력해주세요."),
-    POST_USERS_INVALID_NICKNAME(false,2082,"아이디는 영어, 숫자, '_', '.'만 사용 가능합니다."),
 
     // [POST] /users/login
     POST_USERS_EMPTY_LOGIN_ID(false, 2090, "아이디를 입력해주세요."),
@@ -68,9 +73,9 @@ public enum BaseResponseStatus {
     
     NOT_ACTIVATED_USER(false,3015,"유효한 사용자가 아닙니다."),
     
-    
-    DUPLICATED_NICKNAME(false,3030,"중복된 사용자 이름입니다."),
-    DUPLICATED_EMAIL(false,3035,"중복된 이메일입니다."),
+
+    DUPLICATED_EMAIL(false,3030,"중복된 이메일입니다."),
+    DUPLICATED_NICKNAME(false,3035,"중복된 사용자 이름입니다."),
 
 
     FAILED_TO_MODIFY_USERNAME(false,3040,"14일 이내에 이름 변경은 최대 2번입니다."),

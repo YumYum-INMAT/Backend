@@ -1,5 +1,6 @@
 package yumyum.demo.src.user.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
@@ -12,7 +13,8 @@ import javax.validation.constraints.Size;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginDto {
+public class SignUpDto {
+
     @NotBlank(message = "이메일을 입력해주세요.") //@NotBlank는 @NotNull을 포함
     @Size(max = 320, message = "잘못된 이메일 형식입니다.")
     @Pattern(regexp = "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-z]+$", message = "잘못된 이메일 형식입니다.")
@@ -22,4 +24,16 @@ public class LoginDto {
     @Size(min = 8, max = 20, message = "비밀번호는 특수문자 포함 최소 8글자입니다.")
     @Pattern(regexp = "^(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&]{8,20}", message = "비밀번호는 특수문자 포함 최소 8글자입니다.")
     private String password;
+
+    @NotBlank(message = "닉네임을 입력해주세요.")
+    @Size(min = 2, max = 8, message = "닉네임은 한글 최소 2자, 최대 8자까지 입니다.")
+    @Pattern(regexp = "[가-힣]{2,8}", message = "닉네임은 한글 최소 2자, 최대 8자까지 입니다.")
+    private String nickName;
+
+    @NotNull(message = "나이를 입력해주세요.")
+    private Integer age;
+
+    @NotNull(message = "성별을 입력해주세요.")
+    private Character gender;
+
 }

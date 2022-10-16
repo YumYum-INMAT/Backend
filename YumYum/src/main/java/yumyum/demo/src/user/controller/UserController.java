@@ -1,5 +1,6 @@
 package yumyum.demo.src.user.controller;
 
+import antlr.Token;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -10,7 +11,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
@@ -18,7 +18,7 @@ import yumyum.demo.jwt.JwtFilter;
 import yumyum.demo.jwt.TokenProvider;
 import yumyum.demo.src.user.dto.LoginDto;
 import yumyum.demo.src.user.dto.TokenDto;
-import yumyum.demo.src.user.dto.UserDto;
+import yumyum.demo.src.user.dto.SignUpDto;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.service.UserService;
 
@@ -37,10 +37,77 @@ public class UserController {
     private final TokenProvider tokenProvider;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
+
+    @ApiOperation(value = "회원 가입 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 2020, message = "이메일을 입력해주세요."),
+            @ApiResponse(code = 2021, message = "잘못된 이메일 형식입니다."),
+            @ApiResponse(code = 2030, message = "비밀 번호를 입력해주세요."),
+            @ApiResponse(code = 2031, message = "비밀 번호는 특수문자 포함 8자 이상 20자리 이하입니다."),
+            @ApiResponse(code = 3010, message = "없는 아이디이거나 비밀번호가 틀렸습니다."),
+            @ApiResponse(code = 400, message = "Bad Request")
+    })
     @PostMapping("/signup")
-    public BaseResponse<UserEntity> signup(@Valid @RequestBody UserDto userDto) {
+    public BaseResponse<String> signup(@Valid @RequestBody SignUpDto signUpDto) {
+        /**
+         * 형식적 Validation 처리, 요청받을때 @Valid로 체크하지만 한번 더 체크해줌.
+         */
+
+        if(signUpDto.getEmail() == null) {
+            return new BaseResponse<>(POST_USERS_EMPTY_EMAIL);
+        }
+
+        if(signUpDto.getEmail().length() > 320) {
+            return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
+        }
+
+        String emailPattern = "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-z]+$";
+        if(!Pattern.matches(emailPattern, signUpDto.getEmail())) {
+            return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
+        }
+
+        if(signUpDto.getPassword() == null) {
+            return new BaseResponse<>(POST_USERS_EMPTY_PASSWORD);
+        }
+
+        String passwordPattern = "^(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&]{8,20}";
+        if(!Pattern.matches(passwordPattern, signUpDto.getPassword())) {
+            return new BaseResponse<>(POST_USERS_INVALID_PASSWORD);
+        }
+
+        if(signUpDto.getNickName() == null) {
+            return new BaseResponse<>(POST_USERS_EMPTY_NICKNAME);
+        }
+
+        String nickNamePattern = "[가-힣]{2,8}";
+        if(!Pattern.matches(nickNamePattern, signUpDto.getNickName())) {
+            return new BaseResponse<>(POST_USERS_INVALID_NICKNAME);
+        }
+
+        if(signUpDto.getAge() == null) {
+            return new BaseResponse<>(POST_USERS_EMPTY_AGE);
+        }
+
+        if(signUpDto.getAge() < 1 || signUpDto.getAge() > 100) {
+            return new BaseResponse<>(POST_USERS_INVALID_AGE);
+        }
+
+        if(signUpDto.getGender() == null) {
+            return new BaseResponse<>(POST_USERS_EMPTY_GENDER);
+        }
+
+        if(signUpDto.getGender() != 'F' && signUpDto.getGender() != 'M') {
+            return new BaseResponse<>(POST_USERS_INVALID_GENDER);
+        }
+
         try {
-            return new BaseResponse<>(userService.signup(userDto));
+            userService.signup(signUpDto);
+
+            String result = "회원가입 성공!";
+
+            return new BaseResponse<>(result);
+
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
@@ -54,16 +121,13 @@ public class UserController {
             @ApiResponse(code = 2030, message = "비밀 번호를 입력해주세요."),
             @ApiResponse(code = 2031, message = "비밀 번호는 특수문자 포함 8자 이상 20자리 이하입니다."),
             @ApiResponse(code = 3010, message = "없는 아이디이거나 비밀번호가 틀렸습니다."),
-            @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
-            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+            @ApiResponse(code = 400, message = "Bad Request")
     })
-
     @PostMapping("/login")
     public BaseResponse<TokenDto> login(@Valid @RequestBody LoginDto loginDto) {
 
         /**
-         * 형식적 Validation 처리
+         * 형식적 Validation 처리, 요청받을때 @Valid로 체크하지만 한번 더 체크해줌.
          */
 
         if(loginDto.getEmail() == null) {
@@ -88,7 +152,6 @@ public class UserController {
             return new BaseResponse<>(POST_USERS_INVALID_PASSWORD);
         }
 
-
         try {
             userService.checkEmail(loginDto.getEmail()); //이메일 존재여부 체크
 
@@ -112,7 +175,10 @@ public class UserController {
         }
 
     }
-
+    @ApiResponses(value = {
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
     @GetMapping("/details")
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public BaseResponse<UserEntity> getMyUserInfo(HttpServletRequest request) {
