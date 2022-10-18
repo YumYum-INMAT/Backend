@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,16 +17,15 @@ import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
 import yumyum.demo.jwt.JwtFilter;
 import yumyum.demo.jwt.TokenProvider;
-import yumyum.demo.src.user.dto.LoginDto;
-import yumyum.demo.src.user.dto.NickNameDto;
-import yumyum.demo.src.user.dto.TokenDto;
-import yumyum.demo.src.user.dto.SignUpDto;
+import yumyum.demo.src.user.dto.*;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.service.UserService;
+import yumyum.demo.utils.SecurityUtil;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static yumyum.demo.config.BaseResponseStatus.*;
@@ -175,11 +175,12 @@ public class UserController {
         }
     }
 
+    @ApiOperation(value = "닉네임 중복 체크 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
             @ApiResponse(code = 3035, message = "중복된 닉네임입니다."),
     })
-    @PostMapping("nickname")
+    @PostMapping("/nickname")
     public BaseResponse<String> checkNickName(@Valid @RequestBody NickNameDto nickNameDto) {
         try {
             userService.checkNickName(nickNameDto.getNickName());
@@ -190,21 +191,27 @@ public class UserController {
         }
     }
 
-
+    @ApiOperation(value = "프로필 조회 API")
     @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
             @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
-    @GetMapping("/details")
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
-    public BaseResponse<UserEntity> getMyUserInfo(HttpServletRequest request) {
+    @GetMapping("/profiles")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<UserProfileDto> getUserProfile() {
 
         try {
-            return new BaseResponse<>(userService.getMyUserWithAuthorities().get());
+            Optional<String> currentEmail = SecurityUtil.getCurrentEmail();
+
+            return new BaseResponse<>(userService.getUserProfile(currentEmail.get()));
+
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
     }
+
+
 
     @GetMapping("/{email}")
     @PreAuthorize("hasAnyRole('ADMIN')")

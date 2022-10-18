@@ -8,6 +8,7 @@ import yumyum.demo.config.BaseException;
 import yumyum.demo.jwt.TokenProvider;
 import yumyum.demo.src.user.dto.SignUpDto;
 import yumyum.demo.src.user.dto.TokenDto;
+import yumyum.demo.src.user.dto.UserProfileDto;
 import yumyum.demo.src.user.entity.Authority;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.repository.UserRepository;
@@ -90,4 +91,16 @@ public class UserService {
     }
 
 
+    public UserProfileDto getUserProfile(String email) throws BaseException {
+        UserEntity foundUserEntity = userRepository.findUserEntityByEmail(email).get();
+
+        UserProfileDto userProfile = UserProfileDto.builder()
+                .profileImgUrl(foundUserEntity.getProfileImgUrl())
+                .nickName(foundUserEntity.getNickName())
+                .age(foundUserEntity.getAge())
+                .gender(foundUserEntity.getGender())
+                .build();
+
+        return userProfile;
+    }
 }
