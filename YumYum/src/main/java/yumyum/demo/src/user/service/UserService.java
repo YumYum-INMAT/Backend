@@ -14,6 +14,7 @@ import yumyum.demo.src.user.repository.UserRepository;
 import yumyum.demo.utils.SecurityUtil;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static yumyum.demo.config.BaseResponseStatus.*;
@@ -81,4 +82,12 @@ public class UserService {
         }
 
     }
+
+    public void checkNickName(String nickName) throws BaseException {
+        if(userRepository.findUserEntityByNickName(nickName).isPresent()) {
+            throw new BaseException(DUPLICATED_NICKNAME);
+        }
+    }
+
+
 }

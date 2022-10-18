@@ -17,6 +17,7 @@ import yumyum.demo.config.BaseResponse;
 import yumyum.demo.jwt.JwtFilter;
 import yumyum.demo.jwt.TokenProvider;
 import yumyum.demo.src.user.dto.LoginDto;
+import yumyum.demo.src.user.dto.NickNameDto;
 import yumyum.demo.src.user.dto.TokenDto;
 import yumyum.demo.src.user.dto.SignUpDto;
 import yumyum.demo.src.user.entity.UserEntity;
@@ -48,6 +49,7 @@ public class UserController {
             @ApiResponse(code = 3010, message = "없는 아이디이거나 비밀번호가 틀렸습니다."),
             @ApiResponse(code = 400, message = "Bad Request")
     })
+
     @PostMapping("/signup")
     public BaseResponse<String> signup(@Valid @RequestBody SignUpDto signUpDto) {
         /**
@@ -104,9 +106,7 @@ public class UserController {
         try {
             userService.signup(signUpDto);
 
-            String result = "회원가입 성공!";
-
-            return new BaseResponse<>(result);
+            return new BaseResponse<>("회원가입 성공!");
 
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
@@ -173,8 +173,24 @@ public class UserController {
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
-
     }
+
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 3035, message = "중복된 닉네임입니다."),
+    })
+    @PostMapping("nickname")
+    public BaseResponse<String> checkNickName(@Valid @RequestBody NickNameDto nickNameDto) {
+        try {
+            userService.checkNickName(nickNameDto.getNickName());
+
+            return new BaseResponse<>("닉네임 사용가능!");
+        } catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+
     @ApiResponses(value = {
             @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
