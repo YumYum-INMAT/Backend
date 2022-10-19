@@ -103,4 +103,21 @@ public class UserService {
 
         return userProfile;
     }
+
+    public void updateUserProfile(String email, UserProfileDto userProfileDto) throws BaseException {
+        if(userRepository.findUserEntityByNickName(userProfileDto.getNickName()).isPresent()) {
+            throw new BaseException(DUPLICATED_NICKNAME);
+        }
+
+        UserEntity foundUserEntity = userRepository.findUserEntityByEmail(email).get();
+
+        //프로필 수정
+        foundUserEntity.updateUserProfile(
+                userProfileDto.getProfileImgUrl(),
+                userProfileDto.getNickName(),
+                userProfileDto.getAge(),
+                userProfileDto.getGender());
+
+        userRepository.save(foundUserEntity);
+    }
 }

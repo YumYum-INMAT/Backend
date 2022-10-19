@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
@@ -205,6 +206,30 @@ public class UserController {
             Optional<String> currentEmail = SecurityUtil.getCurrentEmail();
 
             return new BaseResponse<>(userService.getUserProfile(currentEmail.get()));
+
+        } catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    @ApiOperation(value = "프로필 수정 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 3035, message = "중복된 닉네임입니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @PatchMapping("/profiles")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<String> updateUserProfile(@Valid @RequestBody UserProfileDto userProfileDto) {
+
+        try {
+            Optional<String> currentEmail = SecurityUtil.getCurrentEmail();
+
+            userService.updateUserProfile(currentEmail.get(), userProfileDto);
+
+            return new BaseResponse<>("프로필 변경 완료!");
 
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());

@@ -72,4 +72,16 @@ public class UserEntity extends BaseEntity {
         return passwordEncoder.matches(plainPassword, this.password);
     }
 
+    /**
+     * 비즈니스 로직
+     */
+    
+    // 프로필 수정
+    public void updateUserProfile(String profileImgUrl, String nickName, Integer age, Character gender) {
+        this.profileImgUrl = profileImgUrl;
+        this.nickName = nickName;
+        this.age = age;
+        this.gender = gender;
+    }
+
 }
