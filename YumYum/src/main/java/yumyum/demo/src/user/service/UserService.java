@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.jwt.TokenProvider;
+import yumyum.demo.src.user.dto.MyPageDto;
 import yumyum.demo.src.user.dto.SignUpDto;
 import yumyum.demo.src.user.dto.TokenDto;
 import yumyum.demo.src.user.dto.UserProfileDto;
@@ -90,6 +91,16 @@ public class UserService {
         }
     }
 
+    public MyPageDto getMyPage(String email) throws BaseException {
+        UserEntity foundUserEntity = userRepository.findUserEntityByEmail(email).get();
+
+        MyPageDto myPageDto = MyPageDto.builder()
+                .profileImgUrl(foundUserEntity.getProfileImgUrl())
+                .nickName(foundUserEntity.getNickName())
+                .build();
+
+        return myPageDto;
+    }
 
     public UserProfileDto getUserProfile(String email) throws BaseException {
         UserEntity foundUserEntity = userRepository.findUserEntityByEmail(email).get();
@@ -120,4 +131,6 @@ public class UserService {
 
         userRepository.save(foundUserEntity);
     }
+
+
 }

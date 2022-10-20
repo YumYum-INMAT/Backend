@@ -192,6 +192,26 @@ public class UserController {
         }
     }
 
+    @ApiOperation(value = "마이페이지 조회 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @GetMapping("/details")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<MyPageDto> getMyPage() {
+
+        try {
+            Optional<String> currentEmail = SecurityUtil.getCurrentEmail();
+
+            return new BaseResponse<>(userService.getMyPage(currentEmail.get()));
+
+        } catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
     @ApiOperation(value = "프로필 조회 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
@@ -235,8 +255,6 @@ public class UserController {
             return new BaseResponse<>(e.getStatus());
         }
     }
-
-
 
     @GetMapping("/{email}")
     @PreAuthorize("hasAnyRole('ADMIN')")
