@@ -1,28 +1,23 @@
 package yumyum.demo.src.community.repository;
 
-import java.time.LocalDateTime;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.security.core.parameters.P;
-import yumyum.demo.src.community.entity.CommentEntity;
-import yumyum.demo.src.community.entity.CommentLikeEntity;
-import yumyum.demo.src.community.entity.PostEntity;
-import yumyum.demo.src.community.entity.PostLikeEntity;
-import yumyum.demo.src.community.form.CommentForm;
-import yumyum.demo.src.community.form.CommentLikeForm;
-import yumyum.demo.src.community.form.PostForm;
-import yumyum.demo.src.community.form.PostLikeForm;
-import yumyum.demo.src.user.entity.UserEntity;
+import org.springframework.stereotype.Repository;
+import yumyum.demo.src.community.dto.CommentDto;
+import yumyum.demo.src.community.dto.CommentLikeDto;
+import yumyum.demo.src.community.dto.PostDto;
+import yumyum.demo.src.community.dto.PostLikeDto;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
 import java.util.*;
 
-public class CommunityJdbcTempRepository implements CommunityRepository{
+@Repository
+public class CommunityJdbcTempRepository{
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -31,11 +26,11 @@ public class CommunityJdbcTempRepository implements CommunityRepository{
     }
 
     @Override
-    public List<PostForm> findAllPost() {
-        List<PostForm> postFormList = this.jdbcTemplate.query(
+    public List<PostDto> findAllPost() {
+        List<PostDto> postFormList = this.jdbcTemplate.query(
                 "select  from post order by created_at",
                 (rs, rowNum) ->{
-                    PostForm postForm = new PostForm();
+                    PostDto postForm = new PostDto();
                     postForm.setId(rs.getLong("post_id"));
                     postForm.setContents(rs.getString("contents"));
                     postForm.setCountComment(rs.getInt("count_comment"));
@@ -59,11 +54,11 @@ public class CommunityJdbcTempRepository implements CommunityRepository{
     }
 
     @Override
-    public Optional<PostForm> findOnePost(Long post_id) {
-        Optional<PostForm> postForm = this.jdbcTemplate.queryForObject(
+    public Optional<PostDto> findOnePost(Long post_id) {
+        Optional<PostDto> postForm = this.jdbcTemplate.queryForObject(
                 "select * from post where post_id = ?",
                 (rs, rowNum) -> {
-                    PostForm postForm1 = new PostForm();
+                    PostDto postForm1 = new PostDto();
                     postForm1.setId(rs.getLong("post_id"));
                     postForm1.setContents(rs.getString("contents"));
                     postForm1.setCountComment(rs.getInt("count_comment"));
@@ -78,25 +73,25 @@ public class CommunityJdbcTempRepository implements CommunityRepository{
     }
 
 
-    @Override
-    public Long createPost(Long user_id, String topic, String contents) {
+    public Long createPost(String user_name, String topic, String contents, String imgUrl) {
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
         jdbcInsert.withTableName("post").usingGeneratedKeyColumns("comment_id");
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("user_id", user_id);
+        parameters.put("user_name", user_name);
         parameters.put("topic", topic);
         parameters.put("contents", contents);
+        parameters.put("img_url", imgUrl);
 
         Number key = jdbcInsert.executeAndReturnKey(new MapSqlParameterSource(parameters));
 
         return key.longValue();
     }
 
-    @Override
-    public Long updatePost(Long post_id, String topic, String contents) {
+
+    public Long updatePost(String user_name, Long post_id, String topic, String contents, String imgUrl) {
         this.jdbcTemplate.update(
-                "update post set topic = ?, contents = ? where post_id = ?",
-                topic, contents, post_id
+                "update post set topic = ?, contents = ?, imgUrl= ? where post_id = ? and user_name = ? ",
+                topic, contents, imgUrl, post_id, user_name
         );
 
         return post_id;
@@ -111,32 +106,32 @@ public class CommunityJdbcTempRepository implements CommunityRepository{
     }
 
     @Override
-    public List<CommentForm> findAllComment(Long post_id) {
-        List<CommentForm> commentFormList = this.jdbcTemplate.query(
+    public List<CommentDto> findAllComment(Long post_id) {
+        List<CommentDto> commentFormList = this.jdbcTemplate.query(
                 "select * from comment where post_id = ?",
                 (rs, rowNum) -> {
-                    CommentForm commentForm = new CommentForm();
-                    commentForm.setId(rs.getLong("comment_id"));
-                    commentForm.setCommentLevel(rs.getInt("comment_level"));
-                    commentForm.setCountLike(rs.getInt("count_like"));
-                    commentForm.setGroupNumber(rs.getInt("group_number"));
-                    commentForm.setParent_id(rs.getLong("parent_id"));
-                    commentForm.setPostId(rs.getLong("post_id"));
-                    commentForm.setUserId(rs.getLong("user_id"));
+                    CommentDto commentDto = new CommentDto();
+                    commentDto.setId(rs.getLong("comment_id"));
+                    commentDto.setCommentLevel(rs.getInt("comment_level"));
+                    commentDto.setCountLike(rs.getInt("count_like"));
+                    commentDto.setGroupNumber(rs.getInt("group_number"));
+                    commentDto.setParent_id(rs.getLong("parent_id"));
+                    commentDto.setPostId(rs.getLong("post_id"));
+                    commentDto.setUserId(rs.getLong("user_id"));
 
-                    return commentForm;
+                    return commentDto;
                 }, post_id);
         return commentFormList;
     }
 
 
     @Override
-    public Optional<CommentForm> findOneComment(Long post_id, Long comment_id) {
+    public Optional<CommentDto> findOneComment(Long post_id, Long comment_id) {
 
-        Optional<CommentForm> commentForm = this.jdbcTemplate.queryForObject(
+        Optional<CommentDto> commentForm = this.jdbcTemplate.queryForObject(
                 "select * from comment where post_id = ? and comment_id = ?",
                 (rs, rowNum) ->{
-                    CommentForm commentForm1 = new CommentForm();
+                    CommentDto commentForm1 = new CommentDto();
                     commentForm1.setId(rs.getLong("comment_id"));
                     commentForm1.setCommentLevel(rs.getInt("comment_level"));
                     commentForm1.setCountLike(rs.getInt("count_like"));
@@ -151,8 +146,7 @@ public class CommunityJdbcTempRepository implements CommunityRepository{
         return commentForm;
     }
 
-    @Override
-    public Long createComment(Long user_id, Long post_id, String contents) {
+    public Long createComment(String user_name, Long post_id, String contents) {
 
        /* SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
         jdbcInsert.withTableName("comment").usingGeneratedKeyColumns("comment_id");
@@ -168,13 +162,13 @@ public class CommunityJdbcTempRepository implements CommunityRepository{
 
 
         //group number는 최초 댓글일 경우에는 1로, 최초 댓글이 아닐 경우는 group_number의 값들 중 (가장 큰 값 + 1) 로 할당
-        String qurry = "insert into comment(group_number,comment_level, parent_id, post_id, user_id , contents)"+
+        String qurry = "insert into comment(group_number,comment_level, parent_id, post_id, user_name , contents)"+
                 "values( if((select count(*) from comment) = 0, 1, (select max(group_number) from comment) + 1), 0, 0 , ? , ? ,?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         PreparedStatementCreator preparedStatementCreator = (connection) -> {
             PreparedStatement preparedStatement = connection.prepareStatement(qurry, new String[]{"comment_id"});
             preparedStatement.setLong(1, post_id);
-            preparedStatement.setLong(2, user_id);
+            preparedStatement.setString(2, user_name);
             preparedStatement.setString(3,contents);
 
             return preparedStatement;
@@ -240,7 +234,7 @@ public class CommunityJdbcTempRepository implements CommunityRepository{
     }
 
     @Override
-    public Optional<PostLikeForm> SignUplikePost(Long user_id, Long post_id) {
+    public Optional<PostLikeDto> SignUplikePost(Long user_id, Long post_id) {
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
         jdbcInsert.withTableName("post_like").usingGeneratedKeyColumns("post_like_id");
         Map<String, Object> parameters = new HashMap<>();
@@ -249,12 +243,12 @@ public class CommunityJdbcTempRepository implements CommunityRepository{
 
         Number key = jdbcInsert.executeAndReturnKey(new MapSqlParameterSource(parameters));
 
-        PostLikeForm postLikeForm = new PostLikeForm();
-        postLikeForm.setId(key.longValue()); //post_like_id
-        postLikeForm.setPostId(post_id);
-        postLikeForm.setUserId(user_id);
+        PostLikeDto postLikeDto = new PostLikeDto();
+        postLikeDto.setId(key.longValue()); //post_like_id
+        postLikeDto.setPostId(post_id);
+        postLikeDto.setUserId(user_id);
 
-        return Optional.ofNullable(postLikeForm);
+        return Optional.ofNullable(postLikeDto);
     }
 
     @Override
@@ -291,7 +285,7 @@ public class CommunityJdbcTempRepository implements CommunityRepository{
     }
 
     @Override
-    public Optional<CommentLikeForm> SignUplikeComment(Long user_id, Long comment_id) {
+    public Optional<CommentLikeDto> SignUplikeComment(Long user_id, Long comment_id) {
         SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
         jdbcInsert.withTableName("comment_like").usingGeneratedKeyColumns("commentLike_id");
         Map<String, Object> parameters = new HashMap<>();
@@ -301,12 +295,12 @@ public class CommunityJdbcTempRepository implements CommunityRepository{
 
         Number key = jdbcInsert.executeAndReturnKey(new MapSqlParameterSource(parameters));
 
-        CommentLikeForm commentLikeForm = new CommentLikeForm();
-        commentLikeForm.setId(key.longValue()); //comment_like_id
-        commentLikeForm.setUserId(user_id);
-        commentLikeForm.setCommentId(comment_id);
+        CommentLikeDto commentLikeDto = new CommentLikeDto();
+        commentLikeDto.setId(key.longValue()); //comment_like_id
+        commentLikeDto.setUserId(user_id);
+        commentLikeDto.setCommentId(comment_id);
 
-        return Optional.ofNullable(commentLikeForm);
+        return Optional.ofNullable(commentLikeDto);
     }
 
     @Override

@@ -1,11 +1,9 @@
-package yumyum.demo.src.community.form;
+package yumyum.demo.src.community.dto;
 
 import yumyum.demo.src.community.entity.CommentEntity;
 import yumyum.demo.src.user.entity.UserEntity;
 
-import javax.persistence.*;
-
-public class CommentLikeForm extends BaseFrom{
+public class CommentLikeDto {
 
     private Long id;
 

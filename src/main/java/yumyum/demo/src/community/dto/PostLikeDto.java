@@ -1,11 +1,9 @@
-package yumyum.demo.src.community.form;
+package yumyum.demo.src.community.dto;
 
 import yumyum.demo.src.community.entity.PostEntity;
 import yumyum.demo.src.user.entity.UserEntity;
 
-import javax.persistence.*;
-
-public class PostLikeForm extends BaseFrom{
+public class PostLikeDto {
 
     private Long id;
 

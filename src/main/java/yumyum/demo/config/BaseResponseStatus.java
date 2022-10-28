@@ -58,6 +58,11 @@ public enum BaseResponseStatus {
     EMPTY_PAGE_INDEX(false,2200,"페이지 인덱스 값이 필요합니다."),
     INVALID_PAGE_INDEX(false,2201,"잘못된 페이지 인덱스입니다."),
 
+    //게시글 관련 오류
+    POST_EMPTY_TOPIC(false,2201,"제목을 입력해주세요."),
+    POST_OVER_LENGTH_TOPIC(false,2202,"제목은 최대 45자까지 입력해주세요."),
+    POST_EMPTY_CONTENTS(false,2203,"내용을 입력해주세요."),
+    POST_OVER_LENGTH_CONTENTS(false,2204,"내용은 최대 255자까지 입력해주세요.")
 
 
 
