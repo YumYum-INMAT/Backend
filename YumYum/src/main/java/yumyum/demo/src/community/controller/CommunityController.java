@@ -29,15 +29,17 @@ public class CommunityController {
         if(postDto.getTopic() == null){
             return new BaseResponse<>(POST_EMPTY_TOPIC);
         }
+
         if(postDto.getTopic().length()>45){
             return new BaseResponse<>(POST_OVER_LENGTH_TOPIC);
         }
 
-        if(postDto.getContents().length()>255){
-            return new BaseResponse<>(POST_EMPTY_CONTENTS);
-        }
         if(postDto.getContents() == null){
             return new BaseResponse<>(POST_OVER_LENGTH_CONTENTS);
+        }
+
+        if(postDto.getContents().length()>255){
+            return new BaseResponse<>(POST_EMPTY_CONTENTS);
         }
 
         try {
@@ -51,5 +53,37 @@ public class CommunityController {
             return new BaseResponse<>(e.getStatus());
         }
     }
+
+    @PatchMapping("/{post_id}")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<String> updatePost(@PathVariable("post_id") Long post_id, @RequestBody PostDto postDto){
+        if(postDto.getTopic() == null){
+            return new BaseResponse<>(POST_EMPTY_TOPIC);
+        }
+
+        if(postDto.getTopic().length()>45){
+            return new BaseResponse<>(POST_OVER_LENGTH_TOPIC);
+        }
+
+        if(postDto.getContents() == null){
+            return new BaseResponse<>(POST_EMPTY_CONTENTS);
+        }
+
+        if(postDto.getContents().length()>255){
+            return new BaseResponse<>(POST_OVER_LENGTH_CONTENTS);
+        }
+
+        try {
+            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+            communityService.updatePost(currentUsername.get(), post_id, postDto);
+            String result = "게시물을 수정했습니다";
+            return new BaseResponse<>(result);
+        }
+        catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
+
+    }
+
 
 }
