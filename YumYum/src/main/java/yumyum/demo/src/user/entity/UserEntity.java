@@ -24,10 +24,13 @@ public class UserEntity extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String email;
+    private String username;
 
     @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
+    private String phoneNumber;
 
     @Column(nullable = false)
     private String nickName;
@@ -50,11 +53,12 @@ public class UserEntity extends BaseEntity {
 
 
     @Builder
-    public UserEntity(Long id, String email, String password, String nickName, Integer age,
+    public UserEntity(Long id, String username, String password, String phoneNumber, String nickName, Integer age,
                       Character gender, String profileImgUrl, Set<Authority> authorities) {
         this.id = id;
-        this.email = email;
+        this.username = username;
         this.password = password;
+        this.phoneNumber = phoneNumber;
         this.nickName = nickName;
         this.age = age;
         this.gender = gender;

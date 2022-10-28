@@ -15,15 +15,19 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 public class SignUpDto {
 
-    @NotBlank(message = "이메일을 입력해주세요.") //@NotBlank는 @NotNull을 포함
-    @Size(max = 320, message = "잘못된 이메일 형식입니다.")
-    @Pattern(regexp = "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-z]+$", message = "잘못된 이메일 형식입니다.")
-    private String email;
+    @NotBlank(message = "아이디을 입력해주세요.") //@NotBlank는 @NotNull을 포함
+    @Size(min = 3,max = 10, message = "아이디는 최소 3자, 최대 10자입니다.")
+    @Pattern(regexp = "[a-zA-Z0-9]{3,10}", message = "잘못된 아이디 형식입니다.")
+    private String username;
 
     @NotBlank(message = "비밀 번호를 입력해주세요.")
     @Size(min = 8, max = 20, message = "비밀번호는 특수문자 포함 최소 8글자입니다.")
     @Pattern(regexp = "^(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&]{8,20}", message = "비밀번호는 특수문자 포함 최소 8글자입니다.")
     private String password;
+
+    @NotBlank(message = "휴대폰 번호를 입력해주세요.")
+    @Pattern(regexp = "^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$", message = "잘못된 휴대폰 번호입니다.")
+    private String phoneNumber;
 
     @NotBlank(message = "닉네임을 입력해주세요.")
     @Size(min = 2, max = 8, message = "닉네임은 한글 최소 2자, 최대 8자까지 입니다.")

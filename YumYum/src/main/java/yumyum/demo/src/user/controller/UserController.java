@@ -1,18 +1,15 @@
 package yumyum.demo.src.user.controller;
 
-import antlr.Token;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
-import org.springframework.aop.scope.ScopedProxyUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
@@ -23,7 +20,6 @@ import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.service.UserService;
 import yumyum.demo.utils.SecurityUtil;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import java.util.Optional;
@@ -43,11 +39,21 @@ public class UserController {
     @ApiOperation(value = "회원 가입 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
-            @ApiResponse(code = 2020, message = "이메일을 입력해주세요."),
-            @ApiResponse(code = 2021, message = "잘못된 이메일 형식입니다."),
+            @ApiResponse(code = 2020, message = "아이디을 입력해주세요."),
+            @ApiResponse(code = 2021, message = "잘못된 아이디 형식입니다."),
             @ApiResponse(code = 2030, message = "비밀 번호를 입력해주세요."),
             @ApiResponse(code = 2031, message = "비밀 번호는 특수문자 포함 8자 이상 20자리 이하입니다."),
+            @ApiResponse(code = 2040, message = "닉네임을 입력해주세요."),
+            @ApiResponse(code = 2041, message = "닉네임은 한글 최소 2자, 최대 8자까지 사용 가능합니다."),
+            @ApiResponse(code = 2050, message = "나이를 입력해주세요."),
+            @ApiResponse(code = 2051, message = "올바른 나이를 입력해주세요."),
+            @ApiResponse(code = 2060, message = "성별을 입력해주세요."),
+            @ApiResponse(code = 2061, message = "올바른 성별을 입력해주세요."),
+            @ApiResponse(code = 2070, message = "휴대폰 번호를 입력해주세요."),
+            @ApiResponse(code = 2071, message = "잘못된 휴대폰 번호입니다."),
             @ApiResponse(code = 3010, message = "없는 아이디이거나 비밀번호가 틀렸습니다."),
+            @ApiResponse(code = 3030, message = "중복된 아이디입니다."),
+            @ApiResponse(code = 3035, message = "중복된 닉네임입니다."),
             @ApiResponse(code = 400, message = "Bad Request")
     })
 
@@ -57,17 +63,17 @@ public class UserController {
          * 형식적 Validation 처리, 요청받을때 @Valid로 체크하지만 한번 더 체크해줌.
          */
 
-        if(signUpDto.getEmail() == null) {
-            return new BaseResponse<>(POST_USERS_EMPTY_EMAIL);
+        if(signUpDto.getUsername() == null) {
+            return new BaseResponse<>(POST_USERS_EMPTY_USERNAME);
         }
 
-        if(signUpDto.getEmail().length() > 320) {
-            return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
+        if(signUpDto.getUsername().length() > 10 || signUpDto.getUsername().length() < 3) {
+            return new BaseResponse<>(POST_USERS_INVALID_USERNAME);
         }
 
-        String emailPattern = "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-z]+$";
-        if(!Pattern.matches(emailPattern, signUpDto.getEmail())) {
-            return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
+        String usernamePattern = "[a-zA-Z0-9]{3,10}";
+        if(!Pattern.matches(usernamePattern, signUpDto.getUsername())) {
+            return new BaseResponse<>(POST_USERS_INVALID_USERNAME);
         }
 
         if(signUpDto.getPassword() == null) {
@@ -77,6 +83,15 @@ public class UserController {
         String passwordPattern = "^(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&]{8,20}";
         if(!Pattern.matches(passwordPattern, signUpDto.getPassword())) {
             return new BaseResponse<>(POST_USERS_INVALID_PASSWORD);
+        }
+
+        if(signUpDto.getPhoneNumber() == null) {
+            return new BaseResponse<>(POST_USERS_EMPTY_PHONENUMBER);
+        }
+
+        String phoneNumberPattern = "^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$";
+        if(!Pattern.matches(phoneNumberPattern, signUpDto.getPhoneNumber())) {
+            return new BaseResponse<>(POST_USERS_INVALID_PHONENUMBER);
         }
 
         if(signUpDto.getNickName() == null) {
@@ -117,8 +132,8 @@ public class UserController {
     @ApiOperation(value = "로그인 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
-            @ApiResponse(code = 2020, message = "이메일을 입력해주세요."),
-            @ApiResponse(code = 2021, message = "잘못된 이메일 형식입니다."),
+            @ApiResponse(code = 2020, message = "아이디을 입력해주세요."),
+            @ApiResponse(code = 2021, message = "잘못된 아이디 형식입니다."),
             @ApiResponse(code = 2030, message = "비밀 번호를 입력해주세요."),
             @ApiResponse(code = 2031, message = "비밀 번호는 특수문자 포함 8자 이상 20자리 이하입니다."),
             @ApiResponse(code = 3010, message = "없는 아이디이거나 비밀번호가 틀렸습니다."),
@@ -131,17 +146,17 @@ public class UserController {
          * 형식적 Validation 처리, 요청받을때 @Valid로 체크하지만 한번 더 체크해줌.
          */
 
-        if(loginDto.getEmail() == null) {
-            return new BaseResponse<>(POST_USERS_EMPTY_EMAIL);
+        if(loginDto.getUsername() == null) {
+            return new BaseResponse<>(POST_USERS_EMPTY_USERNAME);
         }
 
-        if(loginDto.getEmail().length() > 320) {
-            return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
+        if(loginDto.getUsername().length() > 10 || loginDto.getUsername().length() < 3) {
+            return new BaseResponse<>(POST_USERS_INVALID_USERNAME);
         }
 
-        String emailPattern = "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-z]+$";
-        if(!Pattern.matches(emailPattern, loginDto.getEmail())) {
-            return new BaseResponse<>(POST_USERS_INVALID_EMAIL);
+        String usernamePattern = "[a-zA-Z0-9]{3,10}";
+        if(!Pattern.matches(usernamePattern, loginDto.getUsername())) {
+            return new BaseResponse<>(POST_USERS_INVALID_USERNAME);
         }
 
         if(loginDto.getPassword() == null) {
@@ -154,12 +169,12 @@ public class UserController {
         }
 
         try {
-            userService.checkEmail(loginDto.getEmail()); //이메일 존재여부 체크
+            userService.checkUsername(loginDto.getUsername()); //이메일 존재여부 체크
 
-            userService.checkPassword(loginDto.getEmail(), loginDto.getPassword()); //비밀번호 일치 체크
+            userService.checkPassword(loginDto.getUsername(), loginDto.getPassword()); //비밀번호 일치 체크
 
             UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());
+                    new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
 
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -203,7 +218,7 @@ public class UserController {
     public BaseResponse<MyPageDto> getMyPage() {
 
         try {
-            Optional<String> currentEmail = SecurityUtil.getCurrentEmail();
+            Optional<String> currentEmail = SecurityUtil.getCurrentUsername();
 
             return new BaseResponse<>(userService.getMyPage(currentEmail.get()));
 
@@ -223,7 +238,7 @@ public class UserController {
     public BaseResponse<UserProfileDto> getUserProfile() {
 
         try {
-            Optional<String> currentEmail = SecurityUtil.getCurrentEmail();
+            Optional<String> currentEmail = SecurityUtil.getCurrentUsername();
 
             return new BaseResponse<>(userService.getUserProfile(currentEmail.get()));
 
@@ -245,7 +260,7 @@ public class UserController {
     public BaseResponse<String> updateUserProfile(@Valid @RequestBody UserProfileDto userProfileDto) {
 
         try {
-            Optional<String> currentEmail = SecurityUtil.getCurrentEmail();
+            Optional<String> currentEmail = SecurityUtil.getCurrentUsername();
 
             userService.updateUserProfile(currentEmail.get(), userProfileDto);
 

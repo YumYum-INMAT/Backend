@@ -33,7 +33,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Transactional
     public UserDetails loadUserByUsername(String username) {
 
-        Optional<UserEntity> foundUser = userRepository.findOneWithAuthoritiesByEmail(username);
+        Optional<UserEntity> foundUser = userRepository.findOneWithAuthoritiesByUsername(username);
         if(foundUser.isPresent()) {
             return createUser(username, foundUser.get());
         }
@@ -50,7 +50,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .map(authority -> new SimpleGrantedAuthority(authority.getAuthorityName()))
                 .collect(Collectors.toList());
 
-        return new org.springframework.security.core.userdetails.User(userEntity.getEmail(),
+        return new org.springframework.security.core.userdetails.User(userEntity.getUsername(),
                 userEntity.getPassword(),
                 grantedAuthorityList);
     }

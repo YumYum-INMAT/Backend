@@ -26,8 +26,8 @@ public enum BaseResponseStatus {
     USERS_EMPTY_USER_ID(false, 2010, "유저 아이디 값을 확인해주세요."),
 
     // [POST] /users
-    POST_USERS_EMPTY_EMAIL(false,2020,"이메일을 입력해주세요."),
-    POST_USERS_INVALID_EMAIL(false,2021,"잘못된 이메일 형식입니다."),
+    POST_USERS_EMPTY_USERNAME(false,2020,"아이디를 입력해주세요."),
+    POST_USERS_INVALID_USERNAME(false,2021,"잘못된 아이디 형식입니다."),
 
     POST_USERS_EMPTY_PASSWORD(false,2030,"비밀 번호를 입력해주세요."),
     POST_USERS_INVALID_PASSWORD(false,2031,"비밀 번호는 특수문자 포함 8자 이상 20자리 이하입니다."),
@@ -41,11 +41,11 @@ public enum BaseResponseStatus {
     POST_USERS_EMPTY_GENDER(false,2060,"성별을 입력해주세요."),
     POST_USERS_INVALID_GENDER(false,2061,"올바른 성별을 입력해주세요."),
 
-    POST_USERS_EMPTY_BIRTHDAY(false,2060,"생일을 입력해주세요."),
-    POST_USERS_INVALID_BIRTHDAY(false,2061,"잘못된 생일 형식입니다."),
+    POST_USERS_EMPTY_PHONENUMBER(false,2070,"휴대폰 번호를 입력해주세요."),
+    POST_USERS_INVALID_PHONENUMBER(false,2071,"잘못된 휴대폰 번호입니다."),
 
-    POST_USERS_EMPTY_PRIVACY(false,2070,"개인정보 약관 동의가 필요합니다."),
-    POST_USERS_INVALID_PRIVACY(false,2071,"잘못된 개인정보 약관 동의입니다."),
+    POST_USERS_EMPTY_PRIVACY(false,2080,"개인정보 약관 동의가 필요합니다."),
+    POST_USERS_INVALID_PRIVACY(false,2081,"잘못된 개인정보 약관 동의입니다."),
 
     // [POST] /users/login
     POST_USERS_EMPTY_LOGIN_ID(false, 2090, "아이디를 입력해주세요."),
@@ -74,7 +74,7 @@ public enum BaseResponseStatus {
     NOT_ACTIVATED_USER(false,3015,"유효한 사용자가 아닙니다."),
     
 
-    DUPLICATED_EMAIL(false,3030,"중복된 이메일입니다."),
+    DUPLICATED_USERNAME(false,3030,"중복된 아이디입니다."),
     DUPLICATED_NICKNAME(false,3035,"중복된 닉네임입니다."),
 
 
