@@ -28,7 +28,7 @@ public class CommentEntity extends BaseEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "bigint default 0")
     private Long parent_id;
 
     @Column(nullable = false)
@@ -40,4 +40,6 @@ public class CommentEntity extends BaseEntity {
     @Column(nullable = false, columnDefinition = "int default 0")
     private Integer countLike;
 
+    @Column(nullable = false, columnDefinition = "varchar(100)")
+    private String contents;
 }
