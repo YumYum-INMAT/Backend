@@ -169,7 +169,7 @@ public class UserController {
         }
 
         try {
-            userService.checkUsername(loginDto.getUsername()); //이메일 존재여부 체크
+            userService.checkUsername(loginDto.getUsername()); //아이디 존재여부 체크
 
             userService.checkPassword(loginDto.getUsername(), loginDto.getPassword()); //비밀번호 일치 체크
 
@@ -195,6 +195,7 @@ public class UserController {
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
             @ApiResponse(code = 3035, message = "중복된 닉네임입니다."),
+            @ApiResponse(code = 400, message = "Bad Request")
     })
     @PostMapping("/nickname")
     public BaseResponse<String> checkNickName(@Valid @RequestBody NickNameDto nickNameDto) {
@@ -202,6 +203,23 @@ public class UserController {
             userService.checkNickName(nickNameDto.getNickName());
 
             return new BaseResponse<>("닉네임 사용가능!");
+        } catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    @ApiOperation(value = "아이디 중복 체크 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 3030, message = "중복된 아이디입니다."),
+            @ApiResponse(code = 400, message = "Bad Request")
+    })
+    @PostMapping("/username")
+    public BaseResponse<String> checkUsername(@Valid @RequestBody UsernameDto usernameDto) {
+        try {
+            userService.checkUsernameDuplicate(usernameDto.getUsername());
+
+            return new BaseResponse<>("아이디 사용가능!");
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
@@ -271,15 +289,6 @@ public class UserController {
         }
     }
 
-    @GetMapping("/{email}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public BaseResponse<UserEntity> getUserInfo(@PathVariable("email") String email) {
-        try {
-            return new BaseResponse<>(userService.getUserWithAuthorities(email).get());
-        } catch (BaseException e) {
-            return new BaseResponse<>(e.getStatus());
-        }
-    }
 
 
 }

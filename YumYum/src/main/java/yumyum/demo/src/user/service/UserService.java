@@ -57,20 +57,17 @@ public class UserService {
         userRepository.save(user);
     }
 
-    @Transactional(readOnly = true)
-    public Optional<UserEntity> getMyUserWithAuthorities() throws BaseException {
-        return SecurityUtil.getCurrentUsername().flatMap(userRepository::findOneWithAuthoritiesByUsername);
-    }
-
-    @Transactional(readOnly = true)
-    public Optional<UserEntity> getUserWithAuthorities(String email) throws BaseException {
-        return userRepository.findOneWithAuthoritiesByUsername(email);
-    }
-
-    //아이디 존재 여부 체크
+    //아이디 존재 여부 체크 -> 로그인에서 사용
     public void checkUsername(String username) throws BaseException {
         if(userRepository.findUserEntityByUsername(username).isEmpty()) {
             throw new BaseException(FAILED_TO_LOGIN);
+        }
+    }
+
+    //아이디 중복 여부 체크
+    public void checkUsernameDuplicate(String username) throws BaseException {
+        if(userRepository.findUserEntityByUsername(username).isPresent()) {
+            throw new BaseException(DUPLICATED_USERNAME);
         }
     }
 

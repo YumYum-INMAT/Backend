@@ -54,6 +54,7 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers("/users/signup").permitAll()
                 .antMatchers("/users/login").permitAll()
+                .antMatchers("/users/username").permitAll()
                 .antMatchers("/users/nickname").permitAll()
                 .anyRequest().authenticated();
 
