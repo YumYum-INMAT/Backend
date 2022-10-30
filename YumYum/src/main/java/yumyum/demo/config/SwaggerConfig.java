@@ -16,7 +16,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 public class SwaggerConfig {
     private ApiInfo swaggerInfo() {
         return new ApiInfoBuilder().title("서버 API")
-                .description("INMAT/인맛").build();
+                .description("YUMYUM-INMAT").build();
     }
 
     @Bean

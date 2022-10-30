@@ -28,6 +28,9 @@ public class CommentEntity extends BaseEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
+    @Column(nullable = false, columnDefinition = "varchar(100)")
+    private String contents;
+
     @Column(nullable = false)
     private Long parent_id;
 
