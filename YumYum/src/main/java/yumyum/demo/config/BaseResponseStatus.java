@@ -66,6 +66,9 @@ public enum BaseResponseStatus {
     POST_EMPTY_CONTENTS(false,2302,"내용을 입력해주세요."),
     POST_OVER_LENGTH_CONTENTS(false,2303,"내용은 최대 255자까지 입력해주세요."),
 
+    //댓글 관련 오류
+    COMMENT_EMPTY_CONTENTS(false, 2310, "내용을 입력해주세요."),
+    COMMENT_OVER_LENGTH_CONTENTS(false, 2311, "내용은 최대 100자까지 입력해주세요."),
 
     /**
      * 3000 : Response 오류
