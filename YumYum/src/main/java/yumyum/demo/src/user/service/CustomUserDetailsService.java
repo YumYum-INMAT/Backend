@@ -28,11 +28,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
-
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) {
-
         Optional<UserEntity> foundUser = userRepository.findOneWithAuthoritiesByUsername(username);
         if(foundUser.isPresent()) {
             return createUser(username, foundUser.get());

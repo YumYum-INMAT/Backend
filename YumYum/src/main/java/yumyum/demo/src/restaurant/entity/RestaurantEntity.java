@@ -1,8 +1,10 @@
 package yumyum.demo.src.restaurant.entity;
 
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.DynamicInsert;
 import yumyum.demo.config.BaseEntity;
 
@@ -12,8 +14,9 @@ import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "restaurant")
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @DynamicInsert
 public class RestaurantEntity extends BaseEntity {
     @Id
@@ -66,10 +69,8 @@ public class RestaurantEntity extends BaseEntity {
     @OneToMany(mappedBy = "restaurant",cascade = CascadeType.ALL)
     private List<ReviewEntity> reviewEntities = new ArrayList<>();
 
-    @Builder
-    public RestaurantEntity(Long id, String restaurantName, String imgUrl, String contactNumber,
-                            String address, Double latitude, Double longitude, String restaurantType) {
-        this.id = id;
+    public RestaurantEntity(String restaurantName, String imgUrl, String contactNumber, String address,
+                            Double latitude, Double longitude, String restaurantType, List<RestaurantMenuEntity> restaurantMenuEntities) {
         this.restaurantName = restaurantName;
         this.imgUrl = imgUrl;
         this.contactNumber = contactNumber;
@@ -77,11 +78,25 @@ public class RestaurantEntity extends BaseEntity {
         this.latitude = latitude;
         this.longitude = longitude;
         this.restaurantType = restaurantType;
+
+        for (RestaurantMenuEntity restaurantMenu : restaurantMenuEntities) {
+            addRestaurantMenu(restaurantMenu);
+        }
+        updateAveragePrice();
     }
 
     /**
      * 비즈니스 로직 추가
      */
+    public void addRestaurantMenu(RestaurantMenuEntity restaurantMenu) {
+        restaurantMenuEntities.add(restaurantMenu);
+        restaurantMenu.setRestaurant(this);
+    }
+
+    public void addReview(ReviewEntity reviewEntity) {
+        reviewEntities.add(reviewEntity);
+        reviewEntity.setRestaurant(this);
+    }
 
     //하트 찜 개수 증가
     public void increaseCountHeart() {

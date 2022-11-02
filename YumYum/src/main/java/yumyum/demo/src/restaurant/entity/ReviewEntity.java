@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.DynamicInsert;
 import yumyum.demo.config.BaseEntity;
 import yumyum.demo.src.user.entity.UserEntity;
@@ -12,6 +13,7 @@ import javax.persistence.*;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "review")
 @NoArgsConstructor
 @DynamicInsert
