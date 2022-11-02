@@ -22,7 +22,7 @@ public class CommunityRepository {
     }
 
     public Long createPost(String username, String topic, String contents, String imgUrl) {
-        SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
+       /* SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
         jdbcInsert.withTableName("post").usingGeneratedKeyColumns("post_id");
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("user_id", findUserIdByUsername(username));
@@ -32,7 +32,24 @@ public class CommunityRepository {
 
         Number key = jdbcInsert.executeAndReturnKey(new MapSqlParameterSource(parameters));
 
-        return key.longValue();
+        return key.longValue();*/
+
+        String qurry = "insert into post(user_id, topic, contents, img_url)" +
+                "values(?, ? ,? ,? )";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        PreparedStatementCreator preparedStatementCreator = (connection) -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(qurry, new String[]{"post_id"});
+            preparedStatement.setLong(1, findUserIdByUsername(username));
+            preparedStatement.setString(2, topic);
+            preparedStatement.setString(3, contents);
+            preparedStatement.setString(4, imgUrl);
+
+            return preparedStatement;
+        };
+        jdbcTemplate.update(preparedStatementCreator, keyHolder);
+        return keyHolder.getKey().longValue();
+
     }
 
     public Long updatePost(Long post_id, String topic, String contents, String imgUrl) {
@@ -106,4 +123,47 @@ public class CommunityRepository {
         return keyHolder.getKey().longValue();
 
     }
+
+    //post_like table에 값 추가
+    public void createPostLike(Long post_id, Long user_id){
+        this.jdbcTemplate.update(
+          "insert into post_like (post_id, user_id) values (?, ?);",
+                post_id, user_id
+        );
+    }
+
+    //post_lke table에 값 삭제
+    public void deletePostLike(Long post_id, Long user_id){
+        this.jdbcTemplate.update(
+                "delete from post_like where post_id = ? and user_id = ?",
+                post_id, user_id
+        );
+    }
+
+    //post table에 count_like 값 증가
+    public void incresePostCountLike(Long post_id){
+        this.jdbcTemplate.update(
+                "update post set count_like = count_like + 1 where post_id = ?",
+                post_id
+        );
+    }
+
+    //post table count_like 값 감소
+    public void decresePostCountLike(Long post_id){
+        this.jdbcTemplate.update(
+                "update post set count_like = count_like - 1 where post_id = ?",
+                post_id
+        );
+    }
+
+
+    //post_like table에 이미 값이 있는지 검사
+    public Long checkPostLike(Long post_id, Long user_id){
+        Long count = this.jdbcTemplate.queryForObject("select count(*) from post_like where post_id = ? and user_id = ?"
+                , Long.class, post_id, user_id);
+        return count;
+    }
+
+
+
 }

@@ -4,13 +4,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.src.community.dto.CommentDto;
+import yumyum.demo.src.community.dto.CommentLikeDto;
 import yumyum.demo.src.community.dto.PostDto;
 import yumyum.demo.src.community.repository.CommunityRepository;
 
 import javax.transaction.Transactional;
 
-import static yumyum.demo.config.BaseResponseStatus.DATABASE_ERROR;
-import static yumyum.demo.config.BaseResponseStatus.FAILED_TO_UPDATE_POST;
+import java.util.ArrayList;
+import java.util.List;
+
+import static yumyum.demo.config.BaseResponseStatus.*;
 
 @Service
 public class CommunityService {
@@ -21,23 +24,25 @@ public class CommunityService {
         this.communityRepository = communityRepository;
     }
 
-    public void createPost(String username, PostDto postDto) throws BaseException {
+    public Long createPost(String username, PostDto postDto) throws BaseException {
        try {
-           communityRepository.createPost(username, postDto.getTopic(), postDto.getContents(), postDto.getImgUrl());
+           return communityRepository.createPost(username, postDto.getTopic(), postDto.getContents(), postDto.getImgUrl());
        } catch (Exception exception){
            throw new BaseException(DATABASE_ERROR);
        }
     }
     public Long updatePost (String username, Long post_id, PostDto postDto) throws BaseException{
 
-        // 수정하는 게시물의 작상지기 내 계정과 같은지 검사하기
-        if(username != communityRepository.findUsernameByPostId(post_id)){
-            throw new BaseException(FAILED_TO_UPDATE_POST);
+        // 수정하는 게시물의 작성자가 내 계정과 같은지 검사하기
+        if(username.equals(communityRepository.findUsernameByPostId(post_id))){
+            try {
+                return communityRepository.updatePost(post_id, postDto.getTopic(), postDto.getContents(), postDto.getImgUrl());
+            } catch (Exception exception){
+                throw new BaseException(DATABASE_ERROR);
+            }
         }
-        try {
-            return communityRepository.updatePost(post_id, postDto.getTopic(), postDto.getContents(), postDto.getImgUrl());
-        } catch (Exception exception){
-            throw new BaseException(DATABASE_ERROR);
+        else {
+            throw new BaseException(FAILED_TO_UPDATE_POST);
         }
     }
 
@@ -63,4 +68,52 @@ public class CommunityService {
         }
 
     }
+
+    @Transactional
+    public void likePost(String username, Long post_id) throws BaseException{
+        Long user_id = communityRepository.findUserIdByUsername(username);
+        if(communityRepository.checkPostLike(post_id, user_id) == 0 ){
+            try {
+                communityRepository.createPostLike(post_id, user_id);
+                communityRepository.incresePostCountLike(post_id);
+            }catch (Exception exception){
+                throw new BaseException(DATABASE_ERROR);
+            }
+        }
+        else if(communityRepository.checkPostLike(post_id,user_id) == 1){
+            throw new BaseException(ALREADY_POST_LIKE);
+        }
+        else{
+            for(int i = 0; i< communityRepository.checkPostLike(post_id, user_id); i++){
+                communityRepository.decresePostCountLike(post_id);
+            }
+            communityRepository.deletePostLike(post_id, user_id);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+    @Transactional
+    public void unLikePost(String username, Long post_id) throws BaseException{
+        Long user_id = communityRepository.findUserIdByUsername(username);
+        if(communityRepository.checkPostLike(post_id, user_id) == 1){
+            try{
+                communityRepository.deletePostLike(post_id, user_id);
+                communityRepository.decresePostCountLike(post_id);
+            }catch (Exception exception){
+                throw new BaseException(DATABASE_ERROR);
+            }
+        }
+        else if(communityRepository.checkPostLike(post_id, user_id) == 0){
+            throw new BaseException(ALREADY_POST_UNLIKE);
+        }
+        else {
+            for(int i = 0; i< communityRepository.checkPostLike(post_id, user_id); i++){
+                communityRepository.decresePostCountLike(post_id);
+            }
+            communityRepository.deletePostLike(post_id, user_id);
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+
 }
