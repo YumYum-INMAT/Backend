@@ -75,9 +75,12 @@ public enum BaseResponseStatus {
     
 
     DUPLICATED_USERNAME(false,3030,"중복된 아이디입니다."),
+
     DUPLICATED_NICKNAME(false,3035,"중복된 닉네임입니다."),
-    
-    DUPLICATED_HEART(false,3040,"중복된 하트찜입니다."),
+
+    DUPLICATED_EMAIL(false,3040,"중복된 이메일입니다."),
+
+    DUPLICATED_HEART(false,3045,"중복된 하트찜입니다."),
 
 
     FAILED_TO_MODIFY_USERNAME(false,3040,"14일 이내에 이름 변경은 최대 2번입니다."),

@@ -25,6 +25,11 @@ public class SignUpDto {
     @Pattern(regexp = "^(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&]{8,20}", message = "비밀번호는 특수문자 포함 최소 8글자입니다.")
     private String password;
 
+    @NotBlank(message = "이메일을 입력해주세요.") //@NotBlank는 @NotNull을 포함
+    @Size(max = 320, message = "잘못된 이메일 형식입니다.")
+    @Pattern(regexp = "^[a-zA-Z0-9]+@[a-zA-Z0-9]+\\.[a-z]+$", message = "잘못된 이메일 형식입니다.")
+    private String email;
+
     @NotBlank(message = "휴대폰 번호를 입력해주세요.")
     @Pattern(regexp = "^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$", message = "잘못된 휴대폰 번호입니다.")
     private String phoneNumber;

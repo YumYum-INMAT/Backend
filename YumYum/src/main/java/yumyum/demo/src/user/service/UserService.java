@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.jwt.TokenProvider;
+import yumyum.demo.src.user.dto.HeartRestaurantDto;
 import yumyum.demo.src.user.dto.MyPageDto;
 import yumyum.demo.src.user.dto.SignUpDto;
 import yumyum.demo.src.user.dto.UserProfileDto;
@@ -15,6 +16,7 @@ import yumyum.demo.src.user.repository.UserRepository;
 import yumyum.demo.utils.SecurityUtil;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static yumyum.demo.config.BaseResponseStatus.*;
@@ -34,6 +36,11 @@ public class UserService {
             throw new BaseException(DUPLICATED_USERNAME);
         }
 
+        //이메일 중복 체크
+        if (userRepository.findUserEntityByEmail(signUpDto.getUsername()).isPresent()) {
+            throw new BaseException(DUPLICATED_EMAIL);
+        }
+
         //닉네임 중복 체크
         if(userRepository.findUserEntityByNickName(signUpDto.getNickName()).isPresent()) {
             throw new BaseException(DUPLICATED_NICKNAME);
@@ -47,6 +54,7 @@ public class UserService {
         UserEntity user = UserEntity.builder()
                 .username(signUpDto.getUsername())
                 .password(passwordEncoder.encode(signUpDto.getPassword()))
+                .email(signUpDto.getEmail())
                 .phoneNumber(signUpDto.getPhoneNumber())
                 .nickName(signUpDto.getNickName())
                 .age(signUpDto.getAge())
@@ -128,4 +136,9 @@ public class UserService {
     }
 
 
+//    public List<HeartRestaurantDto> getHeartRestaurant(String username) throws BaseException {
+//        Long userId = userRepository.findUserEntityByUsername(username).get().getId();
+//
+//
+//    }
 }
