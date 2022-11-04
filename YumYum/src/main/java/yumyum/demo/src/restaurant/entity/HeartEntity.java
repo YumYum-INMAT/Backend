@@ -28,4 +28,8 @@ public class HeartEntity extends BaseEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
+    public HeartEntity(RestaurantEntity restaurant, UserEntity user) {
+        this.restaurant = restaurant;
+        this.user = user;
+    }
 }

@@ -1,5 +1,6 @@
 package yumyum.demo.src.restaurant.service;
 
+import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_HEART;
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_NICKNAME;
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_USERNAME;
 
@@ -13,18 +14,24 @@ import yumyum.demo.config.BaseException;
 import yumyum.demo.src.restaurant.dto.CreateRestaurantDto;
 import yumyum.demo.src.restaurant.dto.RestaurantMenuDto;
 import yumyum.demo.src.restaurant.entity.CategoryEntity;
+import yumyum.demo.src.restaurant.entity.HeartEntity;
 import yumyum.demo.src.restaurant.entity.RestaurantEntity;
 import yumyum.demo.src.restaurant.entity.RestaurantMenuEntity;
 import yumyum.demo.src.restaurant.repository.CategoryRepository;
+import yumyum.demo.src.restaurant.repository.HeartRepository;
 import yumyum.demo.src.restaurant.repository.RestaurantRepository;
 import yumyum.demo.src.user.entity.Authority;
 import yumyum.demo.src.user.entity.UserEntity;
+import yumyum.demo.src.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class RestaurantService {
     private final RestaurantRepository restaurantRepository;
     private final CategoryRepository categoryRepository;
+    private final HeartRepository heartRepository;
+    private final UserRepository userRepository;
+
 
 
     public void createRestaurant(CreateRestaurantDto createRestaurantDto) throws BaseException {
@@ -57,5 +64,22 @@ public class RestaurantService {
                 restaurantMenuEntityList);
 
         restaurantRepository.save(restaurantEntity);
+    }
+
+    public void addRestaurantHeart(String username, Long restaurantId) throws BaseException {
+        Optional<UserEntity> userEntityByUsername = userRepository.findUserEntityByUsername(username);
+
+        Optional<RestaurantEntity> restaurantEntityById = restaurantRepository.findRestaurantEntityById(restaurantId);
+
+        Optional<HeartEntity> heartEntityByRestaurantAndUser = heartRepository.findHeartEntityByRestaurantAndUser(
+                restaurantEntityById.get(), userEntityByUsername.get());
+
+        if(heartEntityByRestaurantAndUser.isPresent()) {
+            throw new BaseException(DUPLICATED_HEART);
+        }
+
+        HeartEntity heartEntity = new HeartEntity(restaurantEntityById.get(), userEntityByUsername.get());
+
+        heartRepository.save(heartEntity);
     }
 }
