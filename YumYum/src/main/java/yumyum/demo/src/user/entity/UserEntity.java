@@ -30,6 +30,9 @@ public class UserEntity extends BaseEntity {
     private String password;
 
     @Column(nullable = false)
+    private String email;
+
+    @Column(nullable = false)
     private String phoneNumber;
 
     @Column(nullable = false)
@@ -53,11 +56,12 @@ public class UserEntity extends BaseEntity {
 
 
     @Builder
-    public UserEntity(Long id, String username, String password, String phoneNumber, String nickName, Integer age,
-                      Character gender, String profileImgUrl, Set<Authority> authorities) {
+    public UserEntity(Long id, String username, String password, String email, String phoneNumber, String nickName,
+                      Integer age, Character gender, String profileImgUrl, Set<Authority> authorities) {
         this.id = id;
         this.username = username;
         this.password = password;
+        this.email = email;
         this.phoneNumber = phoneNumber;
         this.nickName = nickName;
         this.age = age;
