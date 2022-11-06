@@ -1,5 +1,6 @@
 package yumyum.demo.src.user.dto;
 
+import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 
 import javax.validation.constraints.NotBlank;
@@ -15,5 +16,6 @@ public class NickNameDto {
     @NotBlank(message = "닉네임을 입력해주세요.")
     @Size(min = 2, max = 8, message = "닉네임은 한글 최소 2자, 최대 8자까지 입니다.")
     @Pattern(regexp = "[가-힣]{2,8}", message = "닉네임은 한글 최소 2자, 최대 8자까지 입니다.")
+    @ApiModelProperty(example = "소고기")
     private String nickName;
 }
