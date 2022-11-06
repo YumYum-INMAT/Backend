@@ -50,6 +50,7 @@ public class RestaurantController {
     @ApiOperation(value = "음식점 하트 찜 설정 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 3045, message = "중복된 하트찜입니다."),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
@@ -68,5 +69,26 @@ public class RestaurantController {
         }
     }
 
+    @ApiOperation(value = "음식점 하트 찜 해제 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 3050, message = "이미 하트찜 해제 상태 입니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @PatchMapping("/{restaurantId}/like")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<String> updateRestaurantHeart(@PathVariable("restaurantId") Long restaurantId) {
+        try {
+            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+
+            restaurantService.updateRestaurantHeart(currentUsername.get(), restaurantId);
+
+            return new BaseResponse<>("음식점 좋아요 해제 완료!");
+        } catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
 
 }

@@ -82,6 +82,8 @@ public enum BaseResponseStatus {
 
     DUPLICATED_HEART(false,3045,"중복된 하트찜입니다."),
 
+    ALREADY_HEART_CANCEL(false,3050,"이미 하트찜 해제 상태 입니다."),
+
 
     FAILED_TO_MODIFY_USERNAME(false,3040,"14일 이내에 이름 변경은 최대 2번입니다."),
     FAILED_TO_MODIFY_NICKNAME(false,3050,"14일 이내에 사용자 이름 변경은 최대 2번입니다."),

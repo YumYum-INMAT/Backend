@@ -25,4 +25,8 @@ public class BaseEntity {
     @Column(columnDefinition = "INT default 1")
     private Integer status;
 
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
 }

@@ -1,5 +1,6 @@
 package yumyum.demo.src.restaurant.service;
 
+import static yumyum.demo.config.BaseResponseStatus.ALREADY_HEART_CANCEL;
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_HEART;
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_NICKNAME;
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_USERNAME;
@@ -75,11 +76,37 @@ public class RestaurantService {
                 restaurantEntityById.get(), userEntityByUsername.get());
 
         if(heartEntityByRestaurantAndUser.isPresent()) {
-            throw new BaseException(DUPLICATED_HEART);
+            int getStatus = heartEntityByRestaurantAndUser.get().getStatus();
+
+            //만약 좋아요가 있다면 status 값이 1인 경우
+            if(getStatus == 1) {
+                throw new BaseException(DUPLICATED_HEART);
+            }
+            //만약 좋아요 취소기록이 있다면, status 값이 0인 경우 다시 1로 활성화
+            if(getStatus == 0) {
+                heartEntityByRestaurantAndUser.get().setStatus(1);
+                heartRepository.save(heartEntityByRestaurantAndUser.get());
+                return;
+            }
         }
-
         HeartEntity heartEntity = new HeartEntity(restaurantEntityById.get(), userEntityByUsername.get());
-
         heartRepository.save(heartEntity);
+    }
+
+    public void updateRestaurantHeart(String username, Long restaurantId) throws BaseException {
+        Optional<UserEntity> userEntityByUsername = userRepository.findUserEntityByUsername(username);
+
+        Optional<RestaurantEntity> restaurantEntityById = restaurantRepository.findRestaurantEntityById(restaurantId);
+
+        Optional<HeartEntity> heartEntityByRestaurantAndUser = heartRepository.findHeartEntityByRestaurantAndUser(
+                restaurantEntityById.get(), userEntityByUsername.get());
+
+        //이미 좋아요가 취소된 상태인 경우
+        if(heartEntityByRestaurantAndUser.get().getStatus() == 0) {
+            throw new BaseException(ALREADY_HEART_CANCEL);
+        }
+        heartEntityByRestaurantAndUser.get().setStatus(0);
+
+        heartRepository.save(heartEntityByRestaurantAndUser.get());
     }
 }
