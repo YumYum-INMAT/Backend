@@ -61,14 +61,14 @@ public enum BaseResponseStatus {
     INVALID_PAGE_INDEX(false,2201,"잘못된 페이지 인덱스입니다."),
 
     //게시글 관련 오류
-    POST_EMPTY_TOPIC(false,2300,"제목을 입력해주세요."),
-    POST_OVER_LENGTH_TOPIC(false,2301,"제목은 최대 45자까지 입력해주세요."),
-    POST_EMPTY_CONTENTS(false,2302,"내용을 입력해주세요."),
-    POST_OVER_LENGTH_CONTENTS(false,2303,"내용은 최대 255자까지 입력해주세요."),
+    POST_EMPTY_TOPIC(false,2500,"제목을 입력해주세요."),
+    POST_OVER_LENGTH_TOPIC(false,2505,"제목은 최대 45자까지 입력해주세요."),
+    POST_EMPTY_CONTENTS(false,2510,"내용을 입력해주세요."),
+    POST_OVER_LENGTH_CONTENTS(false,2515,"내용은 최대 255자까지 입력해주세요."),
 
     //댓글 관련 오류
-    COMMENT_EMPTY_CONTENTS(false, 2310, "내용을 입력해주세요."),
-    COMMENT_OVER_LENGTH_CONTENTS(false, 2311, "내용은 최대 100자까지 입력해주세요."),
+    COMMENT_EMPTY_CONTENTS(false, 2600, "내용을 입력해주세요."),
+    COMMENT_OVER_LENGTH_CONTENTS(false, 2605, "내용은 최대 100자까지 입력해주세요."),
 
     /**
      * 3000 : Response 오류
@@ -126,13 +126,16 @@ public enum BaseResponseStatus {
     FAILED_TO_DELETE_POST(false,3200,"게시글 삭제에 실패하였습니다."),
 
     FAILED_TO_DELETE_COMMENT(false,3200,"댓글 삭제에 실패하였습니다."),
-    
+
     FAILED_TO_REPORT_POST(false,3210,"게시글 신고에 실패하였습니다."),
     FAILED_TO_REPORT_COMMENT(false,3220,"댓글 신고에 실패하였습니다."),
 
     INVALID_KAKAO_USER(false,3500,"잘못된 카카오 로그인입니다."),
 
+    //댓글 관련 오류
+    FAILED_TO_UPDATE_COMMENT(false,3510,"댓글 수정에 실패하였습니다."),
 
+    COMMENT_LIKE_EMPTY(false,3600,"댓글 좋아요를 먼저 해야합니다."),
 
     /**
      * 4000 : Database, Server 오류
