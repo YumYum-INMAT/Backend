@@ -3,6 +3,7 @@ package yumyum.demo.src.community.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
@@ -90,7 +91,8 @@ public class CommunityController {
         }
     }
 
-    /*@DeleteMapping("/{post_id}")
+    //게시글 삭제 api
+    @PatchMapping("/{post_id}/delete")
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<String> deletePost(@PathVariable("post_id")Long post_id){
         try{
@@ -101,7 +103,7 @@ public class CommunityController {
         } catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
-    }*/
+    }
 
 
     //댓글,대댓글 작성 api
@@ -138,7 +140,41 @@ public class CommunityController {
             }
         }
     }
-    //좋아요 설정 api
+    //댓글 수정 api
+    @PatchMapping("/details/comment/{comment_id}")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<String> updateComment(@PathVariable("comment_id")Long comment_id, @RequestBody CommentDto commentDto){
+        if(commentDto.getContents().isBlank()){
+            return new BaseResponse<>(COMMENT_EMPTY_CONTENTS);
+        }
+        if(commentDto.getContents().length() > 100){
+            return new BaseResponse<>(COMMENT_OVER_LENGTH_CONTENTS);
+        }
+
+        try{
+            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+            communityService.updateComment(comment_id,currentUsername.get(), commentDto);
+            String result = "댓글을 수정했습니다";
+            return new BaseResponse<>(result);
+        } catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+    //댓글 삭제 api
+    @PatchMapping("/details/comment/{comment_id}/delete")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<String> deleteComment( @PathVariable("comment_id")Long comment_id){
+        try{
+            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+            communityService.deleteComment(comment_id, currentUsername.get());
+            String result = "댓글을 삭제했습니다";
+            return new BaseResponse<>(result);
+        }  catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    //게시글 좋아요 설정 api
     @PostMapping("/{post_id}/details/like")
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<String> likePost(@PathVariable("post_id") Long post_id ){
@@ -152,8 +188,9 @@ public class CommunityController {
         }
     }
 
-    //좋아요 취소 api
-    @DeleteMapping("/{post_id}/details/like")
+
+    //게시글 좋아요 취소 api
+    @PatchMapping("/{post_id}/details/like/delete")
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<String> unLikePost(@PathVariable("post_id") Long post_id){
         try{
@@ -167,5 +204,32 @@ public class CommunityController {
 
     }
 
+    //댓글 좋아요 설정
+    @PostMapping("/details/comment/{comment_id}/like")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<String> likeComment( @PathVariable("comment_id")Long comment_id){
+        try{
+            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+            communityService.likeComment(currentUsername.get(), comment_id);
+            String result = "댓글 좋아요를 했어요";
+            return new BaseResponse<>(result);
+        }catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    //댓글 좋아요 취소
+    @PatchMapping("/details/comment/{comment_id}/like/delete")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<String> unLikeComment( @PathVariable("comment_id")Long comment_id){
+        try{
+            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+            communityService.unLikeComment(currentUsername.get(), comment_id);
+            String result = "댓글 좋아요를 취소했어요";
+            return new BaseResponse<>(result);
+        }catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
 
 }
