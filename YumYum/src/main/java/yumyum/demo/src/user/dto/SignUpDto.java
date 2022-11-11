@@ -24,7 +24,7 @@ public class SignUpDto {
 
     @NotBlank(message = "비밀 번호를 입력해주세요.")
     @Size(min = 8, max = 20, message = "비밀번호는 특수문자 포함 최소 8글자입니다.")
-    @Pattern(regexp = "^(?=.*[$@$!%*?&])[A-Za-z\\d$@$!%*?&]{8,20}", message = "비밀번호는 특수문자 포함 최소 8글자입니다.")
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,20}$", message = "비밀번호는 특수문자 포함 최소 8글자입니다.")
     private String password;
 
     @NotBlank(message = "이메일을 입력해주세요.") //@NotBlank는 @NotNull을 포함
