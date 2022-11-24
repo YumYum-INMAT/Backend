@@ -13,7 +13,7 @@ import yumyum.demo.config.BaseEntity;
 
 @Entity
 @Getter
-@Table(name = "category")
+@Table(name = "banner")
 @NoArgsConstructor
 @DynamicInsert
 public class BannerEntity extends BaseEntity {
