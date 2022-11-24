@@ -23,11 +23,9 @@ public class ReviewEntity extends BaseEntity {
     @Column(name = "review_id")
     private Long id;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "restaurant_id")
     private RestaurantEntity restaurant;
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
