@@ -28,7 +28,7 @@ public class RestaurantEntity extends BaseEntity {
     private String restaurantName;
 
     @Column(nullable = false)
-    private String imgUrl;
+    private String profileImgUrl;
 
     @Column(nullable = false)
     private String contactNumber;
@@ -64,15 +64,18 @@ public class RestaurantEntity extends BaseEntity {
     private String restaurantType;
 
     @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
+    private List<RestaurantImgEntity> restaurantImgEntities = new ArrayList<>();
+
+    @OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL)
     private List<RestaurantMenuEntity> restaurantMenuEntities = new ArrayList<>();
 
     @OneToMany(mappedBy = "restaurant",cascade = CascadeType.ALL)
     private List<ReviewEntity> reviewEntities = new ArrayList<>();
 
-    public RestaurantEntity(String restaurantName, String imgUrl, String contactNumber, String address,
+    public RestaurantEntity(String restaurantName, String profileImgUrl, String contactNumber, String address,
                             Double latitude, Double longitude, String restaurantType, List<RestaurantMenuEntity> restaurantMenuEntities) {
         this.restaurantName = restaurantName;
-        this.imgUrl = imgUrl;
+        this.profileImgUrl = profileImgUrl;
         this.contactNumber = contactNumber;
         this.address = address;
         this.latitude = latitude;
