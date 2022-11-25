@@ -148,9 +148,11 @@ public enum BaseResponseStatus {
 
     PASSWORD_ENCRYPTION_ERROR(false, 4011, "비밀번호 암호화에 실패하였습니다."),
     PASSWORD_DECRYPTION_ERROR(false, 4012, "비밀번호 복호화에 실패하였습니다."),
+    WRONG_DATE(false, 4032, "잘못된 날짜 형식입니다."),
 
 
-    SEND_SMS_ERROR(false, 5000, "문자 인증 전송을 실패하였습니다.");
+    SEND_SMS_ERROR(false, 5000, "문자 인증 전송을 실패하였습니다."),
+    UNEXPECTED_ERROR(false, 5013, "예상치 못한 에러가 발생했습니다. 다시 시도해주세요.");
 
 
     // 5000 : 필요시 만들어서 쓰세요
