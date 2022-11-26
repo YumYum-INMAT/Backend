@@ -38,7 +38,7 @@ public class UserService {
         }
 
         //이메일 중복 체크
-        if (userRepository.findUserEntityByEmail(signUpDto.getUsername()).isPresent()) {
+        if (userRepository.findUserEntityByEmail(signUpDto.getEmail()).isPresent()) {
             throw new BaseException(DUPLICATED_EMAIL);
         }
 
