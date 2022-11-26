@@ -39,10 +39,9 @@ public class UserController {
     @ApiOperation(value = "회원 가입 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
-            @ApiResponse(code = 3010, message = "없는 아이디이거나 비밀번호가 틀렸습니다."),
-            @ApiResponse(code = 3030, message = "중복된 아이디입니다."),
-            @ApiResponse(code = 3035, message = "중복된 닉네임입니다."),
-            @ApiResponse(code = 400, message = "Bad Request")
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
 
     @PostMapping("/signup")
@@ -60,8 +59,9 @@ public class UserController {
     @ApiOperation(value = "로그인 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
-            @ApiResponse(code = 3010, message = "없는 아이디이거나 비밀번호가 틀렸습니다."),
-            @ApiResponse(code = 400, message = "Bad Request")
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
     @PostMapping("/login")
     public BaseResponse<TokenDto> login(@Valid @RequestBody LoginDto loginDto) {
@@ -92,8 +92,9 @@ public class UserController {
     @ApiOperation(value = "닉네임 중복 체크 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
-            @ApiResponse(code = 3035, message = "중복된 닉네임입니다."),
-            @ApiResponse(code = 400, message = "Bad Request")
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
     @PostMapping("/nickname")
     public BaseResponse<String> checkNickName(@Valid @RequestBody NickNameDto nickNameDto) {
@@ -109,8 +110,9 @@ public class UserController {
     @ApiOperation(value = "아이디 중복 체크 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
-            @ApiResponse(code = 3030, message = "중복된 아이디입니다."),
-            @ApiResponse(code = 400, message = "Bad Request")
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
     @PostMapping("/username")
     public BaseResponse<String> checkUsername(@Valid @RequestBody UsernameDto usernameDto) {
@@ -126,6 +128,7 @@ public class UserController {
     @ApiOperation(value = "마이페이지 조회 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
@@ -147,6 +150,7 @@ public class UserController {
     @ApiOperation(value = "프로필 조회 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
@@ -167,7 +171,6 @@ public class UserController {
     @ApiOperation(value = "프로필 수정 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
-            @ApiResponse(code = 3035, message = "중복된 닉네임입니다."),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")

@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
 import yumyum.demo.src.restaurant.dto.CreateRestaurantDto;
+import yumyum.demo.src.restaurant.dto.GetRestaurantsDto;
 import yumyum.demo.src.restaurant.service.RestaurantService;
 import yumyum.demo.utils.SecurityUtil;
 
@@ -25,6 +26,25 @@ import yumyum.demo.utils.SecurityUtil;
 @RequiredArgsConstructor
 public class RestaurantController {
     private final RestaurantService restaurantService;
+
+    @ApiOperation(value = "홈화면 조회 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @GetMapping("")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<GetRestaurantsDto> getRestaurants() {
+        try {
+            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+
+            return new BaseResponse<>(restaurantService.getRestaurants(currentUsername.get()));
+        } catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
 
     @ApiOperation(value = "음식점 추가 API")
     @ApiResponses(value = {
@@ -50,7 +70,6 @@ public class RestaurantController {
     @ApiOperation(value = "음식점 하트 찜 설정 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
-            @ApiResponse(code = 3045, message = "중복된 하트찜입니다."),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
@@ -72,7 +91,6 @@ public class RestaurantController {
     @ApiOperation(value = "음식점 하트 찜 해제 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
-            @ApiResponse(code = 3050, message = "이미 하트찜 해제 상태 입니다."),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
