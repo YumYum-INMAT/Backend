@@ -5,6 +5,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import yumyum.demo.config.BaseException;
+import yumyum.demo.config.Status;
 import yumyum.demo.jwt.TokenProvider;
 import yumyum.demo.src.user.dto.HeartRestaurantDto;
 import yumyum.demo.src.user.dto.MyPageDto;
@@ -42,7 +43,7 @@ public class UserService {
         }
 
         //닉네임 중복 체크
-        if(userRepository.findUserEntityByNickName(signUpDto.getNickName()).isPresent()) {
+        if(userRepository.findUserEntityByNickNameAndStatus(signUpDto.getNickName(), Status.ACTIVE).isPresent()) {
             throw new BaseException(DUPLICATED_NICKNAME);
         }
 
@@ -80,7 +81,8 @@ public class UserService {
     }
 
     public void checkPassword(String username, String password) throws BaseException {
-        UserEntity user = userRepository.findUserEntityByUsername(username).get();
+        UserEntity user = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         if(!passwordEncoder.matches(password, user.getPassword())) {
             throw new BaseException(FAILED_TO_LOGIN);
@@ -89,13 +91,14 @@ public class UserService {
     }
 
     public void checkNickName(String nickName) throws BaseException {
-        if(userRepository.findUserEntityByNickName(nickName).isPresent()) {
+        if(userRepository.findUserEntityByNickNameAndStatus(nickName, Status.ACTIVE).isPresent()) {
             throw new BaseException(DUPLICATED_NICKNAME);
         }
     }
 
     public MyPageDto getMyPage(String username) throws BaseException {
-        UserEntity foundUserEntity = userRepository.findUserEntityByUsername(username).get();
+        UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         MyPageDto myPageDto = MyPageDto.builder()
                 .profileImgUrl(foundUserEntity.getProfileImgUrl())
@@ -106,7 +109,8 @@ public class UserService {
     }
 
     public UserProfileDto getUserProfile(String username) throws BaseException {
-        UserEntity foundUserEntity = userRepository.findUserEntityByUsername(username).get();
+        UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         UserProfileDto userProfile = UserProfileDto.builder()
                 .profileImgUrl(foundUserEntity.getProfileImgUrl())
@@ -119,19 +123,19 @@ public class UserService {
     }
 
     public void updateUserProfile(String username, UserProfileDto userProfileDto) throws BaseException {
-        if(userRepository.findUserEntityByNickName(userProfileDto.getNickName()).isPresent()) {
-            throw new BaseException(DUPLICATED_NICKNAME);
+        UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        //이 전 닉네임과 다른 닉네임으로 바꿀때는 중복 검사 진행
+        if (!foundUserEntity.getNickName().equals(userProfileDto.getNickName())) {
+            checkNickName(userProfileDto.getNickName());
         }
-
-        UserEntity foundUserEntity = userRepository.findUserEntityByUsername(username).get();
-
-        //프로필 수정
+        //이 전 닉네임으로 그대로 바꿀때는 중복 검사하지 않음
         foundUserEntity.updateUserProfile(
                 userProfileDto.getProfileImgUrl(),
                 userProfileDto.getNickName(),
                 userProfileDto.getAge(),
                 userProfileDto.getGender());
-
         userRepository.save(foundUserEntity);
     }
 

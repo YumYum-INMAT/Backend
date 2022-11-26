@@ -79,6 +79,7 @@ public enum BaseResponseStatus {
     FAILED_TO_LOGIN(false,3010,"없는 아이디이거나 비밀번호가 틀렸습니다."),
     
     NOT_ACTIVATED_USER(false,3015,"유효한 사용자가 아닙니다."),
+    NOT_ACTIVATED_RESTAURANT(false,3020,"유효한 음식점이 아닙니다."),
     
 
     DUPLICATED_USERNAME(false,3030,"중복된 아이디입니다."),
@@ -90,23 +91,6 @@ public enum BaseResponseStatus {
     DUPLICATED_HEART(false,3045,"중복된 하트찜입니다."),
 
     ALREADY_HEART_CANCEL(false,3050,"이미 하트찜 해제 상태 입니다."),
-
-
-    FAILED_TO_MODIFY_USERNAME(false,3040,"14일 이내에 이름 변경은 최대 2번입니다."),
-    FAILED_TO_MODIFY_NICKNAME(false,3050,"14일 이내에 사용자 이름 변경은 최대 2번입니다."),
-
-
-    ALREADY_PUBLIC_ACCOUNT(false,3060,"이미 공개 계정 상태입니다."),
-    ALREADY_PRIVATE_ACCOUNT(false,3070,"이미 비공개 계정 상태입니다."),
-    
-    ALREADY_FOLLOW(false,3080,"이미 팔로우 상태입니다."),
-    ALREADY_FOLLOW_REQUEST(false,3081,"이미 팔로우 요청 상태입니다."),
-
-    ALREADY_UNFOLLOW(false,3090,"이미 언팔로우 상태입니다."),
-    
-    FAILED_TO_ACCEPT_FOLLOW(false,3100,"잘못된 팔로우 요청 승인입니다."),
-
-    FAILED_TO_REJECT_FOLLOW(false,3110,"잘못된 팔로우 요청 취소입니다."),
 
     STILL_ENABLE_PRIVACY(false,3120,"이전의 개인정보 처리 방침 동의가 아직 유효합니다."),
     
@@ -142,9 +126,6 @@ public enum BaseResponseStatus {
      */
     DATABASE_ERROR(false, 4000, "데이터베이스 연결에 실패하였습니다."),
     SERVER_ERROR(false, 4001, "서버와의 연결에 실패하였습니다."),
-
-    //[PATCH] /users/{userIdx}
-    MODIFY_FAIL_USERNAME(false,4014,"유저네임 수정 실패"),
 
     PASSWORD_ENCRYPTION_ERROR(false, 4011, "비밀번호 암호화에 실패하였습니다."),
     PASSWORD_DECRYPTION_ERROR(false, 4012, "비밀번호 복호화에 실패하였습니다."),
