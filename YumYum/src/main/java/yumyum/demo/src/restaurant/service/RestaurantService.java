@@ -4,6 +4,8 @@ import static yumyum.demo.config.BaseResponseStatus.ALREADY_HEART_CANCEL;
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_HEART;
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_NICKNAME;
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_USERNAME;
+import static yumyum.demo.config.BaseResponseStatus.NOT_ACTIVATED_RESTAURANT;
+import static yumyum.demo.config.BaseResponseStatus.NOT_ACTIVATED_USER;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,7 +14,9 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import yumyum.demo.config.BaseException;
+import yumyum.demo.config.Status;
 import yumyum.demo.src.restaurant.dto.CreateRestaurantDto;
+import yumyum.demo.src.restaurant.dto.GetRestaurantsDto;
 import yumyum.demo.src.restaurant.dto.RestaurantMenuDto;
 import yumyum.demo.src.restaurant.entity.CategoryEntity;
 import yumyum.demo.src.restaurant.entity.HeartEntity;
@@ -32,8 +36,6 @@ public class RestaurantService {
     private final CategoryRepository categoryRepository;
     private final HeartRepository heartRepository;
     private final UserRepository userRepository;
-
-
 
     public void createRestaurant(CreateRestaurantDto createRestaurantDto) throws BaseException {
 
@@ -68,45 +70,63 @@ public class RestaurantService {
     }
 
     public void addRestaurantHeart(String username, Long restaurantId) throws BaseException {
-        Optional<UserEntity> userEntityByUsername = userRepository.findUserEntityByUsername(username);
+        UserEntity userEntityByUsername = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        Optional<RestaurantEntity> restaurantEntityById = restaurantRepository.findRestaurantEntityById(restaurantId);
+        RestaurantEntity restaurantEntityById = restaurantRepository.findRestaurantEntityByIdAndStatus(restaurantId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_RESTAURANT));
 
         Optional<HeartEntity> heartEntityByRestaurantAndUser = heartRepository.findHeartEntityByRestaurantAndUser(
-                restaurantEntityById.get(), userEntityByUsername.get());
+                restaurantEntityById, userEntityByUsername);
 
         if(heartEntityByRestaurantAndUser.isPresent()) {
-            int getStatus = heartEntityByRestaurantAndUser.get().getStatus();
+            Status status = heartEntityByRestaurantAndUser.get().getStatus();
 
-            //만약 좋아요가 있다면 status 값이 1인 경우
-            if(getStatus == 1) {
+            //만약 좋아요가 있다면 status 값이 ACTIVE 인 경우
+            if(status.equals(Status.ACTIVE)) {
                 throw new BaseException(DUPLICATED_HEART);
             }
             //만약 좋아요 취소기록이 있다면, status 값이 0인 경우 다시 1로 활성화
-            if(getStatus == 0) {
-                heartEntityByRestaurantAndUser.get().setStatus(1);
+            if(status.equals(Status.INACTIVE)) {
+                heartEntityByRestaurantAndUser.get().setStatus(Status.ACTIVE);
                 heartRepository.save(heartEntityByRestaurantAndUser.get());
+
+                restaurantEntityById.increaseCountHeart();
+                restaurantRepository.save(restaurantEntityById);
                 return;
             }
         }
-        HeartEntity heartEntity = new HeartEntity(restaurantEntityById.get(), userEntityByUsername.get());
+        HeartEntity heartEntity = new HeartEntity(restaurantEntityById, userEntityByUsername);
         heartRepository.save(heartEntity);
+        restaurantEntityById.increaseCountHeart();
+        restaurantRepository.save(restaurantEntityById);
     }
 
     public void updateRestaurantHeart(String username, Long restaurantId) throws BaseException {
-        Optional<UserEntity> userEntityByUsername = userRepository.findUserEntityByUsername(username);
+        UserEntity userEntityByUsername = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        Optional<RestaurantEntity> restaurantEntityById = restaurantRepository.findRestaurantEntityById(restaurantId);
+        RestaurantEntity restaurantEntityById = restaurantRepository.findRestaurantEntityByIdAndStatus(restaurantId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_RESTAURANT));
 
         Optional<HeartEntity> heartEntityByRestaurantAndUser = heartRepository.findHeartEntityByRestaurantAndUser(
-                restaurantEntityById.get(), userEntityByUsername.get());
+                restaurantEntityById, userEntityByUsername);
 
         //이미 좋아요가 취소된 상태인 경우
-        if(heartEntityByRestaurantAndUser.get().getStatus() == 0) {
+        if(heartEntityByRestaurantAndUser.get().getStatus().equals(Status.INACTIVE)) {
             throw new BaseException(ALREADY_HEART_CANCEL);
         }
-        heartEntityByRestaurantAndUser.get().setStatus(0);
-
+        heartEntityByRestaurantAndUser.get().setStatus(Status.INACTIVE);
         heartRepository.save(heartEntityByRestaurantAndUser.get());
+        restaurantEntityById.decreaseCountHeart();
+        restaurantRepository.save(restaurantEntityById);
+    }
+
+    public GetRestaurantsDto getRestaurants(String username) {
+        Optional<UserEntity> userEntity = userRepository.findUserEntityByUsername(username);
+        Long userId = userEntity.get().getId();
+
+
+        return null;
     }
 }
