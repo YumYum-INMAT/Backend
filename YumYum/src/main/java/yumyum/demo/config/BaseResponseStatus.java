@@ -91,6 +91,7 @@ public enum BaseResponseStatus {
     DUPLICATED_HEART(false,3045,"중복된 하트찜입니다."),
 
     ALREADY_HEART_CANCEL(false,3050,"이미 하트찜 해제 상태 입니다."),
+    FAIL_TO_FIND_HEART(false,3051,"하트찜 기록이 없습니다."),
 
     STILL_ENABLE_PRIVACY(false,3120,"이전의 개인정보 처리 방침 동의가 아직 유효합니다."),
     

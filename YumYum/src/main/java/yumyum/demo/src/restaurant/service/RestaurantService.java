@@ -4,6 +4,7 @@ import static yumyum.demo.config.BaseResponseStatus.ALREADY_HEART_CANCEL;
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_HEART;
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_NICKNAME;
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_USERNAME;
+import static yumyum.demo.config.BaseResponseStatus.FAIL_TO_FIND_HEART;
 import static yumyum.demo.config.BaseResponseStatus.NOT_ACTIVATED_RESTAURANT;
 import static yumyum.demo.config.BaseResponseStatus.NOT_ACTIVATED_USER;
 
@@ -109,15 +110,15 @@ public class RestaurantService {
         RestaurantEntity restaurantEntityById = restaurantRepository.findRestaurantEntityByIdAndStatus(restaurantId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_RESTAURANT));
 
-        Optional<HeartEntity> heartEntityByRestaurantAndUser = heartRepository.findHeartEntityByRestaurantAndUser(
-                restaurantEntityById, userEntityByUsername);
+        HeartEntity heartEntityByRestaurantAndUser = heartRepository.findHeartEntityByRestaurantAndUser(restaurantEntityById, userEntityByUsername)
+                .orElseThrow(() -> new BaseException(FAIL_TO_FIND_HEART));
 
         //이미 좋아요가 취소된 상태인 경우
-        if(heartEntityByRestaurantAndUser.get().getStatus().equals(Status.INACTIVE)) {
+        if(heartEntityByRestaurantAndUser.getStatus().equals(Status.INACTIVE)) {
             throw new BaseException(ALREADY_HEART_CANCEL);
         }
-        heartEntityByRestaurantAndUser.get().setStatus(Status.INACTIVE);
-        heartRepository.save(heartEntityByRestaurantAndUser.get());
+        heartEntityByRestaurantAndUser.setStatus(Status.INACTIVE);
+        heartRepository.save(heartEntityByRestaurantAndUser);
         restaurantEntityById.decreaseCountHeart();
         restaurantRepository.save(restaurantEntityById);
     }
