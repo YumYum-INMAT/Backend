@@ -29,7 +29,7 @@ public class UserEntity extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false, length = 60)
     private String email;
 
     @Column(nullable = false)
