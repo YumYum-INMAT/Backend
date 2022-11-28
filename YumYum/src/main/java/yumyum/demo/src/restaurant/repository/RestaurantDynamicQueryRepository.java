@@ -3,6 +3,7 @@ package yumyum.demo.src.restaurant.repository;
 import static yumyum.demo.src.restaurant.entity.QHeartEntity.heartEntity;
 import static yumyum.demo.src.restaurant.entity.QRestaurantEntity.restaurantEntity;
 
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
@@ -23,7 +24,7 @@ public class RestaurantDynamicQueryRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
 
-    public List<RestaurantDto> findRestaurantsOrderByCreatedAt(Long userId) {
+    public List<RestaurantDto> findRestaurantsOrderByCreatedAt(Long userId, int sortType) {
 
         List<Long> heartRestaurantList = getHeartRestaurantsId(userId);
 
@@ -42,6 +43,8 @@ public class RestaurantDynamicQueryRepository {
                                 .otherwise(false).as("userHeart")))
                 .from(restaurantEntity)
                 .where(eqStatus())
+                .orderBy(sortCondition(sortType))
+                .limit(50)
                 .fetch();
     }
 
@@ -52,7 +55,32 @@ public class RestaurantDynamicQueryRepository {
                 .where(heartEntity.user.id.eq(userId)).fetch();
     }
 
-    private BooleanExpression eqStatus () {
+    private BooleanExpression eqStatus() {
         return restaurantEntity.status.eq(Status.ACTIVE);
+    }
+
+    private OrderSpecifier sortCondition(int sortType) {
+
+        //sortType = 1 -> 평점순
+         if (sortType == 1) {
+             return restaurantEntity.averageStar.desc();
+         }
+        //sortType = 2 -> 평균 가격 낮은순
+        if (sortType == 2) {
+            return restaurantEntity.averagePrice.asc();
+        }
+        //sortType = 3 -> 평균 가격 높은순
+        if (sortType == 3) {
+            return restaurantEntity.averagePrice.desc();
+        }
+        //sortType = 4 -> 리뷰 많은순
+        if (sortType == 4) {
+            return restaurantEntity.countReview.desc();
+        }
+        //sortType = 5 -> 하트찜 많은순
+        if (sortType == 5) {
+            return restaurantEntity.countHeart.desc();
+        }
+        return null;
     }
 }

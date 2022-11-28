@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
@@ -36,11 +37,11 @@ public class RestaurantController {
     })
     @GetMapping("")
     @PreAuthorize("hasAnyRole('USER')")
-    public BaseResponse<GetRestaurantsDto> getRestaurants() {
+    public BaseResponse<GetRestaurantsDto> getRestaurants(@RequestParam(value = "sort", defaultValue = "1") int sortType) {
         try {
             Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
 
-            return new BaseResponse<>(restaurantService.getRestaurants(currentUsername.get()));
+            return new BaseResponse<>(restaurantService.getRestaurants(currentUsername.get(), sortType));
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
