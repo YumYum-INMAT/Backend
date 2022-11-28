@@ -16,7 +16,7 @@ import yumyum.demo.config.BaseEntity;
 @Table(name = "todayRecommend")
 @NoArgsConstructor
 @DynamicInsert
-public class TodayRecommend extends BaseEntity {
+public class TodayRecommendEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "today_recommend_id")
