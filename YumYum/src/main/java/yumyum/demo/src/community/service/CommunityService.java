@@ -3,9 +3,8 @@ package yumyum.demo.src.community.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import yumyum.demo.config.BaseException;
-import yumyum.demo.src.community.dto.CommentDto;
-import yumyum.demo.src.community.dto.CommentLikeDto;
-import yumyum.demo.src.community.dto.PostDto;
+import yumyum.demo.config.Status;
+import yumyum.demo.src.community.dto.*;
 import yumyum.demo.src.community.repository.CommunityRepository;
 
 import javax.transaction.Transactional;
@@ -25,9 +24,9 @@ public class CommunityService {
         this.communityRepository = communityRepository;
     }
 
-    public Long createPost(String username, PostDto postDto) throws BaseException {
+    public void createPost(String username, PostDto postDto) throws BaseException {
        try {
-           return communityRepository.createPost(username, postDto.getTopic(), postDto.getContents(), postDto.getImgUrl());
+           communityRepository.createPost(username, postDto);
        } catch (Exception exception){
            throw new BaseException(DATABASE_ERROR);
        }
@@ -37,7 +36,7 @@ public class CommunityService {
         // 수정하는 게시물의 작성자가 내 계정과 같은지 검사하기
         if(username.equals(communityRepository.findUsernameByPostId(post_id))){
             try {
-                return communityRepository.updatePost(post_id, postDto.getTopic(), postDto.getContents(), postDto.getImgUrl());
+                return communityRepository.updatePost(post_id, postDto);
             } catch (Exception exception){
                 throw new BaseException(DATABASE_ERROR);
             }
@@ -50,7 +49,7 @@ public class CommunityService {
     @Transactional
     public Long createComment(String username, Long post_id, CommentDto commentDto) throws BaseException {
        try {
-           Long commentId = communityRepository.createComment(username, post_id, commentDto.getContents());
+           Long commentId = communityRepository.createComment(username, post_id, commentDto);
            communityRepository.increseCountComment(post_id);
            return commentId;
        } catch (Exception exception){
@@ -61,7 +60,7 @@ public class CommunityService {
     @Transactional
     public Long createReplyComment(String username, Long post_id, Long parent_id, CommentDto commentDto) throws BaseException{
         try {
-            Long commentId = communityRepository.createReplyComment(username, post_id, parent_id, commentDto.getContents());
+            Long commentId = communityRepository.createReplyComment(username, post_id, parent_id, commentDto);
             communityRepository.increseCountComment(post_id);
             return commentId;
         } catch (Exception exception){
@@ -82,22 +81,23 @@ public class CommunityService {
             }
         }
         else if(communityRepository.countPostLike(post_id,user_id) == 1){
-           if(communityRepository.statusPostLike(post_id, user_id) == 0){
+           if(communityRepository.statusPostLike(post_id, user_id).equals("INACTIVE")){
                try {
-                   communityRepository.changeStatusPostLike(post_id, user_id, 1);
+                   communityRepository.changeStatusPostLike(post_id, user_id, "ACTIVE");
                    communityRepository.incresePostCountLike(post_id);
                }catch (Exception exception){
                    throw new BaseException(DATABASE_ERROR);
                }
-           } else if (communityRepository.statusPostLike(post_id, user_id) == 1) {
+           } else if (communityRepository.statusPostLike(post_id, user_id).equals("ACTIVE")) {
                throw new BaseException(ALREADY_POST_LIKE);
            }
             else {
                throw new BaseException(DATABASE_ERROR);
            }
+
         }
         else{
-            throw new BaseException(DATABASE_ERROR);
+            throw new BaseException(FAILED_TO_MODIFY_USERNAME);
         }
     }
 
@@ -109,12 +109,12 @@ public class CommunityService {
             throw new BaseException(DATABASE_ERROR);
         }
         else if(communityRepository.countPostLike(post_id, user_id) == 1){
-            if(communityRepository.statusPostLike(post_id, user_id) == 0){
+            if(communityRepository.statusPostLike(post_id, user_id).equals("INACTIVE")){
                 throw new BaseException(ALREADY_POST_UNLIKE);
             }
-            else if(communityRepository.statusPostLike(post_id, user_id) == 1){
+            else if(communityRepository.statusPostLike(post_id, user_id).equals("ACTIVE")){
                 try{
-                    communityRepository.changeStatusPostLike(post_id, user_id, 0);
+                    communityRepository.changeStatusPostLike(post_id, user_id, "INACTIVE");
                     communityRepository.decresePostCountLike(post_id);
                 }catch (Exception exception){
                     throw new BaseException(DATABASE_ERROR);
@@ -150,7 +150,7 @@ public class CommunityService {
         //댓글 작성자와 사용자가 일치하는지 유효성 검사
         if(username.equals(communityRepository.findUsernameByCommentId(comment_id))){
             try{
-                communityRepository.updateComment(comment_id, commentDto.getContents());
+                communityRepository.updateComment(comment_id, commentDto);
             } catch (Exception exception){
                 throw new BaseException(DATABASE_ERROR);
             }
@@ -188,15 +188,15 @@ public class CommunityService {
                 }
             }
             else if (communityRepository.countCommentLike(user_id, comment_id) == 1) {
-                if(communityRepository.statusCommentLike(user_id, comment_id) == 0) {
+                if(communityRepository.statusCommentLike(user_id, comment_id).equals("INACTIVE")) {
                     try {
-                        communityRepository.changeStatusCommentLike(user_id, comment_id, 1);
+                        communityRepository.changeStatusCommentLike(user_id, comment_id, "ACTIVE");
                         communityRepository.increseCommentCountLike(comment_id);
                     } catch (Exception exception) {
                         throw new BaseException(DATABASE_ERROR);
                     }
                 }
-                else if (communityRepository.statusCommentLike(user_id, comment_id) == 1) {
+                else if (communityRepository.statusCommentLike(user_id, comment_id).equals("ACTIVE")) {
                     throw new BaseException(ALREADY_COMMENT_LIKE);
                 }
                 else {
@@ -214,12 +214,12 @@ public class CommunityService {
             throw new BaseException(COMMENT_LIKE_EMPTY);
         }
         else if(communityRepository.countCommentLike(user_id, comment_id) == 1){
-            if(communityRepository.statusCommentLike(user_id, comment_id) == 0){
+            if(communityRepository.statusCommentLike(user_id, comment_id).equals("INACTIVE")){
                 throw new BaseException(ALREADY_COMMENT_UNLIKE);
             }
-            else if (communityRepository.statusCommentLike(user_id, comment_id) == 1) {
+            else if (communityRepository.statusCommentLike(user_id, comment_id).equals("ACTIVE")) {
                 try{
-                communityRepository.changeStatusCommentLike(user_id,comment_id, 0);
+                communityRepository.changeStatusCommentLike(user_id,comment_id, "INACTIVE");
                 communityRepository.decreseCommentCountLike(comment_id);
             }catch (Exception exception){
                     throw new BaseException(DATABASE_ERROR);
@@ -232,6 +232,34 @@ public class CommunityService {
         else {
             throw new BaseException(DATABASE_ERROR);
         }
+    }
+
+    public PostScreenDto getPostScreen(Long post_id, String username) throws BaseException {
+        //유효성 검사
+        Long user_id = communityRepository.findUserIdByUsername(username);
+        try {
+            PostScreenDto postScreenDto = new PostScreenDto(communityRepository.getPostInfo(post_id, user_id), communityRepository.getCommentInfo(post_id, user_id));
+            postScreenDto.setUserId(user_id);
+            return postScreenDto;
+
+        }catch (Exception exception){
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+
+
+
+    public List<CommunityMainDto> getCommunityScreen() throws BaseException{
+        try{
+            List<CommunityMainDto> postinfoDtoList;
+            postinfoDtoList = communityRepository.getCommunityScreen();
+            return postinfoDtoList;
+
+        } catch (Exception exception){
+            throw new BaseException(DATABASE_ERROR);
+        }
+
     }
 }
 

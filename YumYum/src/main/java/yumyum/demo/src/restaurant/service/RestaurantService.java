@@ -68,7 +68,7 @@ public class RestaurantService {
     }
 
     public void addRestaurantHeart(String username, Long restaurantId) throws BaseException {
-        Optional<UserEntity> userEntityByUsername = userRepository.findUserEntityByUsername(username);
+       /* Optional<UserEntity> userEntityByUsername = userRepository.findUserEntityByUsername(username);
 
         Optional<RestaurantEntity> restaurantEntityById = restaurantRepository.findRestaurantEntityById(restaurantId);
 
@@ -90,11 +90,12 @@ public class RestaurantService {
             }
         }
         HeartEntity heartEntity = new HeartEntity(restaurantEntityById.get(), userEntityByUsername.get());
-        heartRepository.save(heartEntity);
+        heartRepository.save(heartEntity);*/
+        return ;
     }
 
     public void updateRestaurantHeart(String username, Long restaurantId) throws BaseException {
-        Optional<UserEntity> userEntityByUsername = userRepository.findUserEntityByUsername(username);
+       /* Optional<UserEntity> userEntityByUsername = userRepository.findUserEntityByUsername(username);
 
         Optional<RestaurantEntity> restaurantEntityById = restaurantRepository.findRestaurantEntityById(restaurantId);
 
@@ -107,6 +108,7 @@ public class RestaurantService {
         }
         heartEntityByRestaurantAndUser.get().setStatus(0);
 
-        heartRepository.save(heartEntityByRestaurantAndUser.get());
+        heartRepository.save(heartEntityByRestaurantAndUser.get());*/
+        return;
     }
 }

@@ -1,13 +1,13 @@
 package yumyum.demo.config;
 
+import jdk.jshell.Snippet;
 import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.Column;
-import javax.persistence.EntityListeners;
-import javax.persistence.MappedSuperclass;
+import javax.persistence.*;
+import java.io.ObjectInputFilter;
 import java.time.LocalDateTime;
 
 @Getter
@@ -22,10 +22,11 @@ public class BaseEntity {
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    @Column(columnDefinition = "INT default 1")
-    private Integer status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 8)
+    protected Status status = Status.ACTIVE;
 
-    public void setStatus(int status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 

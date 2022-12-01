@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import yumyum.demo.config.BaseException;
+import yumyum.demo.config.Status;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.repository.UserRepository;
 
@@ -41,7 +42,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     private org.springframework.security.core.userdetails.User createUser(String username, UserEntity userEntity) {
-        if (userEntity.getStatus() != 1) {
+        if (userEntity.getStatus() != Status.ACTIVE) {
             throw new RuntimeException(username + " -> 활성화되어 있지 않습니다.");
         }
         List<GrantedAuthority> grantedAuthorityList = userEntity.getAuthorities().stream()
