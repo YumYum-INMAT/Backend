@@ -39,5 +39,5 @@ public class GetRestaurantDetailDto {
 
     private String restaurantType;
 
-    private List<ReviewDto> reviewList; //음식점 리뷰 리스트
+    private List<GetReviewDto> reviewList; //음식점 리뷰 리스트
 }
