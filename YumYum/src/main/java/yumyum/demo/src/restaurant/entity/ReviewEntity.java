@@ -40,5 +40,9 @@ public class ReviewEntity extends BaseEntity {
     @Column(nullable = false, length = 100)
     private String contents;
 
-
+    public ReviewEntity(UserEntity user, Integer ratingStar, String contents) {
+        this.user = user;
+        this.ratingStar = ratingStar;
+        this.contents = contents;
+    }
 }
