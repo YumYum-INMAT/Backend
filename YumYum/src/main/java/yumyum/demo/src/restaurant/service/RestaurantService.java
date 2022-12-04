@@ -18,6 +18,7 @@ import yumyum.demo.src.restaurant.dto.CreateRestaurantDto;
 import yumyum.demo.src.restaurant.dto.CreateReviewDto;
 import yumyum.demo.src.restaurant.dto.GetRestaurantDetailDto;
 import yumyum.demo.src.restaurant.dto.GetRestaurantsDto;
+import yumyum.demo.src.restaurant.dto.GetReviewDto;
 import yumyum.demo.src.restaurant.dto.RecentReviewDto;
 import yumyum.demo.src.restaurant.dto.RestaurantDto;
 import yumyum.demo.src.restaurant.dto.RestaurantMenuDto;
@@ -26,6 +27,7 @@ import yumyum.demo.src.restaurant.entity.BannerEntity;
 import yumyum.demo.src.restaurant.entity.CategoryEntity;
 import yumyum.demo.src.restaurant.entity.HeartEntity;
 import yumyum.demo.src.restaurant.entity.RestaurantEntity;
+import yumyum.demo.src.restaurant.entity.RestaurantImgEntity;
 import yumyum.demo.src.restaurant.entity.RestaurantMenuEntity;
 import yumyum.demo.src.restaurant.entity.ReviewEntity;
 import yumyum.demo.src.restaurant.entity.TodayRecommendEntity;
@@ -137,7 +139,7 @@ public class RestaurantService {
     }
 
     public GetRestaurantsDto getRestaurants(String username, int sortType) {
-        UserEntity userEntity = userRepository.findUserEntityByUsername(username)
+        UserEntity userEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         Long userId = userEntity.getId();
@@ -177,8 +179,69 @@ public class RestaurantService {
         return new GetRestaurantsDto(bannerList, todayRecommendList, recentReviewList, restaurantList);
     }
 
+    public GetRestaurantDetailDto getRestaurantDetails(String username, Long restaurantId) throws BaseException {
+        UserEntity userEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        Long userId = userEntity.getId();
+
+        RestaurantEntity restaurantEntity = restaurantRepository.findRestaurantEntityByIdAndStatus(restaurantId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_RESTAURANT));
+
+        List<String> restaurantImgList = new ArrayList<>();
+        for (RestaurantImgEntity restaurantImgEntity : restaurantEntity.getRestaurantImgEntities()) {
+            if (restaurantImgList.size() == 5) {
+                break;
+            }
+            restaurantImgList.add(restaurantImgEntity.getImgUrl());
+        }
+
+        List<RestaurantMenuDto> menuList = new ArrayList<>();
+        for (RestaurantMenuEntity restaurantMenuEntity : restaurantEntity.getRestaurantMenuEntities()) {
+            menuList.add(new RestaurantMenuDto(restaurantMenuEntity.getId(), restaurantMenuEntity.getMenuName(), restaurantMenuEntity.getPrice()));
+        }
+
+        Optional<HeartEntity> heartEntity = heartRepository.findHeartEntityByRestaurantAndUser(restaurantEntity, userEntity);
+        boolean userHeart = false;
+        if (heartEntity.isPresent()) {
+            if (heartEntity.get().getStatus().equals(Status.ACTIVE)) {
+                userHeart = true;
+            }
+        }
+
+        List<GetReviewDto> reviewList = new ArrayList<>();
+        for (ReviewEntity reviewEntity : restaurantEntity.getReviewEntities()) {
+            if (reviewList.size() == 5) {
+                break;
+            }
+            reviewList.add(new GetReviewDto(
+                    reviewEntity.getId(),
+                    reviewEntity.getImgUrl(),
+                    reviewEntity.getUser().getNickName(),
+                    reviewEntity.getRatingStar(),
+                    reviewEntity.getContents()));
+        }
+
+        return new GetRestaurantDetailDto(
+                restaurantId,
+                restaurantEntity.getProfileImgUrl(),
+                restaurantEntity.getRestaurantName(),
+                restaurantImgList,
+                menuList,
+                restaurantEntity.getAddress(),
+                userHeart,
+                restaurantEntity.getContactNumber(),
+                restaurantEntity.getAverageStar(),
+                restaurantEntity.getCountReview(),
+                restaurantEntity.getCountHeart(),
+                restaurantEntity.getAveragePrice(),
+                restaurantEntity.getComplexity(),
+                restaurantEntity.getRestaurantType(),
+                reviewList);
+    }
+
     public void createReview(String username, Long restaurantId, CreateReviewDto createReviewDto) {
-        UserEntity userEntity = userRepository.findUserEntityByUsername(username)
+        UserEntity userEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         RestaurantEntity restaurantEntity = restaurantRepository.findRestaurantEntityByIdAndStatus(restaurantId, Status.ACTIVE)
