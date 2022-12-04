@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
 import yumyum.demo.src.restaurant.dto.CreateRestaurantDto;
+import yumyum.demo.src.restaurant.dto.CreateReviewDto;
+import yumyum.demo.src.restaurant.dto.GetRestaurantDetailDto;
 import yumyum.demo.src.restaurant.dto.GetRestaurantsDto;
 import yumyum.demo.src.restaurant.service.RestaurantService;
 import yumyum.demo.utils.SecurityUtil;
@@ -105,6 +107,28 @@ public class RestaurantController {
             restaurantService.updateRestaurantHeart(currentUsername.get(), restaurantId);
 
             return new BaseResponse<>("음식점 좋아요 해제 완료!");
+        } catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    @ApiOperation(value = "음식점 리뷰 작성 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @PostMapping("/{restaurantId}/reviews")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<String> createReview(@PathVariable("restaurantId") Long restaurantId,
+                                             @Valid @RequestBody CreateReviewDto createReviewDto) {
+        try {
+            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+
+            restaurantService.createReview(currentUsername.get(), restaurantId, createReviewDto);
+
+            return new BaseResponse<>("음식점 리뷰 작성 완료!");
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }

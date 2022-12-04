@@ -15,6 +15,8 @@ import yumyum.demo.config.BaseException;
 import yumyum.demo.config.Status;
 import yumyum.demo.src.restaurant.dto.BannerDto;
 import yumyum.demo.src.restaurant.dto.CreateRestaurantDto;
+import yumyum.demo.src.restaurant.dto.CreateReviewDto;
+import yumyum.demo.src.restaurant.dto.GetRestaurantDetailDto;
 import yumyum.demo.src.restaurant.dto.GetRestaurantsDto;
 import yumyum.demo.src.restaurant.dto.RecentReviewDto;
 import yumyum.demo.src.restaurant.dto.RestaurantDto;
@@ -173,5 +175,28 @@ public class RestaurantService {
         //sortType = 5 -> 하트찜 많은순
 
         return new GetRestaurantsDto(bannerList, todayRecommendList, recentReviewList, restaurantList);
+    }
+
+    public void createReview(String username, Long restaurantId, CreateReviewDto createReviewDto) {
+        UserEntity userEntity = userRepository.findUserEntityByUsername(username)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        RestaurantEntity restaurantEntity = restaurantRepository.findRestaurantEntityByIdAndStatus(restaurantId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_RESTAURANT));
+
+        ReviewEntity reviewEntity = new ReviewEntity(
+                userEntity,
+                createReviewDto.getRatingStar(),
+                createReviewDto.getContents());
+        if (createReviewDto.getImgUrl() == null) {
+            reviewEntity.setImgUrl(null);
+        }
+        else {
+            reviewEntity.setImgUrl(createReviewDto.getImgUrl());
+        }
+
+        restaurantEntity.addReview(reviewEntity);
+
+        restaurantRepository.save(restaurantEntity);
     }
 }
