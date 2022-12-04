@@ -22,7 +22,6 @@ public class CreateReviewDto {
     @ApiModelProperty(example = "5")
     private Integer ratingStar;
 
-    @NotNull(message = "URL을 입력해주세요")
     @Pattern(regexp = "^((http|https)://)?(www.)?([a-zA-Z0-9]+)\\.[a-z]+([a-zA-Z0-9.?#]+)?", message = "올바른 URL이 아닙니다.")
     @ApiModelProperty(example = "www.test.test")
     private String imgUrl;
