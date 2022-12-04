@@ -97,8 +97,18 @@ public class RestaurantEntity extends BaseEntity {
     }
 
     public void addReview(ReviewEntity reviewEntity) {
+        //리뷰 추가
         reviewEntities.add(reviewEntity);
+        addSumStar(reviewEntity.getRatingStar());
         reviewEntity.setRestaurant(this);
+
+        //음식점 사진 추가
+        if (reviewEntity.getImgUrl() != null) {
+            RestaurantImgEntity restaurantImgEntity = new RestaurantImgEntity();
+            restaurantImgEntity.setImgUrl(reviewEntity.getImgUrl());
+            restaurantImgEntities.add(restaurantImgEntity);
+            restaurantImgEntity.setRestaurant(this);
+        }
     }
 
     //하트 찜 개수 증가
