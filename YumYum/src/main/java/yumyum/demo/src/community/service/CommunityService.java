@@ -97,7 +97,7 @@ public class CommunityService {
 
         }
         else{
-            throw new BaseException(FAILED_TO_MODIFY_USERNAME);
+            throw new BaseException(DATABASE_ERROR);
         }
     }
 
