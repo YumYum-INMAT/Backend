@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.validator.constraints.URL;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 @Getter
@@ -18,7 +19,7 @@ import javax.validation.constraints.Size;
 public class PostDto {
     @ApiModelProperty(example = "www.test.img")
     @Size(min = 1, message = "null 값 또는 URL을 입력해주세요")
-    @URL(message = "올바른 URL이 아닙니다.")
+    @Pattern(regexp = "^((http|https)://)?(www.)?([a-zA-Z0-9]+)\\.[a-z]+([a-zA-Z0-9.?#]+)?", message = "올바른 URL이 아닙니다.")
     private String imgUrl;
 
     @ApiModelProperty(example = "냠냠을 소개합니다")

@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.Status;
 import yumyum.demo.jwt.TokenProvider;
-import yumyum.demo.src.user.dto.HeartRestaurantDto;
+//import yumyum.demo.src.user.dto.HeartRestaurantDto;
 import yumyum.demo.src.user.dto.MyPageDto;
 import yumyum.demo.src.user.dto.SignUpDto;
 import yumyum.demo.src.user.dto.UserProfileDto;
