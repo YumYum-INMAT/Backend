@@ -19,4 +19,6 @@ public class GetReviewDto {
     private int ratingStar;
 
     private String contents;
+
+    private String createdAt;
 }
