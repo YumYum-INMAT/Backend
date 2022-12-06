@@ -6,6 +6,8 @@ import static yumyum.demo.config.BaseResponseStatus.FAIL_TO_FIND_HEART;
 import static yumyum.demo.config.BaseResponseStatus.NOT_ACTIVATED_RESTAURANT;
 import static yumyum.demo.config.BaseResponseStatus.NOT_ACTIVATED_USER;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -214,12 +216,36 @@ public class RestaurantService {
             if (reviewList.size() == 5) {
                 break;
             }
+
+            String createdAt;
+            if (ChronoUnit.YEARS.between(reviewEntity.getCreatedAt(), LocalDateTime.now()) >= 1) {
+                createdAt = Long.toString(ChronoUnit.YEARS.between(reviewEntity.getCreatedAt(), LocalDateTime.now())).concat("년 전");
+            }
+            else if (ChronoUnit.MONTHS.between(reviewEntity.getCreatedAt(), LocalDateTime.now()) >= 1) {
+                createdAt = Long.toString(ChronoUnit.MONTHS.between(reviewEntity.getCreatedAt(), LocalDateTime.now())).concat("달 전");
+            }
+            else if (ChronoUnit.WEEKS.between(reviewEntity.getCreatedAt(), LocalDateTime.now()) >= 1) {
+                createdAt = Long.toString(ChronoUnit.WEEKS.between(reviewEntity.getCreatedAt(), LocalDateTime.now())).concat("주 전");
+            }
+            else if (ChronoUnit.DAYS.between(reviewEntity.getCreatedAt(), LocalDateTime.now()) >= 1) {
+                createdAt = Long.toString(ChronoUnit.DAYS.between(reviewEntity.getCreatedAt(), LocalDateTime.now())).concat("일 전");
+            }
+            else if (ChronoUnit.HOURS.between(reviewEntity.getCreatedAt(), LocalDateTime.now()) >= 1) {
+                createdAt = Long.toString(ChronoUnit.HOURS.between(reviewEntity.getCreatedAt(), LocalDateTime.now())).concat("시간 전");
+            }
+            else if (ChronoUnit.MINUTES.between(reviewEntity.getCreatedAt(), LocalDateTime.now()) >= 1) {
+                createdAt = Long.toString(ChronoUnit.MINUTES.between(reviewEntity.getCreatedAt(), LocalDateTime.now())).concat("분 전");
+            }
+            else {
+                createdAt = Long.toString(ChronoUnit.SECONDS.between(reviewEntity.getCreatedAt(), LocalDateTime.now())).concat("초 전");
+            }
             reviewList.add(new GetReviewDto(
                     reviewEntity.getId(),
                     reviewEntity.getImgUrl(),
                     reviewEntity.getUser().getNickName(),
                     reviewEntity.getRatingStar(),
-                    reviewEntity.getContents()));
+                    reviewEntity.getContents(),
+                    createdAt));
         }
 
         return new GetRestaurantDetailDto(
