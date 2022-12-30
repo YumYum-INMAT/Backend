@@ -324,29 +324,29 @@ public class CommunityRepository {
 
         return this.jdbcTemplate.query(
                 "select U.profile_img_url, U.nick_name, C.comment_id, C.contents, C.count_like, C.parent_id, C.group_number, C.created_at, C.updated_at, CL.comment_like_id,\n" +
-                       "                       (\n" +
-                       "                       case\n" +
-                       "                       when timestampdiff(YEAR, C.created_at, now()) >= 1 then concat(timestampdiff(YEAR, C.created_at, now())  , '년 전')\n" +
-                       "                       when timestampdiff(MONTH, C.created_at, now()) >= 1 then concat(timestampdiff(MONTH, C.created_at, now()) , '월 전')\n" +
-                       "                       when timestampdiff(DAY, C.created_at, now()) >=1 then concat(timestampdiff(DAY, C.created_at, now()) , '일 전')\n" +
-                       "                       when timestampdiff(HOUR, C.created_at, now()) >=1 then concat(timestampdiff(HOUR, C.created_at, now()) , '시간 전')\n" +
-                       "                       when timestampdiff(MINUTE, C.created_at, now()) >= 1 then concat(timestampdiff(MINUTE, C.created_at, now()) , '분 전')\n" +
-                       "                       ELSE concat(timestampdiff(SECOND, C.created_at, now()), '초 전')\n" +
-                       "                       END\n" +
-                       "                       ) as created_time,\n" +
-                       "                        (\n" +
-                       "                            case\n" +
-                       "                                when C.created_at = C.updated_at then false\n" +
-                       "                            ELSE true\n" +
-                       "                            END\n" +
-                       "                        ) as check_updated,\n" +
-                                                "(if(CL.comment_like_id is null, false, true)) as check_my_like"+
-                       "\n" +
-                       "                       from user U\n" +
-                       "                       " +
-                        "Left join comment C on U.user_id = C.user_id\n" +
-                        "left join comment_like CL on C.comment_id = CL.comment_id and CL.user_id = ? and CL.status = 'ACTIVE'"+
-                       "                       where C.post_id = ?  ORDER BY C.group_number, C.created_at" ,
+                        "                                              (\n" +
+                        "                                              case\n" +
+                        "                                              when timestampdiff(YEAR, C.created_at, now()) >= 1 then concat(timestampdiff(YEAR, C.created_at, now())  , '년 전')\n" +
+                        "                                              when timestampdiff(MONTH, C.created_at, now()) >= 1 then concat(timestampdiff(MONTH, C.created_at, now()) , '월 전')\n" +
+                        "                                              when timestampdiff(DAY, C.created_at, now()) >=1 then concat(timestampdiff(DAY, C.created_at, now()) , '일 전')\n" +
+                        "                                              when timestampdiff(HOUR, C.created_at, now()) >=1 then concat(timestampdiff(HOUR, C.created_at, now()) , '시간 전')\n" +
+                        "                                              when timestampdiff(MINUTE, C.created_at, now()) >= 1 then concat(timestampdiff(MINUTE, C.created_at, now()) , '분 전')\n" +
+                        "                                              ELSE concat(timestampdiff(SECOND, C.created_at, now()), '초 전')\n" +
+                        "                                              END\n" +
+                        "                                              ) as created_time,\n" +
+                        "                                               (\n" +
+                        "                                                   case\n" +
+                        "                                                       when C.created_at = C.updated_at then false\n" +
+                        "                                                   ELSE true\n" +
+                        "                                                   END\n" +
+                        "                                               ) as check_updated,\n" +
+                        "                                                (if(CL.comment_like_id is null, false, true)) as check_my_like\n" +
+                        "                       \n" +
+                        "                                              from comment C\n" +
+                        "                                              \n" +
+                        "                        inner join user U on U.user_id = C.user_id\n" +
+                        "                        inner join comment_like CL on C.comment_id = CL.comment_id and CL.user_id = ? and CL.status = 'ACTIVE'\n" +
+                        "                                              where C.post_id = ? and C.status = 'ACTIVE' ORDER BY C.group_number, C.created_at;" ,
                 (rs, rowNum) ->{
                     CommentInfoDto commentInfoDto = new CommentInfoDto();
                     commentInfoDto.setProfileImgUrl(rs.getString("U.profile_img_url"));
@@ -403,23 +403,23 @@ public class CommunityRepository {
 
         return this.jdbcTemplate.queryForObject(
                 "select P.post_id, P.user_id, P.topic, P.contents, P.img_url, P.count_comment, P.count_like,P.created_at, U.profile_img_url, U.nick_name,\n" +
-                        "                               (\n" +
-                        "                                   case\n" +
-                        "                                    when timestampdiff(YEAR, P.created_at, now()) >= 1 then concat(timestampdiff(YEAR, P.created_at, now())  , '년 전')\n" +
-                        "                                    when timestampdiff(MONTH, P.created_at, now()) >= 1 then concat(timestampdiff(MONTH, P.created_at, now()) , '월 전')\n" +
-                        "                                    when timestampdiff(DAY, P.created_at, now()) >=1 then concat(timestampdiff(DAY, P.created_at, now()) , '일 전')\n" +
-                        "                                    when timestampdiff(HOUR, P.created_at, now()) >=1 then concat(timestampdiff(HOUR, P.created_at, now()) , '시간 전')\n" +
-                        "                                    when timestampdiff(MINUTE, P.created_at, now()) >= 1 then concat(timestampdiff(MINUTE, P.created_at, now()) , '분 전')\n" +
-                        "                                    ELSE concat(timestampdiff(SECOND, P.created_at, now()), '초 전')\n" +
-                        "                                       END\n" +
+                        "                                                      (\n" +
+                        "                                                           case\n" +
+                        "                                                            when timestampdiff(YEAR, P.created_at, now()) >= 1 then concat(timestampdiff(YEAR, P.created_at, now())  , '년 전')\n" +
+                        "                                                            when timestampdiff(MONTH, P.created_at, now()) >= 1 then concat(timestampdiff(MONTH, P.created_at, now()) , '월 전')\n" +
+                        "                                                            when timestampdiff(DAY, P.created_at, now()) >=1 then concat(timestampdiff(DAY, P.created_at, now()) , '일 전')\n" +
+                        "                                                            when timestampdiff(HOUR, P.created_at, now()) >=1 then concat(timestampdiff(HOUR, P.created_at, now()) , '시간 전')\n" +
+                        "                                                            when timestampdiff(MINUTE, P.created_at, now()) >= 1 then concat(timestampdiff(MINUTE, P.created_at, now()) , '분 전')\n" +
+                        "                                                            ELSE concat(timestampdiff(SECOND, P.created_at, now()), '초 전')\n" +
+                        "                                                               END\n" +
                         "\n" +
-                        "                                ) as created_time,\n" +
-                        "                        ( exists (select pl.post_id from post_like where pl.user_id = ? and pl.status = 'ACTIVE')) as check_my_like\n" +
-                        "                        from user U\n" +
-                        "                        Left join post P on U.user_id = P.user_id\n" +
-                        "                        LEFT JOIN post_like pl on P.post_id = pl.post_id\n" +
+                        "                                                        ) as created_time,\n" +
+                        "                                                ( exists (select pl.post_id from post_like where pl.user_id = ? and pl.status = 'ACTIVE')) as check_my_like\n" +
+                        "                                                from post P\n" +
+                        "                                                inner join user U on U.user_id = P.user_id\n" +
+                        "                                                inner JOIN post_like pl on P.post_id = pl.post_id\n" +
                         "\n" +
-                        "                        where P.post_id = ?;",
+                        "                                                where P.post_id = ? and P.status = 'ACTIVE'",
                 (rs, rowNum) -> {
                     PostinfoDto postinfoDto = new PostinfoDto();
                     postinfoDto.setPostId(rs.getLong("P.post_id"));
@@ -455,21 +455,22 @@ public class CommunityRepository {
 
     public List<CommunityMainDto> getCommunityScreen() {
         return this.jdbcTemplate.query(
-                "select U.nick_name,P.post_id, P.topic, P.contents, P.img_url, P.count_like, P.count_comment,\n" +
-                        "       (\n" +
-                        "           case\n" +
-                        "                                   when timestampdiff(YEAR, P.created_at, now()) >= 1 then concat(timestampdiff(YEAR, P.created_at, now())  , '년 전')\n" +
-                        "                                    when timestampdiff(MONTH, P.created_at, now()) >= 1 then concat(timestampdiff(MONTH, P.created_at, now()) , '월 전')\n" +
-                        "                                    when timestampdiff(DAY, P.created_at, now()) >=1 then concat(timestampdiff(DAY, P.created_at, now()) , '일 전')\n" +
-                        "                                    when timestampdiff(HOUR, P.created_at, now()) >=1 then concat(timestampdiff(HOUR, P.created_at, now()) , '시간 전')\n" +
-                        "                                    when timestampdiff(MINUTE, P.created_at, now()) >= 1 then concat(timestampdiff(MINUTE, P.created_at, now()) , '분 전')\n" +
-                        "                                    ELSE concat(timestampdiff(SECOND, P.created_at, now()) , '초 전')\n" +
-                        "                                       END\n" +
-                        "\n" +
-                        "           ) as created_time\n" +
-                        "            from user U\n" +
-                        "            LEFT JOIN post P on U.user_id = P.user_id\n" +
-                        "            ORDER BY P.created_at",
+                "select P.post_id, P.topic, P.contents, P.img_url, P.count_like, P.count_comment, U.nick_name,\n" +
+                        "                               (\n" +
+                        "                                   case\n" +
+                        "                                                           when timestampdiff(YEAR, P.created_at, now()) >= 1 then concat(timestampdiff(YEAR, P.created_at, now())  , '년 전')\n" +
+                        "                                                            when timestampdiff(MONTH, P.created_at, now()) >= 1 then concat(timestampdiff(MONTH, P.created_at, now()) , '월 전')\n" +
+                        "                                                            when timestampdiff(DAY, P.created_at, now()) >=1 then concat(timestampdiff(DAY, P.created_at, now()) , '일 전')\n" +
+                        "                                                            when timestampdiff(HOUR, P.created_at, now()) >=1 then concat(timestampdiff(HOUR, P.created_at, now()) , '시간 전')\n" +
+                        "                                                            when timestampdiff(MINUTE, P.created_at, now()) >= 1 then concat(timestampdiff(MINUTE, P.created_at, now()) , '분 전')\n" +
+                        "                                                            ELSE concat(timestampdiff(SECOND, P.created_at, now()) , '초 전')\n" +
+                        "                                                               END\n" +
+                        "                    \n" +
+                        "                                   ) as created_time\n" +
+                        "                                    from post P\n" +
+                        "                                    inner JOIN user U on U.user_id = P.user_id\n" +
+                        "                                    where P.status = 'ACTIVE'\n" +
+                        "                                    ORDER BY P.created_at desc; ",
                 (rs, rowNum) -> {
                     CommunityMainDto communityMainDto = new CommunityMainDto();
                     communityMainDto.setNickName(rs.getString("U.nick_name"));

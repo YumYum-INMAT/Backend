@@ -25,6 +25,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     Optional<UserEntity> findUserEntityByNickNameAndStatus(String nickName, Status status);
 
+
 //    @Query("select h.restaurant_id,  from heart h where h.user_id = ")
 //    List<Long> findHeartRestaurantIdByUsername(@Param("") username);
 }
