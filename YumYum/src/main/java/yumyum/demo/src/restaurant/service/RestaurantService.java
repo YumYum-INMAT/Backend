@@ -13,16 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.Status;
-import yumyum.demo.src.restaurant.dto.BannerDto;
-import yumyum.demo.src.restaurant.dto.CreateRestaurantDto;
-import yumyum.demo.src.restaurant.dto.CreateReviewDto;
-import yumyum.demo.src.restaurant.dto.GetRestaurantDetailDto;
-import yumyum.demo.src.restaurant.dto.GetRestaurantsDto;
-import yumyum.demo.src.restaurant.dto.GetReviewDto;
-import yumyum.demo.src.restaurant.dto.RecentReviewDto;
-import yumyum.demo.src.restaurant.dto.RestaurantDto;
-import yumyum.demo.src.restaurant.dto.RestaurantMenuDto;
-import yumyum.demo.src.restaurant.dto.TodayRecommendDto;
+import yumyum.demo.src.restaurant.dto.*;
 import yumyum.demo.src.restaurant.entity.BannerEntity;
 import yumyum.demo.src.restaurant.entity.CategoryEntity;
 import yumyum.demo.src.restaurant.entity.HeartEntity;
@@ -31,13 +22,7 @@ import yumyum.demo.src.restaurant.entity.RestaurantImgEntity;
 import yumyum.demo.src.restaurant.entity.RestaurantMenuEntity;
 import yumyum.demo.src.restaurant.entity.ReviewEntity;
 import yumyum.demo.src.restaurant.entity.TodayRecommendEntity;
-import yumyum.demo.src.restaurant.repository.BannerRepository;
-import yumyum.demo.src.restaurant.repository.CategoryRepository;
-import yumyum.demo.src.restaurant.repository.HeartRepository;
-import yumyum.demo.src.restaurant.repository.RestaurantDynamicQueryRepository;
-import yumyum.demo.src.restaurant.repository.RestaurantRepository;
-import yumyum.demo.src.restaurant.repository.ReviewRepository;
-import yumyum.demo.src.restaurant.repository.TodayRecommendRepository;
+import yumyum.demo.src.restaurant.repository.*;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.repository.UserRepository;
 
@@ -52,6 +37,8 @@ public class RestaurantService {
     private final ReviewRepository reviewRepository;
     private final TodayRecommendRepository todayRecommendRepository;
     private final UserRepository userRepository;
+
+    private final RestaurantJdbcTempRepository restaurantJdbcTempRepository;
 
     public void createRestaurant(CreateRestaurantDto createRestaurantDto) throws BaseException {
 
@@ -261,5 +248,11 @@ public class RestaurantService {
         restaurantEntity.addReview(reviewEntity);
 
         restaurantRepository.save(restaurantEntity);
+    }
+
+    public List<PopularSearchWordDto> getSearchWindow(String contents) {
+        restaurantJdbcTempRepository.postSearch(contents);
+        return restaurantJdbcTempRepository.getPopularSearchWord();
+
     }
 }

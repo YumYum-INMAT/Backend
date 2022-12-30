@@ -315,7 +315,7 @@ public class CommunityController {
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
     //커뮤니티 화면 조회
-    @GetMapping("/")
+    @GetMapping("")
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<List<CommunityMainDto>> getCommunityScreen(){
         try{
@@ -324,6 +324,8 @@ public class CommunityController {
             return new BaseResponse<>(e.getStatus());
         }
     }
+
+
 
 
 
