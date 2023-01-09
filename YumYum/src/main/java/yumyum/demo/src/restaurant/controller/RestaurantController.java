@@ -168,4 +168,21 @@ public class RestaurantController {
             return new BaseResponse<>(e.getStatus());
         }
     }
+
+    @ApiOperation(value = "음식점 검색창 결과 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @GetMapping("/search/")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<List<SearchRestaurantDto>> getSearchResult(@RequestParam(value = "search")String search, @RequestParam(value = "sort")Long sort){
+        try {
+            return new BaseResponse<>(restaurantService.getSearchResult(search, sort));
+        } catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
 }

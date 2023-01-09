@@ -18,7 +18,6 @@ import yumyum.demo.jwt.TokenProvider;
 import yumyum.demo.src.community.dto.CommunityMainDto;
 import yumyum.demo.src.community.dto.PostScreenDto;
 import yumyum.demo.src.user.dto.*;
-import yumyum.demo.src.user.service.UserJdbcTempService;
 import yumyum.demo.src.user.service.UserService;
 import yumyum.demo.utils.SecurityUtil;
 

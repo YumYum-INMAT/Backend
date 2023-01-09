@@ -1,11 +1,5 @@
 package yumyum.demo.src.restaurant.service;
 
-import static yumyum.demo.config.BaseResponseStatus.ALREADY_HEART_CANCEL;
-import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_HEART;
-import static yumyum.demo.config.BaseResponseStatus.FAIL_TO_FIND_HEART;
-import static yumyum.demo.config.BaseResponseStatus.NOT_ACTIVATED_RESTAURANT;
-import static yumyum.demo.config.BaseResponseStatus.NOT_ACTIVATED_USER;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +19,8 @@ import yumyum.demo.src.restaurant.entity.TodayRecommendEntity;
 import yumyum.demo.src.restaurant.repository.*;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.repository.UserRepository;
+
+import static yumyum.demo.config.BaseResponseStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -254,5 +250,26 @@ public class RestaurantService {
         restaurantJdbcTempRepository.postSearch(contents);
         return restaurantJdbcTempRepository.getPopularSearchWord();
 
+    }
+
+    public List<SearchRestaurantDto> getSearchResult(String search, Long sort) throws BaseException{
+       if(sort == 1){
+           return restaurantJdbcTempRepository.getSearchResult1(search);
+       }
+       else if(sort == 2){
+           return restaurantJdbcTempRepository.getSearchRestul2(search);
+       }
+       else if(sort == 3){
+           return restaurantJdbcTempRepository.getSearchRestul3(search);
+       }
+       else if(sort == 4){
+           return restaurantJdbcTempRepository.getSearchRestul4(search);
+       }
+       else if(sort == 5){
+           return restaurantJdbcTempRepository.getSearchRestul5(search);
+       }
+       else{
+           throw new BaseException(DATABASE_ERROR);
+       }
     }
 }
