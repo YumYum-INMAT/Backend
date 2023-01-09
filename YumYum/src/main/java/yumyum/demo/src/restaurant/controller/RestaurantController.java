@@ -161,9 +161,9 @@ public class RestaurantController {
     })
     @GetMapping("/search")
     @PreAuthorize("hasAnyRole('USER')")
-    public BaseResponse<List<PopularSearchWordDto>> getSearchWindow(@RequestBody @Valid SearchContentsDto searchContentsDto){
+    public BaseResponse<List<PopularSearchWordDto>> getSearchWindow(){
         try {
-            return new BaseResponse<>(restaurantService.getSearchWindow(searchContentsDto.getContents()));
+            return new BaseResponse<>(restaurantService.getSearchWindow());
         } catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
@@ -178,9 +178,10 @@ public class RestaurantController {
     })
     @GetMapping("/search/")
     @PreAuthorize("hasAnyRole('USER')")
-    public BaseResponse<List<SearchRestaurantDto>> getSearchResult(@RequestParam(value = "search")String search, @RequestParam(value = "sort")Long sort){
+    public BaseResponse<List<RestaurantDto>> getSearchResult(@RequestParam(value = "search")String search, @RequestParam(value = "sort", defaultValue = "1")Integer sort){
         try {
-            return new BaseResponse<>(restaurantService.getSearchResult(search, sort));
+            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+            return new BaseResponse<>(restaurantService.getSearchResult(currentUsername.get(),search, sort));
         } catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }

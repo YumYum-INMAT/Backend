@@ -246,27 +246,28 @@ public class RestaurantService {
         restaurantRepository.save(restaurantEntity);
     }
 
-    public List<PopularSearchWordDto> getSearchWindow(String contents) {
-        restaurantJdbcTempRepository.postSearch(contents);
+    public List<PopularSearchWordDto> getSearchWindow() {
+        //restaurantJdbcTempRepository.postSearch(contents);
         return restaurantJdbcTempRepository.getPopularSearchWord();
 
     }
 
-    public List<SearchRestaurantDto> getSearchResult(String search, Long sort) throws BaseException{
-       if(sort == 1){
-           return restaurantJdbcTempRepository.getSearchResult1(search);
+    public List<RestaurantDto> getSearchResult(String username, String search, Integer sort) throws BaseException{
+        restaurantJdbcTempRepository.postSearch(search);
+        if(sort == 1){
+           return restaurantJdbcTempRepository.getSearchResult1(username, search);
        }
        else if(sort == 2){
-           return restaurantJdbcTempRepository.getSearchRestul2(search);
+           return restaurantJdbcTempRepository.getSearchResult2(username, search);
        }
        else if(sort == 3){
-           return restaurantJdbcTempRepository.getSearchRestul3(search);
+           return restaurantJdbcTempRepository.getSearchResult3(username, search);
        }
        else if(sort == 4){
-           return restaurantJdbcTempRepository.getSearchRestul4(search);
+           return restaurantJdbcTempRepository.getSearchResult4(username, search);
        }
        else if(sort == 5){
-           return restaurantJdbcTempRepository.getSearchRestul5(search);
+           return restaurantJdbcTempRepository.getSearchResult5(username, search);
        }
        else{
            throw new BaseException(DATABASE_ERROR);

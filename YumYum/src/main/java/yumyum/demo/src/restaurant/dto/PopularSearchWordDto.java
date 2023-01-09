@@ -11,5 +11,5 @@ import lombok.Setter;
 @NoArgsConstructor
 public class PopularSearchWordDto {
     private String word;
-    private Long countWord;
+    private Integer ranking;
 }

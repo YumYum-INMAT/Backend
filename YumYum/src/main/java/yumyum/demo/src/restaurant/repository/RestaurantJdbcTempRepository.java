@@ -27,15 +27,14 @@ public class RestaurantJdbcTempRepository {
 
     public List<PopularSearchWordDto> getPopularSearchWord() {
         return this.jdbcTemplate.query(
-                "select word, count(search_id) as cnt\n" +
+                "select word, rank() over (order by cnt desc) as ranking\n" +
+                        "from (select word, count(search_id) as cnt\n" +
                         "from search\n" +
-                        "group by word\n" +
-                        "order by cnt desc\n" +
-                        "limit 10;",
+                        "group by word) as countWord",
                 (rs, rowNum) -> {
                     PopularSearchWordDto popularSearchWordDto = new PopularSearchWordDto();
                     popularSearchWordDto.setWord(rs.getString("word"));
-                    popularSearchWordDto.setCountWord(rs.getLong("cnt"));
+                    popularSearchWordDto.setRanking(rs.getInt("ranking"));
 
                     return popularSearchWordDto;
                 }
@@ -43,108 +42,151 @@ public class RestaurantJdbcTempRepository {
 
     }
 
-    public List<SearchRestaurantDto> getSearchResult1(String search) {
+    public Long findUserIdByUsername(String username){
+        Long userId = this.jdbcTemplate.queryForObject(
+                "select user_id from user where username = ?",
+                Long.class, username
+        );
+        return userId;
+    }
+
+    /*public boolean checkRestaurantHeart(Long restaurantId, String username){
+        Long userId = findUserIdByUsername(username);
+
+        return this.jdbcTemplate.queryForObject(
+                "select exists(\n" +
+                        "    select heart_id\n" +
+                        "    from heart h\n" +
+                        "    left join restaurant r on r.restaurant_id = h.restaurant_id\n" +
+                        "    where h.status = 'ACTIVE' and h.restaurant_id = ? and h.user_id = ?\n" +
+                        "           );",
+                Boolean.class, restaurantId, userId
+        );
+    }*/
+
+    public List<RestaurantDto> getSearchResult1(String username, String search) {
     return this.jdbcTemplate.query(
-            "select distinct r.restaurant_id, r.profile_img_url, r.restaurant_name, r.address, r.average_star, r.count_review, r.average_price\n" +
+            "select distinct r.restaurant_id, r.profile_img_url, r.restaurant_name, r.address, r.average_star, r.count_review, r.average_price, r.complexity, r.restaurant_type,\n" +
+                    "    exists(select h2.heart_id from heart h2 where h2.status='ACTIVE' and h2.restaurant_id = r.restaurant_id and h2.user_id= ?) as user_heart\n" +
                     "from restaurant r\n" +
                     "inner join restaurant_menu rm on r.restaurant_id = rm.restaurant_id\n" +
-                    "where r.restaurant_name LIKE concat('%', ? ,'%') or rm.menu_name LIKE concat('%',?,'%')\n" +
+                    "where r.restaurant_name LIKE concat('%', ? ,'%') or rm.menu_name LIKE concat('%', ? ,'%')\n" +
                     "order by r.average_star, r.count_review desc  ;",
             (rs, rowNum) -> {
-                SearchRestaurantDto searchRestaurantDto = new SearchRestaurantDto();
-                searchRestaurantDto.setRestaurantId(rs.getLong("restaurant_id"));
-                searchRestaurantDto.setProfileImgUrl(rs.getString("profile_img_url"));
-                searchRestaurantDto.setRestaurantName(rs.getString("restaurant_name"));
-                searchRestaurantDto.setAddress(rs.getString("address"));
-                searchRestaurantDto.setAverageStar(rs.getDouble("average_star"));
-                searchRestaurantDto.setCountReview(rs.getInt("count_review"));
-                searchRestaurantDto.setAveragePrice(rs.getInt("average_price"));
-                return searchRestaurantDto;
-            }, search, search
+                return new RestaurantDto(
+                        rs.getLong("r.restaurant_id"),
+                        rs.getString("r.profile_img_url"),
+                        rs.getString("r.restaurant_name"),
+                        rs.getString("r.address"),
+                        rs.getDouble("r.average_star"),
+                        rs.getInt("r.count_review"),
+                        rs.getInt("r.average_price"),
+                        rs.getInt("r.complexity"),
+                        rs.getString("r.restaurant_type"),
+                        rs.getBoolean("user_heart")
+                );
+            }, findUserIdByUsername(username), search, search
     );
     }
 
-    public List<SearchRestaurantDto> getSearchRestul2(String search) {
+    public List<RestaurantDto> getSearchResult2(String username, String search) {
         return this.jdbcTemplate.query(
-                "select distinct r.restaurant_id, r.profile_img_url, r.restaurant_name, r.address, r.average_star, r.count_review, r.average_price\n" +
+                "select distinct r.restaurant_id, r.profile_img_url, r.restaurant_name, r.address, r.average_star, r.count_review, r.average_price, r.complexity, r.restaurant_type,\n" +
+                        "    exists(select h2.heart_id from heart h2 where h2.status='ACTIVE' and h2.restaurant_id = r.restaurant_id and h2.user_id= ?) as user_heart\n" +
                         "from restaurant r\n" +
                         "inner join restaurant_menu rm on r.restaurant_id = rm.restaurant_id\n" +
-                        "where r.restaurant_name LIKE concat('%', ? ,'%') or rm.menu_name LIKE concat('%',?,'%')\n" +
+                        "where r.restaurant_name LIKE concat('%', ? ,'%') or rm.menu_name LIKE concat('%', ? ,'%')\n" +
                         "order by r.average_price  ;",
                 (rs, rowNum) -> {
-                    SearchRestaurantDto searchRestaurantDto = new SearchRestaurantDto();
-                    searchRestaurantDto.setRestaurantId(rs.getLong("restaurant_id"));
-                    searchRestaurantDto.setProfileImgUrl(rs.getString("profile_img_url"));
-                    searchRestaurantDto.setRestaurantName(rs.getString("restaurant_name"));
-                    searchRestaurantDto.setAddress(rs.getString("address"));
-                    searchRestaurantDto.setAverageStar(rs.getDouble("average_star"));
-                    searchRestaurantDto.setCountReview(rs.getInt("count_review"));
-                    searchRestaurantDto.setAveragePrice(rs.getInt("average_price"));
-                    return searchRestaurantDto;
-                }, search, search
+                    return new RestaurantDto(
+                            rs.getLong("r.restaurant_id"),
+                            rs.getString("r.profile_img_url"),
+                            rs.getString("r.restaurant_name"),
+                            rs.getString("r.address"),
+                            rs.getDouble("r.average_star"),
+                            rs.getInt("r.count_review"),
+                            rs.getInt("r.average_price"),
+                            rs.getInt("r.complexity"),
+                            rs.getString("r.restaurant_type"),
+                            rs.getBoolean("user_heart")
+                    );
+                }, findUserIdByUsername(username), search, search
         );
     }
 
-    public List<SearchRestaurantDto> getSearchRestul3(String search) {
+    public List<RestaurantDto> getSearchResult3(String username, String search) {
         return this.jdbcTemplate.query(
-                "select distinct r.restaurant_id, r.profile_img_url, r.restaurant_name, r.address, r.average_star, r.count_review, r.average_price\n" +
+                "select distinct r.restaurant_id, r.profile_img_url, r.restaurant_name, r.address, r.average_star, r.count_review, r.average_price, r.complexity, r.restaurant_type,\n" +
+                        "    exists(select h2.heart_id from heart h2 where h2.status='ACTIVE' and h2.restaurant_id = r.restaurant_id and h2.user_id= ?) as user_heart\n" +
                         "from restaurant r\n" +
                         "inner join restaurant_menu rm on r.restaurant_id = rm.restaurant_id\n" +
-                        "where r.restaurant_name LIKE concat('%', ? ,'%') or rm.menu_name LIKE concat('%',?,'%')\n" +
-                        "order by r.average_price desc ;",
+                        "where r.restaurant_name LIKE concat('%', ? ,'%') or rm.menu_name LIKE concat('%', ? ,'%')\n" +
+                        "order by r.average_price desc  ;",
                 (rs, rowNum) -> {
-                    SearchRestaurantDto searchRestaurantDto = new SearchRestaurantDto();
-                    searchRestaurantDto.setRestaurantId(rs.getLong("restaurant_id"));
-                    searchRestaurantDto.setProfileImgUrl(rs.getString("profile_img_url"));
-                    searchRestaurantDto.setRestaurantName(rs.getString("restaurant_name"));
-                    searchRestaurantDto.setAddress(rs.getString("address"));
-                    searchRestaurantDto.setAverageStar(rs.getDouble("average_star"));
-                    searchRestaurantDto.setCountReview(rs.getInt("count_review"));
-                    searchRestaurantDto.setAveragePrice(rs.getInt("average_price"));
-                    return searchRestaurantDto;
-                }, search, search
+                    return new RestaurantDto(
+                            rs.getLong("r.restaurant_id"),
+                            rs.getString("r.profile_img_url"),
+                            rs.getString("r.restaurant_name"),
+                            rs.getString("r.address"),
+                            rs.getDouble("r.average_star"),
+                            rs.getInt("r.count_review"),
+                            rs.getInt("r.average_price"),
+                            rs.getInt("r.complexity"),
+                            rs.getString("r.restaurant_type"),
+                            rs.getBoolean("user_heart")
+                    );
+                }, findUserIdByUsername(username), search, search
         );
     }
 
-    public List<SearchRestaurantDto> getSearchRestul4(String search) {
+    public List<RestaurantDto> getSearchResult4(String username, String search) {
         return this.jdbcTemplate.query(
-                "select distinct r.restaurant_id, r.profile_img_url, r.restaurant_name, r.address, r.average_star, r.count_review, r.average_price\n" +
+                "select distinct r.restaurant_id, r.profile_img_url, r.restaurant_name, r.address, r.average_star, r.count_review, r.average_price, r.complexity, r.restaurant_type,\n" +
+                        "    exists(select h2.heart_id from heart h2 where h2.status='ACTIVE' and h2.restaurant_id = r.restaurant_id and h2.user_id= ?) as user_heart\n" +
                         "from restaurant r\n" +
                         "inner join restaurant_menu rm on r.restaurant_id = rm.restaurant_id\n" +
-                        "where r.restaurant_name LIKE concat('%', ? ,'%') or rm.menu_name LIKE concat('%',?,'%')\n" +
-                        "order by r.count_review desc ;",
+                        "where r.restaurant_name LIKE concat('%', ? ,'%') or rm.menu_name LIKE concat('%', ? ,'%')\n" +
+                        "order by r.count_heart desc  ;",
                 (rs, rowNum) -> {
-                    SearchRestaurantDto searchRestaurantDto = new SearchRestaurantDto();
-                    searchRestaurantDto.setRestaurantId(rs.getLong("restaurant_id"));
-                    searchRestaurantDto.setProfileImgUrl(rs.getString("profile_img_url"));
-                    searchRestaurantDto.setRestaurantName(rs.getString("restaurant_name"));
-                    searchRestaurantDto.setAddress(rs.getString("address"));
-                    searchRestaurantDto.setAverageStar(rs.getDouble("average_star"));
-                    searchRestaurantDto.setCountReview(rs.getInt("count_review"));
-                    searchRestaurantDto.setAveragePrice(rs.getInt("average_price"));
-                    return searchRestaurantDto;
-                }, search, search
+                    return new RestaurantDto(
+                            rs.getLong("r.restaurant_id"),
+                            rs.getString("r.profile_img_url"),
+                            rs.getString("r.restaurant_name"),
+                            rs.getString("r.address"),
+                            rs.getDouble("r.average_star"),
+                            rs.getInt("r.count_review"),
+                            rs.getInt("r.average_price"),
+                            rs.getInt("r.complexity"),
+                            rs.getString("r.restaurant_type"),
+                            rs.getBoolean("user_heart")
+                    );
+                }, findUserIdByUsername(username), search, search
         );
     }
 
-    public List<SearchRestaurantDto> getSearchRestul5(String search) {
+    public List<RestaurantDto> getSearchResult5(String username, String search) {
         return this.jdbcTemplate.query(
-                "select distinct r.restaurant_id, r.profile_img_url, r.restaurant_name, r.address, r.average_star, r.count_review, r.average_price\n" +
+                "select distinct r.restaurant_id, r.profile_img_url, r.restaurant_name, r.address, r.average_star, r.count_review, r.average_price, r.complexity, r.restaurant_type,\n" +
+                        "    exists(select h2.heart_id from heart h2 where h2.status='ACTIVE' and h2.restaurant_id = r.restaurant_id and h2.user_id= ?) as user_heart\n" +
                         "from restaurant r\n" +
                         "inner join restaurant_menu rm on r.restaurant_id = rm.restaurant_id\n" +
-                        "where r.restaurant_name LIKE concat('%', ? ,'%') or rm.menu_name LIKE concat('%',?,'%')\n" +
-                        "order by r.count_heart desc ;",
+                        "where r.restaurant_name LIKE concat('%', ? ,'%') or rm.menu_name LIKE concat('%', ? ,'%')\n" +
+                        "order by r.count_heart desc  ;",
                 (rs, rowNum) -> {
-                    SearchRestaurantDto searchRestaurantDto = new SearchRestaurantDto();
-                    searchRestaurantDto.setRestaurantId(rs.getLong("restaurant_id"));
-                    searchRestaurantDto.setProfileImgUrl(rs.getString("profile_img_url"));
-                    searchRestaurantDto.setRestaurantName(rs.getString("restaurant_name"));
-                    searchRestaurantDto.setAddress(rs.getString("address"));
-                    searchRestaurantDto.setAverageStar(rs.getDouble("average_star"));
-                    searchRestaurantDto.setCountReview(rs.getInt("count_review"));
-                    searchRestaurantDto.setAveragePrice(rs.getInt("average_price"));
-                    return searchRestaurantDto;
-                }, search, search
+                    return new RestaurantDto(
+                            rs.getLong("r.restaurant_id"),
+                            rs.getString("r.profile_img_url"),
+                            rs.getString("r.restaurant_name"),
+                            rs.getString("r.address"),
+                            rs.getDouble("r.average_star"),
+                            rs.getInt("r.count_review"),
+                            rs.getInt("r.average_price"),
+                            rs.getInt("r.complexity"),
+                            rs.getString("r.restaurant_type"),
+                            rs.getBoolean("user_heart")
+                    );
+                }, findUserIdByUsername(username), search, search
         );
     }
+
 }
