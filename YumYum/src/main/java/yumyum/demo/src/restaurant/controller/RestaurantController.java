@@ -3,6 +3,8 @@ package yumyum.demo.src.restaurant.controller;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+
+import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,10 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
-import yumyum.demo.src.restaurant.dto.CreateRestaurantDto;
-import yumyum.demo.src.restaurant.dto.CreateReviewDto;
-import yumyum.demo.src.restaurant.dto.GetRestaurantDetailDto;
-import yumyum.demo.src.restaurant.dto.GetRestaurantsDto;
+import yumyum.demo.src.restaurant.dto.*;
 import yumyum.demo.src.restaurant.service.RestaurantService;
 import yumyum.demo.utils.SecurityUtil;
 
@@ -153,4 +152,38 @@ public class RestaurantController {
         }
     }
 
+    @ApiOperation(value = "음식점 검색창 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<List<PopularSearchWordDto>> getSearchWindow(){
+        try {
+            return new BaseResponse<>(restaurantService.getSearchWindow());
+        } catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    @ApiOperation(value = "음식점 검색창 결과 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @GetMapping("/search/")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<List<RestaurantDto>> getSearchResult(@RequestParam(value = "search")String search, @RequestParam(value = "sort", defaultValue = "1")Integer sort){
+        try {
+            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+            return new BaseResponse<>(restaurantService.getSearchResult(currentUsername.get(),search, sort));
+        } catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
 }

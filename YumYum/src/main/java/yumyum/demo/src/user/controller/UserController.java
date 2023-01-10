@@ -15,7 +15,10 @@ import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
 import yumyum.demo.jwt.JwtFilter;
 import yumyum.demo.jwt.TokenProvider;
+import yumyum.demo.src.community.dto.CommunityMainDto;
+import yumyum.demo.src.community.dto.PostScreenDto;
 import yumyum.demo.src.user.dto.*;
+import yumyum.demo.src.user.service.UserJdbcTempService;
 import yumyum.demo.src.user.service.UserService;
 import yumyum.demo.utils.SecurityUtil;
 
@@ -190,27 +193,64 @@ public class UserController {
             return new BaseResponse<>(e.getStatus());
         }
     }
-//    @ApiOperation(value = "내가 하트 찜한 음식점 조회 API")
-//    @ApiResponses(value = {
-//            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
-//            @ApiResponse(code = 3035, message = "중복된 닉네임입니다."),
-//            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
-//            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
-//    })
-//    @PatchMapping("/restaurants")
-//    @PreAuthorize("hasAnyRole('USER')")
-//    public BaseResponse<List<HeartRestaurantDto>> getHeartRestaurant() {
-//        try {
-//            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
-//
-//            List<HeartRestaurantDto> result = userService.getHeartRestaurant(currentUsername.get());
-//
-//            return new BaseResponse<>(result);
-//
-//        } catch (BaseException e) {
-//            return new BaseResponse<>(e.getStatus());
-//        }
-//    }
+
+
+    @ApiOperation(value = "내가 쓴 게시글 조회 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @GetMapping("/posts")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<List<CommunityMainDto>> getPost(){
+        try{
+            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+
+            return new BaseResponse<>(userService.getPost(currentUsername.get()));
+        }catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    @ApiOperation(value = "내가 쓴 리뷰 조회 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @GetMapping("/reviews")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<List<MyReviewDto>> getMyReview(){
+        try{
+            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+
+            return new BaseResponse<>(userService.getMyReview(currentUsername.get()));
+        }catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    @ApiOperation(value = "내가 하트찜한 음식점 조회 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @GetMapping("/restaurants")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<List<MyHeartRestaurantDto>> getMyHeartRestaurant(){
+        try{
+            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+
+            return new BaseResponse<>(userService.getMyHeartRestaurant(currentUsername.get()));
+        }catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
 
 
 

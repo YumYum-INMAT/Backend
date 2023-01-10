@@ -15,16 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.Status;
-import yumyum.demo.src.restaurant.dto.BannerDto;
-import yumyum.demo.src.restaurant.dto.CreateRestaurantDto;
-import yumyum.demo.src.restaurant.dto.CreateReviewDto;
-import yumyum.demo.src.restaurant.dto.GetRestaurantDetailDto;
-import yumyum.demo.src.restaurant.dto.GetRestaurantsDto;
-import yumyum.demo.src.restaurant.dto.GetReviewDto;
-import yumyum.demo.src.restaurant.dto.RecentReviewDto;
-import yumyum.demo.src.restaurant.dto.RestaurantDto;
-import yumyum.demo.src.restaurant.dto.RestaurantMenuDto;
-import yumyum.demo.src.restaurant.dto.TodayRecommendDto;
+import yumyum.demo.src.restaurant.dto.*;
 import yumyum.demo.src.restaurant.entity.BannerEntity;
 import yumyum.demo.src.restaurant.entity.CategoryEntity;
 import yumyum.demo.src.restaurant.entity.HeartEntity;
@@ -33,15 +24,11 @@ import yumyum.demo.src.restaurant.entity.RestaurantImgEntity;
 import yumyum.demo.src.restaurant.entity.RestaurantMenuEntity;
 import yumyum.demo.src.restaurant.entity.ReviewEntity;
 import yumyum.demo.src.restaurant.entity.TodayRecommendEntity;
-import yumyum.demo.src.restaurant.repository.BannerRepository;
-import yumyum.demo.src.restaurant.repository.CategoryRepository;
-import yumyum.demo.src.restaurant.repository.HeartRepository;
-import yumyum.demo.src.restaurant.repository.RestaurantDynamicQueryRepository;
-import yumyum.demo.src.restaurant.repository.RestaurantRepository;
-import yumyum.demo.src.restaurant.repository.ReviewRepository;
-import yumyum.demo.src.restaurant.repository.TodayRecommendRepository;
+import yumyum.demo.src.restaurant.repository.*;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.repository.UserRepository;
+
+import static yumyum.demo.config.BaseResponseStatus.*;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +41,8 @@ public class RestaurantService {
     private final ReviewRepository reviewRepository;
     private final TodayRecommendRepository todayRecommendRepository;
     private final UserRepository userRepository;
+
+    private final RestaurantJdbcTempRepository restaurantJdbcTempRepository;
 
     public void createRestaurant(CreateRestaurantDto createRestaurantDto) throws BaseException {
 
@@ -216,36 +205,12 @@ public class RestaurantService {
             if (reviewList.size() == 5) {
                 break;
             }
-
-            String createdAt;
-            if (ChronoUnit.YEARS.between(reviewEntity.getCreatedAt(), LocalDateTime.now()) >= 1) {
-                createdAt = Long.toString(ChronoUnit.YEARS.between(reviewEntity.getCreatedAt(), LocalDateTime.now())).concat("년 전");
-            }
-            else if (ChronoUnit.MONTHS.between(reviewEntity.getCreatedAt(), LocalDateTime.now()) >= 1) {
-                createdAt = Long.toString(ChronoUnit.MONTHS.between(reviewEntity.getCreatedAt(), LocalDateTime.now())).concat("달 전");
-            }
-            else if (ChronoUnit.WEEKS.between(reviewEntity.getCreatedAt(), LocalDateTime.now()) >= 1) {
-                createdAt = Long.toString(ChronoUnit.WEEKS.between(reviewEntity.getCreatedAt(), LocalDateTime.now())).concat("주 전");
-            }
-            else if (ChronoUnit.DAYS.between(reviewEntity.getCreatedAt(), LocalDateTime.now()) >= 1) {
-                createdAt = Long.toString(ChronoUnit.DAYS.between(reviewEntity.getCreatedAt(), LocalDateTime.now())).concat("일 전");
-            }
-            else if (ChronoUnit.HOURS.between(reviewEntity.getCreatedAt(), LocalDateTime.now()) >= 1) {
-                createdAt = Long.toString(ChronoUnit.HOURS.between(reviewEntity.getCreatedAt(), LocalDateTime.now())).concat("시간 전");
-            }
-            else if (ChronoUnit.MINUTES.between(reviewEntity.getCreatedAt(), LocalDateTime.now()) >= 1) {
-                createdAt = Long.toString(ChronoUnit.MINUTES.between(reviewEntity.getCreatedAt(), LocalDateTime.now())).concat("분 전");
-            }
-            else {
-                createdAt = Long.toString(ChronoUnit.SECONDS.between(reviewEntity.getCreatedAt(), LocalDateTime.now())).concat("초 전");
-            }
             reviewList.add(new GetReviewDto(
                     reviewEntity.getId(),
                     reviewEntity.getImgUrl(),
                     reviewEntity.getUser().getNickName(),
                     reviewEntity.getRatingStar(),
-                    reviewEntity.getContents(),
-                    createdAt));
+                    reviewEntity.getContents()));
         }
 
         return new GetRestaurantDetailDto(
@@ -287,5 +252,33 @@ public class RestaurantService {
         restaurantEntity.addReview(reviewEntity);
 
         restaurantRepository.save(restaurantEntity);
+    }
+
+    public List<PopularSearchWordDto> getSearchWindow() {
+        //restaurantJdbcTempRepository.postSearch(contents);
+        return restaurantJdbcTempRepository.getPopularSearchWord();
+
+    }
+
+    public List<RestaurantDto> getSearchResult(String username, String search, Integer sort) throws BaseException{
+        restaurantJdbcTempRepository.postSearch(search);
+        if(sort == 1){
+           return restaurantJdbcTempRepository.getSearchResult1(username, search);
+       }
+       else if(sort == 2){
+           return restaurantJdbcTempRepository.getSearchResult2(username, search);
+       }
+       else if(sort == 3){
+           return restaurantJdbcTempRepository.getSearchResult3(username, search);
+       }
+       else if(sort == 4){
+           return restaurantJdbcTempRepository.getSearchResult4(username, search);
+       }
+       else if(sort == 5){
+           return restaurantJdbcTempRepository.getSearchResult5(username, search);
+       }
+       else{
+           throw new BaseException(DATABASE_ERROR);
+       }
     }
 }
