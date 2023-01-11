@@ -285,25 +285,25 @@ public class RestaurantService {
 
     }
 
-    public List<RestaurantDto> getSearchResult(String username, String search, Integer sort) throws BaseException{
-        restaurantJdbcTempRepository.postSearch(search);
+    public List<RestaurantDto> getSearchResult(String username, String query, Integer sort) throws BaseException{
+        restaurantJdbcTempRepository.postSearch(query);
         if(sort == 1){
-           return restaurantJdbcTempRepository.getSearchResult1(username, search);
-       }
-       else if(sort == 2){
-           return restaurantJdbcTempRepository.getSearchResult2(username, search);
-       }
-       else if(sort == 3){
-           return restaurantJdbcTempRepository.getSearchResult3(username, search);
-       }
-       else if(sort == 4){
-           return restaurantJdbcTempRepository.getSearchResult4(username, search);
-       }
-       else if(sort == 5){
-           return restaurantJdbcTempRepository.getSearchResult5(username, search);
-       }
-       else{
+           return restaurantJdbcTempRepository.getSearchResult1(username, query);
+        }
+        else if(sort == 2){
+           return restaurantJdbcTempRepository.getSearchResult2(username, query);
+        }
+        else if(sort == 3){
+           return restaurantJdbcTempRepository.getSearchResult3(username, query);
+        }
+        else if(sort == 4){
+           return restaurantJdbcTempRepository.getSearchResult4(username, query);
+        }
+        else if(sort == 5){
+           return restaurantJdbcTempRepository.getSearchResult5(username, query);
+        }
+        else{
            throw new BaseException(DATABASE_ERROR);
-       }
+        }
     }
 }

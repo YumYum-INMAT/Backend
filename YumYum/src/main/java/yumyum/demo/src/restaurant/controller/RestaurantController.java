@@ -176,14 +176,33 @@ public class RestaurantController {
             @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
-    @GetMapping("/search/")
+    @GetMapping("/search")
     @PreAuthorize("hasAnyRole('USER')")
-    public BaseResponse<List<RestaurantDto>> getSearchResult(@RequestParam(value = "search")String search, @RequestParam(value = "sort", defaultValue = "1")Integer sort){
+    public BaseResponse<List<RestaurantDto>> getSearchResult(@RequestParam(value = "query")String query, @RequestParam(value = "sort", defaultValue = "1")Integer sort){
         try {
             Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
-            return new BaseResponse<>(restaurantService.getSearchResult(currentUsername.get(),search, sort));
+            return new BaseResponse<>(restaurantService.getSearchResult(currentUsername.get(),query, sort));
         } catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
     }
+
+//    @ApiOperation(value = "리뷰 리스트 조회 API")
+//    @ApiResponses(value = {
+//            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+//            @ApiResponse(code = 400, message = "Bad Request"),
+//            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+//            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+//    })
+//    @GetMapping("/{restaurantId}/reviews")
+//    @PreAuthorize("hasAnyRole('USER')")
+//    public BaseResponse<List<>> getReviews(@PathVariable("restaurantId") Long restaurantId) {
+//        try {
+//            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+//
+//            return new BaseResponse<>(restaurantService.getReviews(currentUsername.get(), restaurantId));
+//        } catch (BaseException e) {
+//            return new BaseResponse<>(e.getStatus());
+//        }
+//    }
 }
