@@ -176,7 +176,7 @@ public class RestaurantController {
             @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
-    @GetMapping("/search")
+    @GetMapping("/search/result")
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<List<RestaurantDto>> getSearchResult(@RequestParam(value = "query")String query, @RequestParam(value = "sort", defaultValue = "1")Integer sort){
         try {
