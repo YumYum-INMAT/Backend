@@ -80,7 +80,8 @@ public enum BaseResponseStatus {
     
     NOT_ACTIVATED_USER(false,3015,"유효한 사용자가 아닙니다."),
     NOT_ACTIVATED_RESTAURANT(false,3020,"유효한 음식점이 아닙니다."),
-    
+    NOT_ACTIVATED_REVIEW(false,3025,"유효한 리뷰가 아닙니다."),
+
 
     DUPLICATED_USERNAME(false,3030,"중복된 아이디입니다."),
 
