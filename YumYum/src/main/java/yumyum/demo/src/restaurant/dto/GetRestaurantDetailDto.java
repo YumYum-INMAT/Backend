@@ -23,6 +23,10 @@ public class GetRestaurantDetailDto {
 
     private String address; //주소
 
+    private Double latitude; // 위도
+
+    private Double longitude; // 경도
+
     private boolean userHeart; //유저 하트 여부
 
     private String contactNumber; //연락처

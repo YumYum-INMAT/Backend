@@ -223,6 +223,8 @@ public class RestaurantService {
                 restaurantImgList,
                 menuList,
                 restaurantEntity.getAddress(),
+                restaurantEntity.getLatitude(),
+                restaurantEntity.getLongitude(),
                 userHeart,
                 restaurantEntity.getContactNumber(),
                 restaurantEntity.getAverageStar(),
