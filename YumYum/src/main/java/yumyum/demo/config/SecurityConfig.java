@@ -55,6 +55,7 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers("/users/signup").permitAll()
                 .antMatchers("/users/login").permitAll()
+                .antMatchers("/users/login-anonymous").permitAll()
                 .antMatchers("/users/username").permitAll()
                 .antMatchers("/users/nickname").permitAll()
                 .antMatchers(HttpMethod.GET,"/swagger-resources/**").permitAll()
