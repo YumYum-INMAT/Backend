@@ -27,7 +27,7 @@ public class PostScreenDto {
     private String imgUrl;
     private Long countPostLike;
     private Long countComment;
-    private String crated_at;
+    private String createdAt;
     // 값이 false면 수정이 안 된 상태고, 값이 true면 수정된 상태이다
     private boolean myLike;
 
@@ -43,7 +43,7 @@ public class PostScreenDto {
         this.imgUrl = postinfoDto.getImgUrl();
         this.countPostLike = postinfoDto.getCountPostLike();
         this.countComment = postinfoDto.getCountComment();
-        this.crated_at = postinfoDto.getCrated_at();
+        this.createdAt = postinfoDto.getCreatedAt();
         this.myLike = postinfoDto.isMyLike();
 
         this.commentInfoDtoList = commentInfoDtoList;

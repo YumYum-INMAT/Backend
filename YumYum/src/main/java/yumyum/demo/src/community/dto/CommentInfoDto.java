@@ -19,7 +19,7 @@ public class CommentInfoDto {
     private String profileImgUrl;
     private String contents;
     private Long countCommentLike;
-    private String create_at;
+    private String createdAt;
     private int groupNumber;
     private Long parentId;
     // 값이 false면 수정이 안 된 상태고, 값이 true면 수정된 상태이다

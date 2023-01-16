@@ -23,7 +23,7 @@ public class PostinfoDto {
     private String imgUrl;
     private Long countPostLike;
     private Long countComment;
-    private String crated_at;
+    private String createdAt;
     // 값이 false면 좋아요를 안 한 상태이고, 값이 true면 좋아요를 한 상태이다
     private boolean myLike;
 

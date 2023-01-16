@@ -46,27 +46,44 @@ public class CommunityService {
         }
     }
 
+    public String checkPostStatus(Long post_id){
+        return communityRepository.checkPostStatus(post_id);
+    }
+
     @Transactional
     public Long createComment(String username, Long post_id, CommentDto commentDto) throws BaseException {
-       try {
-           Long commentId = communityRepository.createComment(username, post_id, commentDto);
-           communityRepository.increseCountComment(post_id);
-           return commentId;
-       } catch (Exception exception){
-           throw new BaseException(DATABASE_ERROR);
-        }
+       if(checkPostStatus(post_id).equals("ACTIVE")) {
+           try {
+               Long commentId = communityRepository.createComment(username, post_id, commentDto);
+               communityRepository.increseCountComment(post_id);
+               return commentId;
+           } catch (Exception exception) {
+               throw new BaseException(DATABASE_ERROR);
+           }
+       } else if (checkPostStatus(post_id).equals("INACTIVE")) {
+           throw new BaseException(UNEXPECTED_ERROR);
+       }
+        else {
+            throw new BaseException(DATABASE_ERROR);
+       }
     }
 
     @Transactional
     public Long createReplyComment(String username, Long post_id, Long parent_id, CommentDto commentDto) throws BaseException{
-        try {
-            Long commentId = communityRepository.createReplyComment(username, post_id, parent_id, commentDto);
-            communityRepository.increseCountComment(post_id);
-            return commentId;
-        } catch (Exception exception){
+        if(checkPostStatus(post_id).equals("ACTIVE")) {
+            try {
+                Long commentId = communityRepository.createReplyComment(username, post_id, parent_id, commentDto);
+                communityRepository.increseCountComment(post_id);
+                return commentId;
+            } catch (Exception exception) {
+                throw new BaseException(DATABASE_ERROR);
+            }
+        } else if (checkPostStatus(post_id).equals("INACTIVE")) {
+            throw new BaseException(UNEXPECTED_ERROR);
+        }
+        else {
             throw new BaseException(DATABASE_ERROR);
         }
-
     }
 
     @Transactional
@@ -252,9 +269,9 @@ public class CommunityService {
 
     public List<CommunityMainDto> getCommunityScreen() throws BaseException{
         try{
-            List<CommunityMainDto> postinfoDtoList;
-            postinfoDtoList = communityRepository.getCommunityScreen();
-            return postinfoDtoList;
+            List<CommunityMainDto> communityMainDtoList;
+            communityMainDtoList = communityRepository.getCommunityScreen();
+            return communityMainDtoList;
 
         } catch (Exception exception){
             throw new BaseException(DATABASE_ERROR);

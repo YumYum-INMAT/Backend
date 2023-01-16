@@ -24,12 +24,12 @@ public class PostDto {
 
     @ApiModelProperty(example = "냠냠을 소개합니다")
     @NotBlank(message = "제목을 입력해주세요.")
-    @Size(min = 1, max = 45, message = "제목은 최대 45자까지 입력해주세요.")
+    @Size(min = 1, max = 100, message = "제목은 최대 45자까지 입력해주세요.")
     private String topic;
 
     @ApiModelProperty(example = "프론트엔드,백엔드,디자인")
     @NotBlank(message = "내용을 입력해주세요.")
-    @Size(min = 1, max = 255, message = "내용은 최대 255자까지 입력해주세요.")
+    @Size(min = 1, max = 3000, message = "내용은 최대 255자까지 입력해주세요.")
     private String contents;
 
 }

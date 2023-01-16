@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import yumyum.demo.src.restaurant.dto.PopularSearchWordDto;
 import yumyum.demo.src.restaurant.dto.RestaurantDto;
-import yumyum.demo.src.restaurant.dto.SearchRestaurantDto;
 
 import javax.sql.DataSource;
 import java.util.List;

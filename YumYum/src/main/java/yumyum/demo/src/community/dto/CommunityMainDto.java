@@ -23,6 +23,6 @@ public class CommunityMainDto {
     private Long countComment;
 
     //그 외
-    private String created_at;
+    private String createdAt;
 
 }
