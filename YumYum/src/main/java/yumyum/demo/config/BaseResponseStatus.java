@@ -86,6 +86,8 @@ public enum BaseResponseStatus {
     DUPLICATED_USERNAME(false,3030,"중복된 아이디입니다."),
 
     DUPLICATED_NICKNAME(false,3035,"중복된 닉네임입니다."),
+    
+    DUPLICATED_PHONE_NUMBER(false,3037,"중복된 휴대폰 번호입니다."),
 
     DUPLICATED_EMAIL(false,3040,"중복된 이메일입니다."),
 

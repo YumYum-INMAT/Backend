@@ -53,6 +53,11 @@ public class UserService {
             throw new BaseException(DUPLICATED_NICKNAME);
         }
 
+        //휴대폰 번호 중복 체크
+        if(userRepository.findUserEntityByPhoneNumberAndStatus(signUpDto.getPhoneNumber(), Status.ACTIVE).isPresent()) {
+            throw new BaseException(DUPLICATED_PHONE_NUMBER);
+        }
+
         //빌더 패턴의 장점
         Authority authority = Authority.builder()
                 .authorityName("ROLE_USER")
@@ -101,6 +106,28 @@ public class UserService {
             throw new BaseException(DUPLICATED_NICKNAME);
         }
     }
+
+//    public TokenDto anonymousLogin() throws BaseException {
+//
+//
+//        //빌더 패턴의 장점
+//        Authority authority = Authority.builder()
+//                .authorityName("ROLE_ANONYMOUS")
+//                .build();
+//
+//        UserEntity user = UserEntity.builder()
+//                .username("anonymous")
+//                .password(passwordEncoder.encode("1234abcd!"))
+//                .email("anonymous@email.com")
+//                .phoneNumber("010-1234-5678")
+//                .nickName("익명")
+//                .age(20)
+//                .gender('M')
+//                .authorities(Collections.singleton(authority))
+//                .build();
+//
+//
+//    }
 
     public MyPageDto getMyPage(String username) throws BaseException {
         UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
