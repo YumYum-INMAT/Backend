@@ -107,27 +107,31 @@ public class UserService {
         }
     }
 
-//    public TokenDto anonymousLogin() throws BaseException {
-//
-//
-//        //빌더 패턴의 장점
-//        Authority authority = Authority.builder()
-//                .authorityName("ROLE_ANONYMOUS")
-//                .build();
-//
-//        UserEntity user = UserEntity.builder()
-//                .username("anonymous")
-//                .password(passwordEncoder.encode("1234abcd!"))
-//                .email("anonymous@email.com")
-//                .phoneNumber("010-1234-5678")
-//                .nickName("익명")
-//                .age(20)
-//                .gender('M')
-//                .authorities(Collections.singleton(authority))
-//                .build();
-//
-//
-//    }
+    public LoginDto anonymousLogin() throws BaseException {
+        List<UserEntity> anonymousUserEntities = userRepository.findAllByEmail("anonymous@email.com");
+
+        Integer anonymousUserSize = anonymousUserEntities.size() + 1;
+
+        //빌더 패턴의 장점
+        Authority authority = Authority.builder()
+                .authorityName("ROLE_ANONYMOUS")
+                .build();
+
+        UserEntity user = UserEntity.builder()
+                .username("anonymous" + Integer.toString(anonymousUserSize))
+                .password(passwordEncoder.encode("1234abcd!"))
+                .email("anonymous@email.com")
+                .phoneNumber("010-0000-0000")
+                .nickName("비회원유저")
+                .age(0)
+                .gender('M')
+                .authorities(Collections.singleton(authority))
+                .build();
+
+        userRepository.save(user);
+
+        return new LoginDto("anonymous" + Integer.toString(anonymousUserSize), "1234abcd!");
+    }
 
     public MyPageDto getMyPage(String username) throws BaseException {
         UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
