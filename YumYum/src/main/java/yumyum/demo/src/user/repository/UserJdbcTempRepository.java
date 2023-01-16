@@ -56,7 +56,7 @@ public class UserJdbcTempRepository {
                     communityMainDto.setImgUrl(rs.getString("P.img_url"));
                     communityMainDto.setCountPostLike(rs.getLong("P.count_like"));
                     communityMainDto.setCountComment(rs.getLong("P.count_comment"));
-                    communityMainDto.setCreated_at(rs.getString("created_time"));
+                    communityMainDto.setCreatedAt(rs.getString("created_time"));
 
                     return communityMainDto;
                 }, user_id
@@ -91,7 +91,7 @@ public class UserJdbcTempRepository {
                     myReviewDto.setRestaurantId(rs.getLong("R.restaurant_id"));
                     myReviewDto.setUserId(rs.getLong("R.user_id"));
                     myReviewDto.setRestaurantName(rs.getString("R2.restaurant_name"));
-                    myReviewDto.setCreated_time(rs.getString("created_time"));
+                    myReviewDto.setCreatedAt(rs.getString("created_time"));
 
                     return myReviewDto;
                 }, user_id

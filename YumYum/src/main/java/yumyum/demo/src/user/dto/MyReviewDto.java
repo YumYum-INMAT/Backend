@@ -17,6 +17,6 @@ public class MyReviewDto {
 
     private String restaurantName;
 
-    private String created_time;
+    private String createdAt;
 
 }
