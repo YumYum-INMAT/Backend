@@ -91,7 +91,7 @@ public class UserJdbcTempRepository {
                     myReviewDto.setRestaurantId(rs.getLong("R.restaurant_id"));
                     myReviewDto.setUserId(rs.getLong("R.user_id"));
                     myReviewDto.setRestaurantName(rs.getString("R2.restaurant_name"));
-                    myReviewDto.setCreatedTime(rs.getString("created_time"));
+                    myReviewDto.setCreatedAt(rs.getString("created_time"));
 
                     return myReviewDto;
                 }, user_id
