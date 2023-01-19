@@ -117,7 +117,7 @@ public class TokenProvider implements InitializingBean {
     /**
      * 토큰의 유효성을 검증하기 위함 -> 파싱 후 검증하고 리턴한다.
      */
-    public boolean validateAccessToken(String token) {
+    public boolean isValidAccessToken(String token) {
         try{
             Jwts.parserBuilder().setSigningKey(accessTokenKey).build().parseClaimsJws(token);
             return true;
