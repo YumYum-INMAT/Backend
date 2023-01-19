@@ -19,20 +19,28 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
+import yumyum.demo.src.user.dto.TokenDto;
 
 @Component
 public class TokenProvider implements InitializingBean {
     private final Logger logger = LoggerFactory.getLogger(TokenProvider.class);
     private static final String AUTHORITIES_KEY = "auth";
-    private final String secret;
-    private final long tokenValidityMilliSecond;
+    private final String accessTokenSecret;
+    private final String refreshTokenSecret;
+    private final long accessTokenValidTime;
+    private final long refreshTokenValidTime;
 
-    private Key key;
+    private Key accessTokenKey;
+    private Key refreshTokenKey;
 
-    public TokenProvider(@Value("${jwt.secret}") String secret,
-                         @Value("${jwt.token-validity-in-seconds}") long tokenValidityInSeconds){
-        this.secret = secret;
-        this.tokenValidityMilliSecond = tokenValidityInSeconds * 1000;
+    public TokenProvider(@Value("${jwt.access-token-secret}") String accessTokenSecret,
+                         @Value("${jwt.refresh-token-secret}") String refreshTokenSecret,
+                         @Value("${jwt.access-token-expiration-time}") long accessTokenValidTime,
+                         @Value("${jwt.refresh-token-expiration-time}") long refreshTokenValidTime) {
+        this.accessTokenSecret = accessTokenSecret;
+        this.refreshTokenSecret = refreshTokenSecret;
+        this.accessTokenValidTime = accessTokenValidTime * 60 * 60 * 1000; //1시간
+        this.refreshTokenValidTime = refreshTokenValidTime * 24 * 60 * 60 * 1000; //15일
     }
 
     /**
@@ -40,27 +48,47 @@ public class TokenProvider implements InitializingBean {
      */
     @Override
     public void afterPropertiesSet() throws Exception {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
+        byte[] accessTokenKeyBytes = Decoders.BASE64.decode(accessTokenSecret);
+        this.accessTokenKey = Keys.hmacShaKeyFor(accessTokenKeyBytes);
+
+        byte[] refreshTokenKeyBytes = Decoders.BASE64.decode(refreshTokenSecret);
+        this.refreshTokenKey = Keys.hmacShaKeyFor(refreshTokenKeyBytes);
     }
 
     /**
-     * Authentication에 있는 권한 정보를 이용해서 토큰을 생성한다.
+     * Authentication에 있는 권한 정보를 이용해서 엑세스 토큰을 생성한다.
      * 정보를 바탕으로 권한을 가져오고, 유효시간과 암호화를 통해 토큰을 생성한다.
      */
-    public String createToken(Authentication authentication){
+    public String createAccessToken(Authentication authentication) {
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
         long now = (new Date()).getTime();
-        Date validateTime = new Date(now + this.tokenValidityMilliSecond);
+        Date accessTokenExpiredTime = new Date(now + this.accessTokenValidTime);
 
-        String newToken = Jwts.builder().setSubject(authentication.getName())
+        return Jwts.builder().setSubject(authentication.getName())
                 .claim(AUTHORITIES_KEY, authorities)
-                .signWith(key, SignatureAlgorithm.HS512)
-                .setExpiration(validateTime).compact();
-        return newToken;
+                .signWith(accessTokenKey, SignatureAlgorithm.HS512)
+                .setExpiration(accessTokenExpiredTime).compact();
+    }
+
+    /**
+     * Authentication에 있는 권한 정보를 이용해서 리프레쉬 토큰을 생성한다.
+     * 정보를 바탕으로 권한을 가져오고, 유효시간과 암호화를 통해 토큰을 생성한다.
+     */
+    public String createRefreshToken(Authentication authentication) {
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+
+        long now = (new Date()).getTime();
+        Date refreshTokenExpiredTime = new Date(now + this.refreshTokenValidTime);
+
+        return Jwts.builder().setSubject(authentication.getName())
+                .claim(AUTHORITIES_KEY, authorities)
+                .signWith(refreshTokenKey, SignatureAlgorithm.HS512)
+                .setExpiration(refreshTokenExpiredTime).compact();
     }
 
     /**
@@ -69,11 +97,11 @@ public class TokenProvider implements InitializingBean {
      *
      * claim : JWT의 속성 정보
      */
-    public Authentication getAuthentication(String token){
+    public Authentication getAuthenticationByAccessToken(String token) {
 
         Claims claims = Jwts
                 .parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(accessTokenKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -89,9 +117,9 @@ public class TokenProvider implements InitializingBean {
     /**
      * 토큰의 유효성을 검증하기 위함 -> 파싱 후 검증하고 리턴한다.
      */
-    public boolean validateToken(String token){
+    public boolean validateAccessToken(String token) {
         try{
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(accessTokenKey).build().parseClaimsJws(token);
             return true;
         }catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e){
             logger.info("잘못된 JWT 서명입니다.");
