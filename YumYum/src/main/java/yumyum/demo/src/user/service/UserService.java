@@ -14,7 +14,9 @@ import yumyum.demo.src.community.dto.CommunityMainDto;
 import yumyum.demo.src.community.dto.PostScreenDto;
 import yumyum.demo.src.user.dto.*;
 import yumyum.demo.src.user.entity.Authority;
+import yumyum.demo.src.user.entity.RefreshTokenEntity;
 import yumyum.demo.src.user.entity.UserEntity;
+import yumyum.demo.src.user.repository.RefreshTokenRepository;
 import yumyum.demo.src.user.repository.UserJdbcTempRepository;
 import yumyum.demo.src.user.repository.UserRepository;
 import yumyum.demo.utils.SecurityUtil;
@@ -30,6 +32,7 @@ import static yumyum.demo.config.BaseResponseStatus.*;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final UserJdbcTempRepository userJdbcTempRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
@@ -215,5 +218,20 @@ public class UserService {
 
     }
 
+    public void updateRefreshToken(String username, String refreshToken, String userAgent) throws BaseException {
+        UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
+        Optional<RefreshTokenEntity> refreshTokenEntity = refreshTokenRepository.findRefreshTokenEntityByUserAndStatus(foundUserEntity, Status.ACTIVE);
+
+        //첫 로그인인 경우 -> 디비에 저장된 refresh 토큰 칼럼이 없음
+        if (refreshTokenEntity.isEmpty()) {
+            RefreshTokenEntity createdRefreshTokenEntity = new RefreshTokenEntity(foundUserEntity, refreshToken, userAgent);
+            refreshTokenRepository.save(createdRefreshTokenEntity);
+        }
+        else {
+            refreshTokenEntity.get().updateRefreshToken(refreshToken);
+            refreshTokenRepository.save(refreshTokenEntity.get());
+        }
+    }
 }

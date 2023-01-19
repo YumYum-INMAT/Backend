@@ -67,7 +67,8 @@ public class UserController {
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
     @PostMapping("/login")
-    public BaseResponse<TokenDto> login(@Valid @RequestBody LoginDto loginDto) {
+    public BaseResponse<TokenDto> login(@RequestHeader("User-Agent") String userAgent,
+                                        @Valid @RequestBody LoginDto loginDto) {
 
         try {
             userService.checkUsername(loginDto.getUsername()); //아이디 존재여부 체크
@@ -80,12 +81,16 @@ public class UserController {
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            String jwt = tokenProvider.createToken(authentication);
+            String accessToken = tokenProvider.createAccessToken(authentication);
+            String refreshToken = tokenProvider.createRefreshToken(authentication);
+
+            //발급받은 리프레쉬 토큰을 디비에 저장
+            userService.updateRefreshToken(loginDto.getUsername(), refreshToken, userAgent);
 
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer " + jwt);
+            httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
-            return new BaseResponse<>(new TokenDto(jwt));
+            return new BaseResponse<>(new TokenDto(accessToken, refreshToken));
 
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
@@ -100,7 +105,7 @@ public class UserController {
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
     @PostMapping("/login-anonymous")
-    public BaseResponse<TokenDto> anonymousLogin() {
+    public BaseResponse<TokenDto> anonymousLogin(@RequestHeader("User-Agent") String userAgent) {
         try {
             LoginDto anonymousLoginDto = userService.anonymousLogin();
 
@@ -114,12 +119,14 @@ public class UserController {
             Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            String jwt = tokenProvider.createToken(authentication);
+            String accessToken = tokenProvider.createAccessToken(authentication);
+            String refreshToken = tokenProvider.createRefreshToken(authentication);
+            userService.updateRefreshToken(anonymousLoginDto.getUsername(), refreshToken, userAgent);
 
             HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer " + jwt);
+            httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
-            return new BaseResponse<>(new TokenDto(jwt));
+            return new BaseResponse<>(new TokenDto(accessToken, refreshToken));
 
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
