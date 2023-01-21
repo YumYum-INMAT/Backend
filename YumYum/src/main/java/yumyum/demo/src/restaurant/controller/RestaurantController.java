@@ -205,24 +205,4 @@ public class RestaurantController {
             return new BaseResponse<>(e.getStatus());
         }
     }
-
-    @ApiOperation(value = "리뷰 상세 조회 API")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
-            @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
-            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
-    })
-    @GetMapping("/{restaurantId}/reviews/{reviewId}")
-    @PreAuthorize("hasAnyRole('USER')")
-    public BaseResponse<GetReviewDto> getReviewDetails(@PathVariable("restaurantId") Long restaurantId,
-                                                       @PathVariable("reviewId") Long reviewId) {
-        try {
-            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
-
-            return new BaseResponse<>(restaurantService.getReviewDetails(currentUsername.get(), restaurantId, reviewId));
-        } catch (BaseException e) {
-            return new BaseResponse<>(e.getStatus());
-        }
-    }
 }

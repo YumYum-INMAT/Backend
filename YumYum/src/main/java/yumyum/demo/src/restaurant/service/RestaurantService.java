@@ -313,25 +313,6 @@ public class RestaurantService {
         return result;
     }
 
-    public GetReviewDto getReviewDetails(String username, Long restaurantId, Long reviewId) throws BaseException {
-        UserEntity userEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
-                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
-
-        RestaurantEntity restaurantEntity = restaurantRepository.findRestaurantEntityByIdAndStatus(restaurantId, Status.ACTIVE)
-                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_RESTAURANT));
-
-        ReviewEntity reviewEntity = reviewRepository.findReviewEntityByIdAndStatus(reviewId, Status.ACTIVE)
-                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_REVIEW));
-
-        return new GetReviewDto(
-                reviewEntity.getId(),
-                reviewEntity.getImgUrl(),
-                reviewEntity.getUser().getNickName(),
-                reviewEntity.getRatingStar(),
-                reviewEntity.getContents(),
-                convertCreatedAt(reviewEntity.getCreatedAt()));
-    }
-
     private String convertCreatedAt(Temporal createAt) {
         if (ChronoUnit.YEARS.between(createAt, LocalDateTime.now()) >= 1) {
             return Long.toString(ChronoUnit.YEARS.between(createAt, LocalDateTime.now())).concat("년 전");
