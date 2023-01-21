@@ -1,7 +1,6 @@
 package yumyum.demo.src.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,7 +10,6 @@ import yumyum.demo.config.Status;
 import yumyum.demo.jwt.TokenProvider;
 //import yumyum.demo.src.user.dto.HeartRestaurantDto;
 import yumyum.demo.src.community.dto.CommunityMainDto;
-import yumyum.demo.src.community.dto.PostScreenDto;
 import yumyum.demo.src.user.dto.*;
 import yumyum.demo.src.user.entity.Authority;
 import yumyum.demo.src.user.entity.RefreshTokenEntity;
@@ -19,7 +17,6 @@ import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.repository.RefreshTokenRepository;
 import yumyum.demo.src.user.repository.UserJdbcTempRepository;
 import yumyum.demo.src.user.repository.UserRepository;
-import yumyum.demo.utils.SecurityUtil;
 
 import java.util.Collections;
 import java.util.List;
@@ -136,11 +133,11 @@ public class UserService {
         return new LoginDto("anonymous" + Integer.toString(anonymousUserSize), "1234abcd!");
     }
 
-    public UserProfileDto getUserProfile(String username) throws BaseException {
+    public UpdateUserProfileDto getUserProfile(String username) throws BaseException {
         UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        UserProfileDto userProfile = UserProfileDto.builder()
+        UpdateUserProfileDto userProfile = UpdateUserProfileDto.builder()
                 .profileImgUrl(foundUserEntity.getProfileImgUrl())
                 .nickName(foundUserEntity.getNickName())
                 .age(foundUserEntity.getAge())
@@ -150,7 +147,7 @@ public class UserService {
         return userProfile;
     }
 
-    public void updateUserProfile(String username, UserProfileDto userProfileDto) throws BaseException {
+    public void updateUserProfile(String username, UpdateUserProfileDto userProfileDto) throws BaseException {
         UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 

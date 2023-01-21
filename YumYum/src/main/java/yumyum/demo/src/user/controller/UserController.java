@@ -10,16 +10,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
 import yumyum.demo.jwt.JwtFilter;
 import yumyum.demo.jwt.TokenProvider;
 import yumyum.demo.src.community.dto.CommunityMainDto;
-import yumyum.demo.src.community.dto.PostScreenDto;
 import yumyum.demo.src.user.dto.*;
-import yumyum.demo.src.user.service.UserJdbcTempService;
 import yumyum.demo.src.user.service.UserService;
 import yumyum.demo.utils.SecurityUtil;
 
@@ -27,9 +24,6 @@ import javax.validation.Valid;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
-
-import static yumyum.demo.config.BaseResponseStatus.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -178,7 +172,7 @@ public class UserController {
     })
     @GetMapping("/profiles")
     @PreAuthorize("hasAnyRole('USER')")
-    public BaseResponse<UserProfileDto> getUserProfile() {
+    public BaseResponse<UpdateUserProfileDto> getUserProfile() {
 
         try {
             Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
@@ -199,7 +193,7 @@ public class UserController {
     })
     @PatchMapping("/profiles")
     @PreAuthorize("hasAnyRole('USER')")
-    public BaseResponse<String> updateUserProfile(@Valid @RequestBody UserProfileDto userProfileDto) {
+    public BaseResponse<String> updateUserProfile(@Valid @RequestBody UpdateUserProfileDto userProfileDto) {
 
         try {
             Optional<String> currentUsername = SecurityUtil.getCurrentUsername();

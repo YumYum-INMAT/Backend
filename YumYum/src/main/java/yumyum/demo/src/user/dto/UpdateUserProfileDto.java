@@ -2,7 +2,6 @@ package yumyum.demo.src.user.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
-import org.hibernate.validator.constraints.URL;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -14,7 +13,7 @@ import javax.validation.constraints.Size;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserProfileDto {
+public class UpdateUserProfileDto {
 
     @Size(min = 1, message = "null 값 또는 URL을 입력해주세요") // NULL값 허용, But "", " " 등 빈칸 허용X
     @Pattern(regexp = "^((http|https)://)?(www.)?([a-zA-Z0-9]+)\\.[a-z]+([a-zA-Z0-9.?#]+)?", message = "올바른 URL이 아닙니다.")
