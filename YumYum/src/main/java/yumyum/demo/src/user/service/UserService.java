@@ -133,18 +133,18 @@ public class UserService {
         return new LoginDto("anonymous" + Integer.toString(anonymousUserSize), "1234abcd!");
     }
 
-    public UpdateUserProfileDto getUserProfile(String username) throws BaseException {
+    public GetUserProfileDto getUserProfile(String username) throws BaseException {
         UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        UpdateUserProfileDto userProfile = UpdateUserProfileDto.builder()
-                .profileImgUrl(foundUserEntity.getProfileImgUrl())
-                .nickName(foundUserEntity.getNickName())
-                .age(foundUserEntity.getAge())
-                .gender(foundUserEntity.getGender())
-                .build();
-
-        return userProfile;
+        return new GetUserProfileDto(
+                foundUserEntity.getId(),
+                foundUserEntity.getUsername(),
+                foundUserEntity.getEmail(),
+                foundUserEntity.getPhoneNumber(),
+                foundUserEntity.getNickName(),
+                foundUserEntity.getAge(),
+                foundUserEntity.getGender());
     }
 
     public void updateUserProfile(String username, UpdateUserProfileDto userProfileDto) throws BaseException {

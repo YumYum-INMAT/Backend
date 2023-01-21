@@ -172,8 +172,7 @@ public class UserController {
     })
     @GetMapping("/profiles")
     @PreAuthorize("hasAnyRole('USER')")
-    public BaseResponse<UpdateUserProfileDto> getUserProfile() {
-
+    public BaseResponse<GetUserProfileDto> getUserProfile() {
         try {
             Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
 
