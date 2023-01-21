@@ -153,6 +153,7 @@ public class RestaurantService {
         for (ReviewEntity entity : reviewEntities) {
             recentReviewList.add(new RecentReviewDto(
                     entity.getId(),
+                    entity.getRestaurant().getId(),
                     entity.getImgUrl(),
                     entity.getRestaurant().getRestaurantName(),
                     entity.getUser().getNickName(),
