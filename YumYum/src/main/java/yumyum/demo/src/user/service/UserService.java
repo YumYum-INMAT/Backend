@@ -136,18 +136,6 @@ public class UserService {
         return new LoginDto("anonymous" + Integer.toString(anonymousUserSize), "1234abcd!");
     }
 
-    public MyPageDto getMyPage(String username) throws BaseException {
-        UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
-                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
-
-        MyPageDto myPageDto = MyPageDto.builder()
-                .profileImgUrl(foundUserEntity.getProfileImgUrl())
-                .nickName(foundUserEntity.getNickName())
-                .build();
-
-        return myPageDto;
-    }
-
     public UserProfileDto getUserProfile(String username) throws BaseException {
         UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
