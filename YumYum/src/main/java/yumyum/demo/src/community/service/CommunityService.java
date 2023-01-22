@@ -3,13 +3,11 @@ package yumyum.demo.src.community.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import yumyum.demo.config.BaseException;
-import yumyum.demo.config.Status;
 import yumyum.demo.src.community.dto.*;
 import yumyum.demo.src.community.repository.CommunityRepository;
 
 import javax.transaction.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static yumyum.demo.config.BaseResponseStatus.*;
@@ -55,7 +53,7 @@ public class CommunityService {
        if(checkPostStatus(post_id).equals("ACTIVE")) {
            try {
                Long commentId = communityRepository.createComment(username, post_id, commentDto);
-               communityRepository.increseCountComment(post_id);
+               communityRepository.increaseCountComment(post_id);
                return commentId;
            } catch (Exception exception) {
                throw new BaseException(DATABASE_ERROR);
@@ -73,7 +71,7 @@ public class CommunityService {
         if(checkPostStatus(post_id).equals("ACTIVE")) {
             try {
                 Long commentId = communityRepository.createReplyComment(username, post_id, parent_id, commentDto);
-                communityRepository.increseCountComment(post_id);
+                communityRepository.increaseCountComment(post_id);
                 return commentId;
             } catch (Exception exception) {
                 throw new BaseException(DATABASE_ERROR);
@@ -92,7 +90,7 @@ public class CommunityService {
         if(communityRepository.countPostLike(post_id, user_id) == 0 ){
             try {
                 communityRepository.createPostLike(post_id, user_id);
-                communityRepository.incresePostCountLike(post_id);
+                communityRepository.increasePostCountLike(post_id);
             }catch (Exception exception){
                 throw new BaseException(DATABASE_ERROR);
             }
@@ -101,7 +99,7 @@ public class CommunityService {
            if(communityRepository.statusPostLike(post_id, user_id).equals("INACTIVE")){
                try {
                    communityRepository.changeStatusPostLike(post_id, user_id, "ACTIVE");
-                   communityRepository.incresePostCountLike(post_id);
+                   communityRepository.increasePostCountLike(post_id);
                }catch (Exception exception){
                    throw new BaseException(DATABASE_ERROR);
                }
@@ -132,7 +130,7 @@ public class CommunityService {
             else if(communityRepository.statusPostLike(post_id, user_id).equals("ACTIVE")){
                 try{
                     communityRepository.changeStatusPostLike(post_id, user_id, "INACTIVE");
-                    communityRepository.decresePostCountLike(post_id);
+                    communityRepository.decreasePostCountLike(post_id);
                 }catch (Exception exception){
                     throw new BaseException(DATABASE_ERROR);
                 }
@@ -182,7 +180,7 @@ public class CommunityService {
         if(username.equals(communityRepository.findUsernameByCommentId(comment_id))){
             try{
                 communityRepository.deleteComment(comment_id);
-                communityRepository.decreseCountComment(communityRepository.findPostIdByCommentId(comment_id));
+                communityRepository.decreaseCountComment(communityRepository.findPostIdByCommentId(comment_id));
             } catch (Exception exception){
                 throw new BaseException(DATABASE_ERROR);
             }
@@ -199,7 +197,7 @@ public class CommunityService {
             if(communityRepository.countCommentLike(user_id, comment_id) == 0){
                 try {
                     communityRepository.createCommentLike(user_id, comment_id);
-                    communityRepository.increseCommentCountLike(comment_id);
+                    communityRepository.increaseCommentCountLike(comment_id);
                 }catch (Exception exception){
                     throw new BaseException(DATABASE_ERROR);
                 }
@@ -208,7 +206,7 @@ public class CommunityService {
                 if(communityRepository.statusCommentLike(user_id, comment_id).equals("INACTIVE")) {
                     try {
                         communityRepository.changeStatusCommentLike(user_id, comment_id, "ACTIVE");
-                        communityRepository.increseCommentCountLike(comment_id);
+                        communityRepository.increaseCommentCountLike(comment_id);
                     } catch (Exception exception) {
                         throw new BaseException(DATABASE_ERROR);
                     }
@@ -237,7 +235,7 @@ public class CommunityService {
             else if (communityRepository.statusCommentLike(user_id, comment_id).equals("ACTIVE")) {
                 try{
                 communityRepository.changeStatusCommentLike(user_id,comment_id, "INACTIVE");
-                communityRepository.decreseCommentCountLike(comment_id);
+                communityRepository.decreaseCommentCountLike(comment_id);
             }catch (Exception exception){
                     throw new BaseException(DATABASE_ERROR);
                 }
