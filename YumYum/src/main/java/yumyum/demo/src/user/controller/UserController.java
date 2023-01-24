@@ -81,9 +81,6 @@ public class UserController {
             //발급받은 리프레쉬 토큰을 디비에 저장
             userService.updateRefreshToken(loginDto.getUsername(), refreshToken, userAgent);
 
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer " + accessToken);
-
             return new BaseResponse<>(new TokenDto(accessToken, refreshToken));
 
         } catch (BaseException e) {
@@ -116,9 +113,6 @@ public class UserController {
             String accessToken = tokenProvider.createAccessToken(authentication);
             String refreshToken = tokenProvider.createRefreshToken(authentication);
             userService.updateRefreshToken(anonymousLoginDto.getUsername(), refreshToken, userAgent);
-
-            HttpHeaders httpHeaders = new HttpHeaders();
-            httpHeaders.add(JwtFilter.AUTHORIZATION_HEADER, "Bearer " + accessToken);
 
             return new BaseResponse<>(new TokenDto(accessToken, refreshToken));
 
