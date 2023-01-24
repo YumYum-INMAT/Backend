@@ -1,26 +1,17 @@
 package yumyum.demo.src.user.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponseStatus;
 import yumyum.demo.config.Status;
-import yumyum.demo.jwt.TokenProvider;
-//import yumyum.demo.src.user.dto.HeartRestaurantDto;
 import yumyum.demo.src.community.dto.CommunityMainDto;
 import yumyum.demo.src.user.dto.*;
-import yumyum.demo.src.user.entity.Authority;
-import yumyum.demo.src.user.entity.RefreshTokenEntity;
 import yumyum.demo.src.user.entity.UserEntity;
-import yumyum.demo.src.user.repository.RefreshTokenRepository;
 import yumyum.demo.src.user.repository.UserJdbcTempRepository;
 import yumyum.demo.src.user.repository.UserRepository;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static yumyum.demo.config.BaseResponseStatus.*;
 
@@ -29,7 +20,6 @@ import static yumyum.demo.config.BaseResponseStatus.*;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final UserJdbcTempRepository userJdbcTempRepository;
 
     public GetUserProfileDto getUserProfile(String username) throws BaseException {
