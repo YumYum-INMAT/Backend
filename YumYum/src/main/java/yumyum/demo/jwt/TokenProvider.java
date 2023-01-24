@@ -124,7 +124,23 @@ public class TokenProvider implements InitializingBean {
         }catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e){
             logger.info("잘못된 JWT 서명입니다.");
         }catch (ExpiredJwtException e){
-            logger.info("만료된 Token 입니다.");
+            logger.info("만료된 Access Token 입니다.");
+        }catch (UnsupportedJwtException e){
+            logger.info("지원하지 않는 JWT Token 입니다.");
+        }catch (MissingClaimException e){
+            logger.info("알 수 없는 에러가 발생했습니다.");
+        }
+        return false;
+    }
+
+    public boolean isValidRefreshToken(String token) {
+        try{
+            Jwts.parserBuilder().setSigningKey(refreshTokenKey).build().parseClaimsJws(token);
+            return true;
+        }catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e){
+            logger.info("잘못된 JWT 서명입니다.");
+        }catch (ExpiredJwtException e){
+            logger.info("만료된 Refresh Token 입니다.");
         }catch (UnsupportedJwtException e){
             logger.info("지원하지 않는 JWT Token 입니다.");
         }catch (MissingClaimException e){
