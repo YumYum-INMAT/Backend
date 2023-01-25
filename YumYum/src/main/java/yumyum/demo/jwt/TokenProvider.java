@@ -3,6 +3,7 @@ package yumyum.demo.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -11,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
+import org.springframework.util.StringUtils;
 import yumyum.demo.src.user.dto.TokenDto;
 
 @Component
@@ -39,7 +42,7 @@ public class TokenProvider implements InitializingBean {
                          @Value("${jwt.refresh-token-expiration-time}") long refreshTokenValidTime) {
         this.accessTokenSecret = accessTokenSecret;
         this.refreshTokenSecret = refreshTokenSecret;
-        this.accessTokenValidTime = accessTokenValidTime * 60 * 60 * 1000; //1시간
+        this.accessTokenValidTime = accessTokenValidTime * 60 * 1000; //1시간
         this.refreshTokenValidTime = refreshTokenValidTime * 24 * 60 * 60 * 1000; //15일
     }
 
@@ -114,6 +117,23 @@ public class TokenProvider implements InitializingBean {
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 
+    private Authentication getAuthenticationByRefreshToken(String token) {
+
+        Claims claims = Jwts
+                .parserBuilder()
+                .setSigningKey(refreshTokenKey)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        Collection<? extends GrantedAuthority> authorities  = Arrays.stream(
+                        claims.get(AUTHORITIES_KEY).toString().split(","))
+                .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+        User principal = new User(claims.getSubject(), "", authorities);
+
+        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+    }
+
     /**
      * 토큰의 유효성을 검증하기 위함 -> 파싱 후 검증하고 리턴한다.
      */
@@ -143,6 +163,13 @@ public class TokenProvider implements InitializingBean {
         }
     }
 
+    public String resolveAccessToken(HttpServletRequest request){
+        String accessToken = request.getHeader("Authorization");
+        if(StringUtils.hasText(accessToken) && accessToken.startsWith("Bearer "))
+            return accessToken.substring(7);
+        return null;
+    }
+
     public boolean isValidRefreshToken(String token) {
         try{
             Jwts.parserBuilder().setSigningKey(refreshTokenKey).build().parseClaimsJws(token);
@@ -168,4 +195,13 @@ public class TokenProvider implements InitializingBean {
             return true;
         }
     }
+
+    public TokenDto reIssueAccessAndRefreshToken(String refreshToken) {
+        Authentication authentication = this.getAuthenticationByRefreshToken(refreshToken);
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        return new TokenDto(this.createAccessToken(authentication), this.createRefreshToken(authentication));
+    }
+
 }
