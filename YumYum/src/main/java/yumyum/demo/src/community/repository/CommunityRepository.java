@@ -2,23 +2,14 @@ package yumyum.demo.src.community.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import yumyum.demo.config.Status;
 import yumyum.demo.src.community.dto.*;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public class CommunityRepository {
@@ -399,7 +390,7 @@ public class CommunityRepository {
         );
     }*/
 
-    public PostinfoDto getPostInfo(Long post_id, Long user_id) {
+    public PostInfoDto getPostInfo(Long post_id, Long user_id) {
 
         return this.jdbcTemplate.queryForObject(
                 "select P.post_id, P.user_id, P.topic, P.contents, P.img_url, P.count_comment, P.count_like,P.created_at, U.profile_img_url, U.nick_name,\n" +
@@ -421,7 +412,7 @@ public class CommunityRepository {
                         "\n" +
                         "                                                where P.post_id = ? and P.status = 'ACTIVE'",
                 (rs, rowNum) -> {
-                    PostinfoDto postinfoDto = new PostinfoDto();
+                    PostInfoDto postinfoDto = new PostInfoDto();
                     postinfoDto.setPostId(rs.getLong("P.post_id"));
                     postinfoDto.setTopic(rs.getString("P.topic"));
                     postinfoDto.setContents(rs.getString("P.contents"));
@@ -494,6 +485,7 @@ public class CommunityRepository {
                 String.class, post_id
         );
     }
+
 }
 
 /*
