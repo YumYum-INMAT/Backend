@@ -133,6 +133,16 @@ public class TokenProvider implements InitializingBean {
         return false;
     }
 
+    public boolean isExpiredAccessToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(accessTokenKey).build().parseClaimsJws(token);
+            return false;
+        } catch (ExpiredJwtException e) {
+            logger.info("만료된 Access Token 입니다.");
+            return true;
+        }
+    }
+
     public boolean isValidRefreshToken(String token) {
         try{
             Jwts.parserBuilder().setSigningKey(refreshTokenKey).build().parseClaimsJws(token);
@@ -147,5 +157,15 @@ public class TokenProvider implements InitializingBean {
             logger.info("알 수 없는 에러가 발생했습니다.");
         }
         return false;
+    }
+
+    public boolean isExpiredRefreshToken(String token) {
+        try {
+            Jwts.parserBuilder().setSigningKey(refreshTokenKey).build().parseClaimsJws(token);
+            return false;
+        } catch (ExpiredJwtException e) {
+            logger.info("만료된 Refresh Token 입니다.");
+            return true;
+        }
     }
 }
