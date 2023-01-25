@@ -18,9 +18,10 @@ public enum BaseResponseStatus {
      */
     // Common
     REQUEST_ERROR(false, 2000, "입력값을 확인해주세요."),
-    EMPTY_REFRESH_TOKEN(false, 2001, "Refresh 토큰을 입력해주세요."),
-    INVALID_REFRESH_TOKEN(false, 2002, "유효하지 않은 Refresh 토큰입니다."),
-    INVALID_USER_JWT(false,2003,"권한이 없는 유저의 접근입니다."),
+    EMPTY_ACCESS_TOKEN(false, 2001, "Access 토큰을 입력해주세요."),
+    INVALID_ACCESS_TOKEN(false, 2002, "유효하지 않은 Access 토큰입니다."),
+    EMPTY_REFRESH_TOKEN(false, 2003, "Refresh 토큰을 입력해주세요."),
+    INVALID_REFRESH_TOKEN(false, 2004, "유효하지 않은 Refresh 토큰입니다."),
 
     // users
     USERS_EMPTY_USER_ID(false, 2010, "유저 아이디 값을 확인해주세요."),
