@@ -22,7 +22,7 @@ public class JwtFilter extends GenericFilterBean {
     //do filter 내부에서 실제 필터링됨 : jWT 토큰의 인증 여부를
     // security context에 저장하는 역할 수행
     private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
-    public static final String ACCESS_TOKEN = "ACCESS-TOKEN";
+    public static final String ACCESS_TOKEN = "Authorization";
     public static final String REFRESH_TOKEN = "REFRESH-TOKEN";
     private TokenProvider tokenProvider;
 
@@ -66,8 +66,8 @@ public class JwtFilter extends GenericFilterBean {
      */
     private String resolveToken(HttpServletRequest request){
         String accessToken = request.getHeader(ACCESS_TOKEN);
-        if(StringUtils.hasText(accessToken))
-            return accessToken;
+        if(StringUtils.hasText(accessToken) && accessToken.startsWith("Bearer "))
+            return accessToken.substring(7);
         return null;
     }
 }
