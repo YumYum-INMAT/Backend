@@ -2,23 +2,14 @@ package yumyum.demo.src.community.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import yumyum.demo.config.Status;
 import yumyum.demo.src.community.dto.*;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public class CommunityRepository {
@@ -93,12 +84,12 @@ public class CommunityRepository {
     public Long createComment(String username, Long post_id, CommentDto commentDto) {
 
         //group number는 최초 댓글일 경우에는 1로, 최초 댓글이 아닐 경우는 group_number의 값들 중 (가장 큰 값 + 1) 로 할당
-        String qurry = "insert into comment(group_number,comment_level, parent_id, post_id, user_id , contents, status)" +
+        String query = "insert into comment(group_number,comment_level, parent_id, post_id, user_id , contents, status)" +
                 "values( if((select counting from(select count(*) as counting from comment where post_id = ?) c) = 0, 1, ((select num + 1  from (select max(group_number) as num from comment) as A) ) ),0, 0 , ? , ? , ?, ? )";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         PreparedStatementCreator preparedStatementCreator = (connection) -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(qurry, new String[]{"comment_id"});
+            PreparedStatement preparedStatement = connection.prepareStatement(query, new String[]{"comment_id"});
             preparedStatement.setLong(1,post_id);
             preparedStatement.setLong(2, post_id);
             preparedStatement.setLong(3, findUserIdByUsername(username));
@@ -111,14 +102,14 @@ public class CommunityRepository {
         return keyHolder.getKey().longValue();
     }
 
-    public void increseCountComment(Long post_id) {
+    public void increaseCountComment(Long post_id) {
         this.jdbcTemplate.update(
                 "update post set count_comment = count_comment + 1 where post_id = ?",
                 post_id
         );
     }
 
-    public void decreseCountComment(Long post_id){
+    public void decreaseCountComment(Long post_id){
         this.jdbcTemplate.update(
                 "update post set count_comment = count_comment - 1  where post_id = ?;",
                 post_id
@@ -126,12 +117,12 @@ public class CommunityRepository {
     }
 
     public Long createReplyComment(String username, Long post_id, Long parent_id, CommentDto commentDto) {
-        String qurry = "insert into comment(group_number, comment_level, parent_id, post_id, user_id, contents, status)" +
+        String query = "insert into comment(group_number, comment_level, parent_id, post_id, user_id, contents, status)" +
                 "values((select groupNum from (select distinct group_number as groupNum from comment where comment_id = ?) as c), 1 , ? , ? , ? ,?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         PreparedStatementCreator preparedStatementCreator = (connection) -> {
-            PreparedStatement preparedStatement = connection.prepareStatement(qurry, new String[]{"comment_id"});
+            PreparedStatement preparedStatement = connection.prepareStatement(query, new String[]{"comment_id"});
             preparedStatement.setLong(1, parent_id);
             preparedStatement.setLong(2, parent_id);
             preparedStatement.setLong(3, post_id);
@@ -163,7 +154,7 @@ public class CommunityRepository {
     }
 
     //post table에 count_like 값 증가
-    public void incresePostCountLike(Long post_id){
+    public void increasePostCountLike(Long post_id){
         this.jdbcTemplate.update(
                 "update post set count_like = count_like + 1 where post_id = ?",
                 post_id
@@ -171,7 +162,7 @@ public class CommunityRepository {
     }
 
     //post table count_like 값 감소
-    public void decresePostCountLike(Long post_id){
+    public void decreasePostCountLike(Long post_id){
         this.jdbcTemplate.update(
                 "update post set count_like = count_like - 1 where post_id = ?",
                 post_id
@@ -258,7 +249,7 @@ public class CommunityRepository {
         );
     }
 
-    public void increseCommentCountLike(Long comment_id) {
+    public void increaseCommentCountLike(Long comment_id) {
         this.jdbcTemplate.update(
                 "update comment set count_like = count_like + 1 where comment_id = ?;",
                 comment_id
@@ -280,7 +271,7 @@ public class CommunityRepository {
         );
     }
 
-    public void decreseCommentCountLike(Long comment_id) {
+    public void decreaseCommentCountLike(Long comment_id) {
         this.jdbcTemplate.update(
                 "update comment set count_like = count_like - 1 where comment_id = ?;",
                 comment_id
@@ -399,7 +390,7 @@ public class CommunityRepository {
         );
     }*/
 
-    public PostinfoDto getPostInfo(Long post_id, Long user_id) {
+    public PostInfoDto getPostInfo(Long post_id, Long user_id) {
 
         return this.jdbcTemplate.queryForObject(
                 "select P.post_id, P.user_id, P.topic, P.contents, P.img_url, P.count_comment, P.count_like,P.created_at, U.profile_img_url, U.nick_name,\n" +
@@ -421,7 +412,7 @@ public class CommunityRepository {
                         "\n" +
                         "                                                where P.post_id = ? and P.status = 'ACTIVE'",
                 (rs, rowNum) -> {
-                    PostinfoDto postinfoDto = new PostinfoDto();
+                    PostInfoDto postinfoDto = new PostInfoDto();
                     postinfoDto.setPostId(rs.getLong("P.post_id"));
                     postinfoDto.setTopic(rs.getString("P.topic"));
                     postinfoDto.setContents(rs.getString("P.contents"));
@@ -494,6 +485,7 @@ public class CommunityRepository {
                 String.class, post_id
         );
     }
+
 }
 
 /*

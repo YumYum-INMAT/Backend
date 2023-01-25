@@ -58,6 +58,7 @@ public class SecurityConfig {
                 .antMatchers("/users/login-anonymous").permitAll()
                 .antMatchers("/users/username").permitAll()
                 .antMatchers("/users/nickname").permitAll()
+                .antMatchers("/users/issue").permitAll()
                 .antMatchers(HttpMethod.GET,"/swagger-resources/**").permitAll()
                 .antMatchers(HttpMethod.GET,"/swagger-ui/**").permitAll()
                 .antMatchers(HttpMethod.GET,"/v2/api-docs").permitAll()

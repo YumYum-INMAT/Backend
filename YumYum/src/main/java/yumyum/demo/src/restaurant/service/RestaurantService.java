@@ -153,6 +153,7 @@ public class RestaurantService {
         for (ReviewEntity entity : reviewEntities) {
             recentReviewList.add(new RecentReviewDto(
                     entity.getId(),
+                    entity.getRestaurant().getId(),
                     entity.getImgUrl(),
                     entity.getRestaurant().getRestaurantName(),
                     entity.getUser().getNickName(),
@@ -310,25 +311,6 @@ public class RestaurantService {
         }
 
         return result;
-    }
-
-    public GetReviewDto getReviewDetails(String username, Long restaurantId, Long reviewId) throws BaseException {
-        UserEntity userEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
-                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
-
-        RestaurantEntity restaurantEntity = restaurantRepository.findRestaurantEntityByIdAndStatus(restaurantId, Status.ACTIVE)
-                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_RESTAURANT));
-
-        ReviewEntity reviewEntity = reviewRepository.findReviewEntityByIdAndStatus(reviewId, Status.ACTIVE)
-                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_REVIEW));
-
-        return new GetReviewDto(
-                reviewEntity.getId(),
-                reviewEntity.getImgUrl(),
-                reviewEntity.getUser().getNickName(),
-                reviewEntity.getRatingStar(),
-                reviewEntity.getContents(),
-                convertCreatedAt(reviewEntity.getCreatedAt()));
     }
 
     private String convertCreatedAt(Temporal createAt) {

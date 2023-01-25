@@ -5,13 +5,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostinfoDto {
+public class PostInfoDto {
     //작성자
     private String nickName;
     private String profileImgUrl;

@@ -116,14 +116,12 @@ public class CommunityController {
     //댓글,대댓글 작성 api
     @PostMapping(value = {"/{post_id}/details/comment" , "/{post_id}/details/comment/{parent_id}"})
     @PreAuthorize("hasAnyRole('USER')")
-    public BaseResponse<String> createComment(@PathVariable("post_id")Long post_id, @PathVariable(value = "parent_id", required = false) Long parent_id, @RequestBody @Valid CommentDto commentDto){
+    public BaseResponse<GetCommentIdDto> createComment(@PathVariable("post_id")Long post_id, @PathVariable(value = "parent_id", required = false) Long parent_id, @RequestBody @Valid CommentDto commentDto){
 
         if(parent_id == null){
             try{
                 Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
-                communityService.createComment(currentUsername.get(), post_id, commentDto);
-                String result = "댓글을 작성했습니다";
-                return new BaseResponse<>(result);
+                return new BaseResponse<>(new GetCommentIdDto(communityService.createComment(currentUsername.get(), post_id, commentDto)));
             } catch(BaseException e){
                 return new BaseResponse<>(e.getStatus());
             }
@@ -132,9 +130,7 @@ public class CommunityController {
         else{
             try{
                 Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
-                communityService.createReplyComment(currentUsername.get(), post_id, parent_id, commentDto);
-                String result = "대댓글을 작성했습니다";
-                return new BaseResponse<>(result);
+                return new BaseResponse<>(new GetCommentIdDto(communityService.createReplyComment(currentUsername.get(), post_id, parent_id, commentDto)));
             }
             catch (BaseException e){
                 return new BaseResponse<>(e.getStatus());
@@ -283,7 +279,7 @@ public class CommunityController {
     }
 
 
-    @ApiOperation(value = "특정 게시물 조회 API")
+    /*@ApiOperation(value = "특정 게시물 조회 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
             @ApiResponse(code = 4000, message = "데이터베이스 연결에 실패하였습니다."),
@@ -304,7 +300,7 @@ public class CommunityController {
         }
 
     }
-
+*/
     @ApiOperation(value = "커뮤니티 조회 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
@@ -325,8 +321,26 @@ public class CommunityController {
         }
     }
 
+    @ApiOperation(value = "특정 게시물 조회 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 4000, message = "데이터베이스 연결에 실패하였습니다."),
 
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @GetMapping("/{post_id}")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<PostScreenDto> getPostScreen(@PathVariable("post_id") Long post_id){
+        try{
+            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+            return new BaseResponse<>(communityService.getPostScreen(post_id, currentUsername.get()));
+        }catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
 
+    }
 
 
 

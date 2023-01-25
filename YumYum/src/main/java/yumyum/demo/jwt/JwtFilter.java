@@ -22,7 +22,8 @@ public class JwtFilter extends GenericFilterBean {
     //do filter 내부에서 실제 필터링됨 : jWT 토큰의 인증 여부를
     // security context에 저장하는 역할 수행
     private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
-    public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String ACCESS_TOKEN = "Authorization";
+    public static final String REFRESH_TOKEN = "REFRESH-TOKEN";
     private TokenProvider tokenProvider;
 
     /**
@@ -44,11 +45,11 @@ public class JwtFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-        String jwt = resolveToken(httpServletRequest); // request에서 토큰 받음
+        String accessToken = resolveToken(httpServletRequest); // request에서 토큰 받음
         String requestURI = httpServletRequest.getRequestURI();
 
-        if(StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)){
-            Authentication authentication = tokenProvider.getAuthentication(jwt);
+        if(StringUtils.hasText(accessToken) && tokenProvider.isValidAccessToken(accessToken)){
+            Authentication authentication = tokenProvider.getAuthenticationByAccessToken(accessToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
             logger.debug("Security Context에 '{}' 인증 정보를 저장했습니다. URL : {}", authentication, requestURI);
         }
@@ -64,9 +65,9 @@ public class JwtFilter extends GenericFilterBean {
      * @return
      */
     private String resolveToken(HttpServletRequest request){
-        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer "))
-            return bearerToken.substring(7);
+        String accessToken = request.getHeader(ACCESS_TOKEN);
+        if(StringUtils.hasText(accessToken) && accessToken.startsWith("Bearer "))
+            return accessToken.substring(7);
         return null;
     }
 }

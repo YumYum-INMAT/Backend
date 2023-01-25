@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 public class RecentReviewDto {
     private Long reviewId;
 
+    private Long restaurantId;
+
     private String imgUrl;
 
     private String restaurantName;
