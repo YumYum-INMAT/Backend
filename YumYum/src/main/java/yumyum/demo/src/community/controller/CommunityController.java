@@ -279,7 +279,7 @@ public class CommunityController {
     }
 
 
-    @ApiOperation(value = "특정 게시물 조회 API")
+    /*@ApiOperation(value = "특정 게시물 조회 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
             @ApiResponse(code = 4000, message = "데이터베이스 연결에 실패하였습니다."),
@@ -300,7 +300,7 @@ public class CommunityController {
         }
 
     }
-
+*/
     @ApiOperation(value = "커뮤니티 조회 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
@@ -321,8 +321,26 @@ public class CommunityController {
         }
     }
 
+    @ApiOperation(value = "특정 게시물 조회 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 4000, message = "데이터베이스 연결에 실패하였습니다."),
 
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @GetMapping("/{post_id}")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<PostScreenDto> getPostScreen(@PathVariable("post_id") Long post_id){
+        try{
+            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
+            return new BaseResponse<>(communityService.getPostScreen(post_id, currentUsername.get()));
+        }catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
 
+    }
 
 
 

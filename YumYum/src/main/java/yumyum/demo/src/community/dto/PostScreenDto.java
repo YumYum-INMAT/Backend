@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.*;
 import java.util.List;
 
 @Getter
@@ -32,9 +31,9 @@ public class PostScreenDto {
     private boolean myLike;
 
     //댓글
-    List<CommentInfoDto> commentInfoDtoList;
+    List<List<CommentInfoDto>> commentInfoDtoList;
 
-    public PostScreenDto(PostinfoDto postinfoDto, List<CommentInfoDto> commentInfoDtoList) {
+    public PostScreenDto(PostInfoDto postinfoDto, List<List<CommentInfoDto>> listList) {
         this.profileImgUrl = postinfoDto.getProfileImgUrl();
         this.nickName = postinfoDto.getNickName();
         this.postId = postinfoDto.getPostId();
@@ -46,7 +45,7 @@ public class PostScreenDto {
         this.createdAt = postinfoDto.getCreatedAt();
         this.myLike = postinfoDto.isMyLike();
 
-        this.commentInfoDtoList = commentInfoDtoList;
+        this.commentInfoDtoList = listList;
     }
 
 }

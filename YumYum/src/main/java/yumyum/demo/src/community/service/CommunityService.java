@@ -8,6 +8,7 @@ import yumyum.demo.src.community.repository.CommunityRepository;
 
 import javax.transaction.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static yumyum.demo.config.BaseResponseStatus.*;
@@ -50,7 +51,8 @@ public class CommunityService {
 
     @Transactional
     public Long createComment(String username, Long post_id, CommentDto commentDto) throws BaseException {
-       if(checkPostStatus(post_id).equals("ACTIVE")) {
+       String status = checkPostStatus(post_id);
+        if(status.equals("ACTIVE")) {
            try {
                Long commentId = communityRepository.createComment(username, post_id, commentDto);
                communityRepository.increaseCountComment(post_id);
@@ -58,7 +60,7 @@ public class CommunityService {
            } catch (Exception exception) {
                throw new BaseException(DATABASE_ERROR);
            }
-       } else if (checkPostStatus(post_id).equals("INACTIVE")) {
+       } else if (status.equals("INACTIVE")) {
            throw new BaseException(UNEXPECTED_ERROR);
        }
         else {
@@ -68,7 +70,8 @@ public class CommunityService {
 
     @Transactional
     public Long createReplyComment(String username, Long post_id, Long parent_id, CommentDto commentDto) throws BaseException{
-        if(checkPostStatus(post_id).equals("ACTIVE")) {
+        String status = checkPostStatus(post_id);
+        if(status.equals("ACTIVE")) {
             try {
                 Long commentId = communityRepository.createReplyComment(username, post_id, parent_id, commentDto);
                 communityRepository.increaseCountComment(post_id);
@@ -76,7 +79,7 @@ public class CommunityService {
             } catch (Exception exception) {
                 throw new BaseException(DATABASE_ERROR);
             }
-        } else if (checkPostStatus(post_id).equals("INACTIVE")) {
+        } else if (status.equals("INACTIVE")) {
             throw new BaseException(UNEXPECTED_ERROR);
         }
         else {
@@ -85,33 +88,38 @@ public class CommunityService {
     }
 
     @Transactional
-    public void likePost(String username, Long post_id) throws BaseException{
+    public void likePost(String username, Long post_id) throws BaseException {
         Long user_id = communityRepository.findUserIdByUsername(username);
-        if(communityRepository.countPostLike(post_id, user_id) == 0 ){
-            try {
-                communityRepository.createPostLike(post_id, user_id);
-                communityRepository.increasePostCountLike(post_id);
-            }catch (Exception exception){
+        Long postLike = communityRepository.countPostLike(post_id, user_id);
+
+        if (communityRepository.checkPostStatus(post_id) == "ACTIVE") {
+            if (postLike == 0) {
+                try {
+                    communityRepository.createPostLike(post_id, user_id);
+                    communityRepository.increasePostCountLike(post_id);
+                } catch (Exception exception) {
+                    throw new BaseException(DATABASE_ERROR);
+                }
+            } else if (postLike == 1) {
+                String status = communityRepository.statusPostLike(post_id, user_id);
+                if (status.equals("INACTIVE")) {
+                    try {
+                        communityRepository.changeStatusPostLike(post_id, user_id, "ACTIVE");
+                        communityRepository.increasePostCountLike(post_id);
+                    } catch (Exception exception) {
+                        throw new BaseException(DATABASE_ERROR);
+                    }
+                } else if (status.equals("ACTIVE")) {
+                    throw new BaseException(ALREADY_POST_LIKE);
+                } else {
+                    throw new BaseException(DATABASE_ERROR);
+                }
+
+            } else {
                 throw new BaseException(DATABASE_ERROR);
             }
         }
-        else if(communityRepository.countPostLike(post_id,user_id) == 1){
-           if(communityRepository.statusPostLike(post_id, user_id).equals("INACTIVE")){
-               try {
-                   communityRepository.changeStatusPostLike(post_id, user_id, "ACTIVE");
-                   communityRepository.increasePostCountLike(post_id);
-               }catch (Exception exception){
-                   throw new BaseException(DATABASE_ERROR);
-               }
-           } else if (communityRepository.statusPostLike(post_id, user_id).equals("ACTIVE")) {
-               throw new BaseException(ALREADY_POST_LIKE);
-           }
-            else {
-               throw new BaseException(DATABASE_ERROR);
-           }
-
-        }
-        else{
+        else {
             throw new BaseException(DATABASE_ERROR);
         }
     }
@@ -119,30 +127,32 @@ public class CommunityService {
     @Transactional
     public void unLikePost(String username, Long post_id) throws BaseException{
         Long user_id = communityRepository.findUserIdByUsername(username);
+        Long postLike = communityRepository.countPostLike(post_id, user_id);
 
-        if(communityRepository.countPostLike(post_id, user_id) == 0){
-            throw new BaseException(DATABASE_ERROR);
-        }
-        else if(communityRepository.countPostLike(post_id, user_id) == 1){
-            if(communityRepository.statusPostLike(post_id, user_id).equals("INACTIVE")){
-                throw new BaseException(ALREADY_POST_UNLIKE);
-            }
-            else if(communityRepository.statusPostLike(post_id, user_id).equals("ACTIVE")){
-                try{
-                    communityRepository.changeStatusPostLike(post_id, user_id, "INACTIVE");
-                    communityRepository.decreasePostCountLike(post_id);
-                }catch (Exception exception){
+        if(communityRepository.checkPostStatus(post_id) == "ACTIVE") {
+            if (postLike == 0) {
+                throw new BaseException(DATABASE_ERROR);
+            } else if (postLike == 1) {
+                String status = communityRepository.statusPostLike(post_id, user_id);
+                if (status.equals("INACTIVE")) {
+                    throw new BaseException(ALREADY_POST_UNLIKE);
+                } else if (status.equals("ACTIVE")) {
+                    try {
+                        communityRepository.changeStatusPostLike(post_id, user_id, "INACTIVE");
+                        communityRepository.decreasePostCountLike(post_id);
+                    } catch (Exception exception) {
+                        throw new BaseException(DATABASE_ERROR);
+                    }
+                } else {
                     throw new BaseException(DATABASE_ERROR);
                 }
-            }
-            else {
+            } else {
                 throw new BaseException(DATABASE_ERROR);
             }
         }
         else {
             throw new BaseException(DATABASE_ERROR);
         }
-
     }
 
     @Transactional
@@ -193,8 +203,9 @@ public class CommunityService {
 
     public void likeComment(String username, Long comment_id) throws BaseException {
         Long user_id = communityRepository.findUserIdByUsername(username);
+        Long commentLike = communityRepository.countCommentLike(user_id, comment_id);
 
-            if(communityRepository.countCommentLike(user_id, comment_id) == 0){
+            if(commentLike == 0){
                 try {
                     communityRepository.createCommentLike(user_id, comment_id);
                     communityRepository.increaseCommentCountLike(comment_id);
@@ -202,8 +213,9 @@ public class CommunityService {
                     throw new BaseException(DATABASE_ERROR);
                 }
             }
-            else if (communityRepository.countCommentLike(user_id, comment_id) == 1) {
-                if(communityRepository.statusCommentLike(user_id, comment_id).equals("INACTIVE")) {
+            else if (commentLike == 1) {
+                String status = communityRepository.statusCommentLike(user_id, comment_id);
+                if(status.equals("INACTIVE")) {
                     try {
                         communityRepository.changeStatusCommentLike(user_id, comment_id, "ACTIVE");
                         communityRepository.increaseCommentCountLike(comment_id);
@@ -211,7 +223,7 @@ public class CommunityService {
                         throw new BaseException(DATABASE_ERROR);
                     }
                 }
-                else if (communityRepository.statusCommentLike(user_id, comment_id).equals("ACTIVE")) {
+                else if (status.equals("ACTIVE")) {
                     throw new BaseException(ALREADY_COMMENT_LIKE);
                 }
                 else {
@@ -225,14 +237,17 @@ public class CommunityService {
 
     public void unLikeComment(String username, Long comment_id) throws BaseException{
         Long user_id = communityRepository.findUserIdByUsername(username);
-        if(communityRepository.countCommentLike(user_id,comment_id) == 0){
+        Long commentLike = communityRepository.countCommentLike(user_id, comment_id);
+
+        if(commentLike == 0){
             throw new BaseException(COMMENT_LIKE_EMPTY);
         }
-        else if(communityRepository.countCommentLike(user_id, comment_id) == 1){
-            if(communityRepository.statusCommentLike(user_id, comment_id).equals("INACTIVE")){
+        else if(commentLike == 1){
+            String status = communityRepository.statusCommentLike(user_id, comment_id);
+            if(status.equals("INACTIVE")){
                 throw new BaseException(ALREADY_COMMENT_UNLIKE);
             }
-            else if (communityRepository.statusCommentLike(user_id, comment_id).equals("ACTIVE")) {
+            else if (status.equals("ACTIVE")) {
                 try{
                 communityRepository.changeStatusCommentLike(user_id,comment_id, "INACTIVE");
                 communityRepository.decreaseCommentCountLike(comment_id);
@@ -249,21 +264,6 @@ public class CommunityService {
         }
     }
 
-    public PostScreenDto getPostScreen(Long post_id, String username) throws BaseException {
-        //유효성 검사
-        Long user_id = communityRepository.findUserIdByUsername(username);
-        try {
-            PostScreenDto postScreenDto = new PostScreenDto(communityRepository.getPostInfo(post_id, user_id), communityRepository.getCommentInfo(post_id, user_id));
-            postScreenDto.setUserId(user_id);
-            return postScreenDto;
-
-        }catch (Exception exception){
-            throw new BaseException(DATABASE_ERROR);
-        }
-    }
-
-
-
 
     public List<CommunityMainDto> getCommunityScreen() throws BaseException{
         try{
@@ -276,6 +276,45 @@ public class CommunityService {
         }
 
     }
+
+    public PostScreenDto getPostScreen(Long post_id, String username) {
+        Long user_id = communityRepository.findUserIdByUsername(username);
+        try {
+          List<CommentInfoDto> commentInfoDtoList = new ArrayList<>(communityRepository.getCommentInfo(post_id, user_id));
+          List<List<CommentInfoDto>> commentInfoDtoMultiList = new ArrayList<>();
+
+          int i = 0;
+
+          List<CommentInfoDto> commentInfoDtoList1 = new ArrayList<>();
+          //댓글이 없을때도 고려하자
+          if(!commentInfoDtoList.isEmpty()) {
+              for (CommentInfoDto commentInfoDto : commentInfoDtoList) {
+                  if (commentInfoDto.getGroupNumber() != i) {
+                      i = commentInfoDto.getGroupNumber();
+                      commentInfoDtoMultiList.add(commentInfoDtoList1);
+
+                      commentInfoDtoList1 = new ArrayList<>();
+                      commentInfoDtoList1.add(commentInfoDto);
+                  } else if (commentInfoDto.getGroupNumber() == i) {
+                      commentInfoDtoList1.add(commentInfoDto);
+                  }
+              }
+
+              commentInfoDtoMultiList.remove(0);
+              commentInfoDtoMultiList.add(commentInfoDtoList1);
+          }
+
+          PostScreenDto PostScreenDto = new PostScreenDto(communityRepository.getPostInfo(post_id, user_id), commentInfoDtoMultiList);
+
+            return PostScreenDto;
+        }catch (Exception exception){
+            throw new BaseException(DATABASE_ERROR);
+        }
+
+    }
+
+
+
 }
 
 
