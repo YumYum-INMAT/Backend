@@ -42,8 +42,8 @@ public class TokenProvider implements InitializingBean {
                          @Value("${jwt.refresh-token-expiration-time}") long refreshTokenValidTime) {
         this.accessTokenSecret = accessTokenSecret;
         this.refreshTokenSecret = refreshTokenSecret;
-        this.accessTokenValidTime = accessTokenValidTime * 60 * 1000; //1시간
-        this.refreshTokenValidTime = refreshTokenValidTime * 24 * 60 * 60 * 1000; //15일
+        this.accessTokenValidTime = accessTokenValidTime * 60 * 60 * 1000; //1시간
+        this.refreshTokenValidTime = refreshTokenValidTime * 24 * 60 * 60 * 1000; //7일
     }
 
     /**
