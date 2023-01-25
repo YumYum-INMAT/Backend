@@ -4,7 +4,9 @@ import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_EMAIL;
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_NICKNAME;
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_PHONE_NUMBER;
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_USERNAME;
+import static yumyum.demo.config.BaseResponseStatus.EXPIRED_REFRESH_TOKEN;
 import static yumyum.demo.config.BaseResponseStatus.FAILED_TO_LOGIN;
+import static yumyum.demo.config.BaseResponseStatus.INVALID_REFRESH_TOKEN;
 import static yumyum.demo.config.BaseResponseStatus.NOT_ACTIVATED_USER;
 
 import java.util.Collections;
@@ -16,8 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.Status;
+import yumyum.demo.jwt.TokenProvider;
 import yumyum.demo.src.user.dto.LoginDto;
 import yumyum.demo.src.user.dto.SignUpDto;
+import yumyum.demo.src.user.dto.TokenDto;
 import yumyum.demo.src.user.entity.Authority;
 import yumyum.demo.src.user.entity.RefreshTokenEntity;
 import yumyum.demo.src.user.entity.UserEntity;
@@ -30,6 +34,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TokenProvider tokenProvider;
 
     @Transactional
     public void signup(SignUpDto signUpDto) throws BaseException {
@@ -142,5 +147,45 @@ public class AuthService {
         userRepository.save(user);
 
         return new LoginDto("anonymous" + anonymousUserSize, "1234abcd!");
+    }
+
+    public TokenDto reissueAccessToken(String refreshToken, String userAgent) throws BaseException {
+        // refresh 토큰이 유효한 경우
+        if (tokenProvider.isValidRefreshToken(refreshToken)) {
+            RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findRefreshTokenEntityByUserAgentAndStatus(userAgent, Status.ACTIVE)
+                    .orElseThrow(() -> new BaseException(INVALID_REFRESH_TOKEN));
+
+            // DB에 저장된 refresh 토큰과 동일한 경우 -> access, refresh 토큰 둘다 발급
+            // access 재발급 할때마다 refresh 토큰도 재발급하면 보안에 좋음
+            if (isEqualToSavedRefreshToken(refreshTokenEntity, refreshToken)) {
+                TokenDto tokenDto = tokenProvider.reIssueAccessAndRefreshToken(refreshToken);
+
+                refreshTokenEntity.updateRefreshToken(tokenDto.getRefreshToken());
+                refreshTokenRepository.save(refreshTokenEntity);
+                return tokenDto;
+            }
+
+            // DB에 저장된 refresh 토큰과 일치하지 않는 경우
+            else {
+                throw new BaseException(INVALID_REFRESH_TOKEN);
+            }
+        }
+
+        // refresh 토큰 또한 만료된 경우
+        else if (tokenProvider.isExpiredRefreshToken(refreshToken)) {
+            throw new BaseException(EXPIRED_REFRESH_TOKEN);
+        }
+
+        // refresh 토큰이 잘못된 경우
+        else {
+            throw new BaseException(INVALID_REFRESH_TOKEN);
+        }
+    }
+
+    public boolean isEqualToSavedRefreshToken(RefreshTokenEntity refreshTokenEntity, String refreshToken) throws BaseException {
+        if (refreshTokenEntity.getRefreshToken().equals(refreshToken)) {
+            return true;
+        }
+        return false;
     }
 }
