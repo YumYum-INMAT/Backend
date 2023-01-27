@@ -37,6 +37,7 @@ public class PostScreenDto {
         this.profileImgUrl = postinfoDto.getProfileImgUrl();
         this.nickName = postinfoDto.getNickName();
         this.postId = postinfoDto.getPostId();
+        this.userId = postinfoDto.getUserId();
         this.topic = postinfoDto.getTopic();
         this.contents = postinfoDto.getContents();
         this.imgUrl = postinfoDto.getImgUrl();
