@@ -32,7 +32,7 @@ import yumyum.demo.src.user.service.AuthService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping("/auth")
 public class AuthController {
     private final AuthService authService;
     private final TokenProvider tokenProvider;
