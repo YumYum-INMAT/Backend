@@ -1,7 +1,7 @@
 package yumyum.demo.src.restaurant.entity;
 
-import lombok.AccessLevel;
-import lombok.Builder;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,15 +34,20 @@ public class ReviewEntity extends BaseEntity {
     @Column(nullable = false, columnDefinition = "int default 1")
     private Integer ratingStar;
 
-    @Column
-    private String imgUrl;
-
     @Column(nullable = false, length = 100)
     private String contents;
+
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL)
+    private List<ReviewImgEntity> reviewImgEntities = new ArrayList<>();
 
     public ReviewEntity(UserEntity user, Integer ratingStar, String contents) {
         this.user = user;
         this.ratingStar = ratingStar;
         this.contents = contents;
+    }
+
+    public void addReviewImg(ReviewImgEntity reviewImgEntity) {
+        reviewImgEntities.add(reviewImgEntity);
+        reviewImgEntity.setReview(this);
     }
 }
