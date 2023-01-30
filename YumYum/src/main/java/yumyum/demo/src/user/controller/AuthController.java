@@ -97,6 +97,7 @@ public class AuthController {
     })
     @PostMapping("/login")
     public BaseResponse<TokenDto> login(@RequestHeader("User-Agent") String userAgent,
+                                        @RequestHeader("Device-Identifier") String deviceIdentifier,
                                         @Valid @RequestBody LoginDto loginDto) {
 
         try {
@@ -112,7 +113,7 @@ public class AuthController {
             String refreshToken = tokenProvider.createRefreshToken(authentication);
 
             //발급받은 리프레쉬 토큰을 디비에 저장
-            authService.updateRefreshToken(loginDto.getUsername(), refreshToken, userAgent);
+            authService.updateRefreshToken(loginDto.getUsername(), refreshToken, userAgent, deviceIdentifier);
 
             return new BaseResponse<>(new TokenDto(accessToken, refreshToken));
 
@@ -127,7 +128,8 @@ public class AuthController {
             @ApiResponse(code = 400, message = "Bad Request")
     })
     @PostMapping("/login-anonymous")
-    public BaseResponse<TokenDto> anonymousLogin(@RequestHeader("User-Agent") String userAgent) {
+    public BaseResponse<TokenDto> anonymousLogin(@RequestHeader("User-Agent") String userAgent,
+                                                 @RequestHeader(value = "Device-Identifier") String deviceIdentifier) {
         try {
             LoginDto anonymousLoginDto = authService.anonymousLogin();
 
@@ -140,7 +142,7 @@ public class AuthController {
 
             String accessToken = tokenProvider.createAccessToken(authentication);
             String refreshToken = tokenProvider.createRefreshToken(authentication);
-            authService.updateRefreshToken(anonymousLoginDto.getUsername(), refreshToken, userAgent);
+            authService.updateRefreshToken(anonymousLoginDto.getUsername(), refreshToken, userAgent, deviceIdentifier);
 
             return new BaseResponse<>(new TokenDto(accessToken, refreshToken));
 
@@ -157,7 +159,8 @@ public class AuthController {
     @PostMapping("/issue")
     public BaseResponse<TokenDto> reissueAccessToken(
             HttpServletRequest request,
-            @RequestHeader("User-Agent") String userAgent) {
+            @RequestHeader("User-Agent") String userAgent,
+            @RequestHeader("Device-Identifier") String deviceIdentifier) {
         String accessToken = tokenProvider.resolveAccessToken(request);
         String refreshToken = request.getHeader(REFRESH_TOKEN);
 
@@ -175,7 +178,7 @@ public class AuthController {
         }
 
         try {
-            return new BaseResponse<>(authService.reissueAccessToken(refreshToken, userAgent));
+            return new BaseResponse<>(authService.reissueAccessToken(refreshToken, userAgent, deviceIdentifier));
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }

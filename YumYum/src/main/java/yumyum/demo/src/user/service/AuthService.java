@@ -106,7 +106,7 @@ public class AuthService {
         }
     }
 
-    public void updateRefreshToken(String username, String refreshToken, String userAgent) throws BaseException {
+    public void updateRefreshToken(String username, String refreshToken, String userAgent, String deviceIdentifier) throws BaseException {
         UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
@@ -114,7 +114,7 @@ public class AuthService {
 
         //첫 로그인인 경우 -> 디비에 저장된 refresh 토큰 칼럼이 없음
         if (refreshTokenEntity.isEmpty()) {
-            RefreshTokenEntity createdRefreshTokenEntity = new RefreshTokenEntity(foundUserEntity, refreshToken, userAgent);
+            RefreshTokenEntity createdRefreshTokenEntity = new RefreshTokenEntity(foundUserEntity, refreshToken, userAgent, deviceIdentifier);
             refreshTokenRepository.save(createdRefreshTokenEntity);
         }
         else {
@@ -149,10 +149,10 @@ public class AuthService {
         return new LoginDto("anonymous" + anonymousUserSize, "1234abcd!");
     }
 
-    public TokenDto reissueAccessToken(String refreshToken, String userAgent) throws BaseException {
+    public TokenDto reissueAccessToken(String refreshToken, String userAgent, String deviceIdentifier) throws BaseException {
         // refresh 토큰이 유효한 경우
         if (tokenProvider.isValidRefreshToken(refreshToken)) {
-            RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findRefreshTokenEntityByUserAgentAndStatus(userAgent, Status.ACTIVE)
+            RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findRefreshTokenEntityByUserAgentAndDeviceIdentifierAndStatus(userAgent, deviceIdentifier, Status.ACTIVE)
                     .orElseThrow(() -> new BaseException(INVALID_REFRESH_TOKEN));
 
             // DB에 저장된 refresh 토큰과 동일한 경우 -> access, refresh 토큰 둘다 발급
