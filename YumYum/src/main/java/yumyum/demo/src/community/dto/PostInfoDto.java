@@ -13,9 +13,10 @@ public class PostInfoDto {
     //작성자
     private String nickName;
     private String profileImgUrl;
-    //게시물 내용
 
+    //게시물 내용
     private Long postId;
+    private Long userId;
     private String topic;
     private String contents;
     private String imgUrl;
