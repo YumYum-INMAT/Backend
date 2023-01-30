@@ -292,23 +292,6 @@ public class CommunityRepository {
 
     }
 
-   /* public PostinfoDto getpostInfo(Long post_id) {
-        return this.jdbcTemplate.queryForObject(
-                "select post.topic, post.contents, post.img_url, post.count_comment, post.create_at, user.profileImgulr, user.nickname from post outer join user on post.user_id = user.user_id where post.post_id = ?",
-                (rs, rowNum) -> {
-                    PostinfoDto postinfoDto = new PostinfoDto();
-                    postinfoDto.setProfileImgUrl(rs.getString("user.profile_img_url"));
-                    postinfoDto.setNickName(rs.getString("user.nickname"));
-                    postinfoDto.setTopic(rs.getString("post.topic"));
-                    postinfoDto.setContents(rs.getString("contents"));
-                    postinfoDto.setImgUrl(rs.getString("post.img_url"));
-                    postinfoDto.setCountPostLike(rs.getLong("post.count_like"));
-                    postinfoDto.setCountComment(rs.getLong("post.count_comment"));
-                    postinfoDto.setCrated_at(rs.getDate("created_At").toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
-                    return postinfoDto;
-                }, post_id);
-
-    }*/
 
 
     public List<CommentInfoDto> getCommentInfo(Long post_id, Long user_id) {
@@ -414,6 +397,7 @@ public class CommunityRepository {
                 (rs, rowNum) -> {
                     PostInfoDto postinfoDto = new PostInfoDto();
                     postinfoDto.setPostId(rs.getLong("P.post_id"));
+                    postinfoDto.setUserId(rs.getLong("P.user_id"));
                     postinfoDto.setTopic(rs.getString("P.topic"));
                     postinfoDto.setContents(rs.getString("P.contents"));
                     postinfoDto.setImgUrl(rs.getString("P.img_url"));

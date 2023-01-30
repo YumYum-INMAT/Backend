@@ -35,10 +35,14 @@ public class RefreshTokenEntity extends BaseEntity {
     @Column(nullable = false)
     private String userAgent;
 
-    public RefreshTokenEntity(UserEntity user, String refreshToken, String userAgent) {
+    @Column(nullable = false)
+    private String deviceIdentifier;
+
+    public RefreshTokenEntity(UserEntity user, String refreshToken, String userAgent, String deviceIdentifier) {
         this.user = user;
         this.refreshToken = refreshToken;
         this.userAgent = userAgent;
+        this.deviceIdentifier = deviceIdentifier;
     }
 
     public void updateRefreshToken(String refreshToken) {

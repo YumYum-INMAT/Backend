@@ -103,11 +103,13 @@ public class RestaurantEntity extends BaseEntity {
         reviewEntity.setRestaurant(this);
 
         //음식점 사진 추가
-        if (reviewEntity.getImgUrl() != null) {
-            RestaurantImgEntity restaurantImgEntity = new RestaurantImgEntity();
-            restaurantImgEntity.setImgUrl(reviewEntity.getImgUrl());
-            restaurantImgEntities.add(restaurantImgEntity);
-            restaurantImgEntity.setRestaurant(this);
+        if (!reviewEntity.getReviewImgEntities().isEmpty()) {
+            for (ReviewImgEntity reviewImgEntity : reviewEntity.getReviewImgEntities()) {
+                RestaurantImgEntity restaurantImgEntity = new RestaurantImgEntity();
+                restaurantImgEntity.setImgUrl(reviewImgEntity.getImgUrl());
+                restaurantImgEntities.add(restaurantImgEntity);
+                restaurantImgEntity.setRestaurant(this);
+            }
         }
     }
 

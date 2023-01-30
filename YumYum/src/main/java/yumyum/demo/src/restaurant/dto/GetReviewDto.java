@@ -1,5 +1,6 @@
 package yumyum.demo.src.restaurant.dto;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class GetReviewDto {
     private Long reviewId;
 
-    private String reviewImgUrl;
+    private List<ImgUrlDto> reviewImgUrl;
 
     private String nickName;
 

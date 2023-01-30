@@ -24,6 +24,7 @@ import yumyum.demo.src.restaurant.entity.RestaurantEntity;
 import yumyum.demo.src.restaurant.entity.RestaurantImgEntity;
 import yumyum.demo.src.restaurant.entity.RestaurantMenuEntity;
 import yumyum.demo.src.restaurant.entity.ReviewEntity;
+import yumyum.demo.src.restaurant.entity.ReviewImgEntity;
 import yumyum.demo.src.restaurant.entity.TodayRecommendEntity;
 import yumyum.demo.src.restaurant.repository.*;
 import yumyum.demo.src.user.entity.UserEntity;
@@ -151,10 +152,18 @@ public class RestaurantService {
         List<ReviewEntity> reviewEntities = reviewRepository.findTop3ByStatusOrderByCreatedAtDesc(Status.ACTIVE);
         List<RecentReviewDto> recentReviewList = new ArrayList<>();
         for (ReviewEntity entity : reviewEntities) {
+            List<ImgUrlDto> imgUrlDtoList = new ArrayList<>();
+
+            if (!entity.getReviewImgEntities().isEmpty()) {
+                for (ReviewImgEntity reviewImgEntity: entity.getReviewImgEntities()) {
+                    imgUrlDtoList.add(new ImgUrlDto(reviewImgEntity.getImgUrl()));
+                }
+            }
+
             recentReviewList.add(new RecentReviewDto(
                     entity.getId(),
                     entity.getRestaurant().getId(),
-                    entity.getImgUrl(),
+                    imgUrlDtoList,
                     entity.getRestaurant().getRestaurantName(),
                     entity.getUser().getNickName(),
                     entity.getRatingStar(),
@@ -208,9 +217,17 @@ public class RestaurantService {
                 break;
             }
 
+            List<ImgUrlDto> imgUrlDtoList = new ArrayList<>();
+
+            if (!reviewEntity.getReviewImgEntities().isEmpty()) {
+                for (ReviewImgEntity reviewImgEntity: reviewEntity.getReviewImgEntities()) {
+                    imgUrlDtoList.add(new ImgUrlDto(reviewImgEntity.getImgUrl()));
+                }
+            }
+
             reviewList.add(new GetReviewDto(
                     reviewEntity.getId(),
-                    reviewEntity.getImgUrl(),
+                    imgUrlDtoList,
                     reviewEntity.getUser().getNickName(),
                     reviewEntity.getRatingStar(),
                     reviewEntity.getContents(),
@@ -248,11 +265,13 @@ public class RestaurantService {
                 userEntity,
                 createReviewDto.getRatingStar(),
                 createReviewDto.getContents());
-        if (createReviewDto.getImgUrl() == null) {
-            reviewEntity.setImgUrl(null);
-        }
-        else {
-            reviewEntity.setImgUrl(createReviewDto.getImgUrl());
+
+        // 작성한 리뷰에 사진이 있는 경우
+        if (!createReviewDto.getImgUrlDtoList().isEmpty()) {
+            for (ImgUrlDto imgUrlDto: createReviewDto.getImgUrlDtoList()) {
+                ReviewImgEntity reviewImgEntity = new ReviewImgEntity(imgUrlDto.getImgUrl());
+                reviewEntity.addReviewImg(reviewImgEntity);
+            }
         }
 
         restaurantEntity.addReview(reviewEntity);
@@ -301,9 +320,17 @@ public class RestaurantService {
         List<GetReviewDto> result = new ArrayList<>();
 
         for (ReviewEntity reviewEntity : reviewEntities) {
+            List<ImgUrlDto> imgUrlDtoList = new ArrayList<>();
+
+            if (!reviewEntity.getReviewImgEntities().isEmpty()) {
+                for (ReviewImgEntity reviewImgEntity: reviewEntity.getReviewImgEntities()) {
+                    imgUrlDtoList.add(new ImgUrlDto(reviewImgEntity.getImgUrl()));
+                }
+            }
+
             result.add(new GetReviewDto(
                     reviewEntity.getId(),
-                    reviewEntity.getImgUrl(),
+                    imgUrlDtoList,
                     reviewEntity.getUser().getNickName(),
                     reviewEntity.getRatingStar(),
                     reviewEntity.getContents(),
