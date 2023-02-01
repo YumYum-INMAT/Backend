@@ -119,6 +119,8 @@ public class AuthService {
         }
         else {
             refreshTokenEntity.get().updateRefreshToken(refreshToken);
+            refreshTokenEntity.get().updateDeviceIdentifier(deviceIdentifier);
+            refreshTokenEntity.get().updateUserAgent(userAgent);
             refreshTokenRepository.save(refreshTokenEntity.get());
         }
     }
