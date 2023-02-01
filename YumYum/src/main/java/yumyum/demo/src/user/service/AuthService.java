@@ -154,7 +154,7 @@ public class AuthService {
     public TokenDto reissueAccessToken(String refreshToken, String userAgent, String deviceIdentifier) throws BaseException {
         // refresh 토큰이 유효한 경우
         if (tokenProvider.isValidRefreshToken(refreshToken)) {
-            RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findRefreshTokenEntityByUserAgentAndDeviceIdentifierAndStatus(userAgent, deviceIdentifier, Status.ACTIVE)
+            RefreshTokenEntity refreshTokenEntity = refreshTokenRepository.findRefreshTokenEntityByRefreshTokenAndUserAgentAndDeviceIdentifierAndStatus(refreshToken, userAgent, deviceIdentifier, Status.ACTIVE)
                     .orElseThrow(() -> new BaseException(INVALID_REFRESH_TOKEN));
 
             // DB에 저장된 refresh 토큰과 동일한 경우 -> access, refresh 토큰 둘다 발급
