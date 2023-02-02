@@ -190,4 +190,13 @@ public class AuthService {
         }
         return false;
     }
+
+    public void logout(String username) {
+        UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        List<RefreshTokenEntity> refreshTokenList = refreshTokenRepository.findAllByUserAndStatus(foundUserEntity, Status.ACTIVE);
+
+        refreshTokenRepository.deleteAll(refreshTokenList);
+    }
 }

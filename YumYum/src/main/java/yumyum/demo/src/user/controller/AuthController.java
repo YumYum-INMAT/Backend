@@ -3,6 +3,7 @@ package yumyum.demo.src.user.controller;
 import static yumyum.demo.config.BaseResponseStatus.EMPTY_ACCESS_TOKEN;
 import static yumyum.demo.config.BaseResponseStatus.EMPTY_REFRESH_TOKEN;
 import static yumyum.demo.config.BaseResponseStatus.INVALID_ACCESS_TOKEN;
+import static yumyum.demo.config.BaseResponseStatus.NOT_ACTIVATED_USER;
 
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -15,6 +16,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -29,6 +31,7 @@ import yumyum.demo.src.user.dto.SignUpDto;
 import yumyum.demo.src.user.dto.TokenDto;
 import yumyum.demo.src.user.dto.UsernameDto;
 import yumyum.demo.src.user.service.AuthService;
+import yumyum.demo.utils.SecurityUtil;
 
 @RestController
 @RequiredArgsConstructor
@@ -179,6 +182,26 @@ public class AuthController {
 
         try {
             return new BaseResponse<>(authService.reissueAccessToken(refreshToken, userAgent, deviceIdentifier));
+        } catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    @ApiOperation(value = "로그아웃 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @DeleteMapping("/logout")
+    public BaseResponse<String> logout() {
+        try {
+            String currentUsername = SecurityUtil.getCurrentUsername()
+                    .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+            authService.logout(currentUsername);
+            return new BaseResponse<>("로그아웃 성공!");
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
