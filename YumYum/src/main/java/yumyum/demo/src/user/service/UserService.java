@@ -1,11 +1,15 @@
 package yumyum.demo.src.user.service;
 
+import java.util.ArrayList;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponseStatus;
 import yumyum.demo.config.Status;
 import yumyum.demo.src.community.dto.CommunityMainDto;
+import yumyum.demo.src.restaurant.entity.ReviewEntity;
+import yumyum.demo.src.restaurant.entity.ReviewImgEntity;
+import yumyum.demo.src.restaurant.repository.ReviewRepository;
 import yumyum.demo.src.user.dto.*;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.repository.UserJdbcTempRepository;
@@ -14,12 +18,14 @@ import yumyum.demo.src.user.repository.UserRepository;
 import java.util.List;
 
 import static yumyum.demo.config.BaseResponseStatus.*;
+import static yumyum.demo.utils.ConvertUtil.*;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
+    private final ReviewRepository reviewRepository;
     private final UserJdbcTempRepository userJdbcTempRepository;
 
     public GetUserProfileDto getUserProfile(String username) throws BaseException {
@@ -70,13 +76,34 @@ public class UserService {
     }
 
     public List<MyReviewDto> getMyReview(String username) throws BaseException{
-        Long user_id = userJdbcTempRepository.findUserIdByUsername(username);
+        UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        try{
-            return userJdbcTempRepository.getMyReview(user_id);
-        }catch (Exception exception){
-            throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
+        List<ReviewEntity> reviewEntityList = reviewRepository.findAllByUserAndStatus(foundUserEntity, Status.ACTIVE);
+
+        List<MyReviewDto> result = new ArrayList<>();
+
+        for (ReviewEntity reviewEntity : reviewEntityList) {
+            List<String> imageUrlList = new ArrayList<>();
+
+            if (!reviewEntity.getReviewImgEntities().isEmpty()) {
+                for (ReviewImgEntity reviewImgEntity : reviewEntity.getReviewImgEntities()) {
+                    imageUrlList.add(reviewImgEntity.getImgUrl());
+                }
+            }
+
+            result.add(new MyReviewDto(
+                    reviewEntity.getId(),
+                    reviewEntity.getContents(),
+                    imageUrlList,
+                    reviewEntity.getRatingStar(),
+                    reviewEntity.getRestaurant().getId(),
+                    foundUserEntity.getId(),
+                    reviewEntity.getRestaurant().getRestaurantName(),
+                    convertCreatedAt(reviewEntity.getCreatedAt())));
         }
+
+        return result;
     }
 
     public List<MyHeartRestaurantDto> getMyHeartRestaurant(String username) throws BaseException{

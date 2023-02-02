@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import yumyum.demo.config.Status;
 import yumyum.demo.src.restaurant.entity.RestaurantEntity;
 import yumyum.demo.src.restaurant.entity.ReviewEntity;
+import yumyum.demo.src.user.entity.UserEntity;
 
 @Repository
 public interface ReviewRepository extends JpaRepository<ReviewEntity, Long> {
@@ -15,4 +16,6 @@ public interface ReviewRepository extends JpaRepository<ReviewEntity, Long> {
     List<ReviewEntity> findTop3ByStatusOrderByCreatedAtDesc(Status status);
 
     List<ReviewEntity> findAllByRestaurantAndStatusOrderByCreatedAtDesc(RestaurantEntity restaurant, Status status);
+
+    List<ReviewEntity> findAllByUserAndStatus(UserEntity user, Status status);
 }

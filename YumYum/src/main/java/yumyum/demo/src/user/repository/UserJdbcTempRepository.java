@@ -22,11 +22,9 @@ public class UserJdbcTempRepository {
 
 
     public Long findUserIdByUsername(String username) {
-        Long userId = this.jdbcTemplate.queryForObject(
+        return this.jdbcTemplate.queryForObject(
                 "select user_id from user where username = ?",
-                Long.class, username
-        );
-        return userId;
+                Long.class, username);
     }
 
     public List<CommunityMainDto> getPost(Long user_id) {
@@ -62,41 +60,6 @@ public class UserJdbcTempRepository {
                 }, user_id
 
         );
-    }
-
-    public List<MyReviewDto> getMyReview(Long user_id) {
-        return this.jdbcTemplate.query(
-                "select R.review_id, R.contents, R.img_url, R.rating_star, R.restaurant_id, R.user_id, R2.restaurant_name,\n" +
-                        "                               (\n" +
-                        "                                                           case\n" +
-                        "                                                            when timestampdiff(YEAR, R.created_at, now()) >= 1 then concat(timestampdiff(YEAR, R.created_at, now())  , '년 전')\n" +
-                        "                                                            when timestampdiff(MONTH , R.created_at, now()) >= 1 then concat(timestampdiff(MONTH, R.created_at, now()) , '월 전')\n" +
-                        "                                                            when timestampdiff(DAY , R.created_at, now()) >=1 then concat(timestampdiff(DAY, R.created_at, now()) , '일 전')\n" +
-                        "                                                            when timestampdiff(HOUR , R.created_at, now()) >=1 then concat(timestampdiff(HOUR, R.created_at, now()) , '시간 전')\n" +
-                        "                                                            when timestampdiff(MINUTE , R.created_at, now()) >= 1 then concat(timestampdiff(MINUTE, R.created_at, now()) , '분 전')\n" +
-                        "                                                            ELSE concat(timestampdiff(SECOND, R.created_at, now()) , '초 전')\n" +
-                        "                                                               END\n" +
-                        "                        \n" +
-                        "                                                        ) as created_time\n" +
-                        "                        from review R\n" +
-                        "                        inner join restaurant R2 on R.restaurant_id = R2.restaurant_id\n" +
-                        "                        where user_id = ? and R.status = 'ACTIVE'\n" +
-                        "                        order by R.created_at desc;",
-                (rs, rowNum) -> {
-                    MyReviewDto myReviewDto = new MyReviewDto();
-                    myReviewDto.setReviewId(rs.getLong("R.review_id"));
-                    myReviewDto.setContents(rs.getString("R.contents"));
-                    myReviewDto.setImgUrl(rs.getString("R.img_url"));
-                    myReviewDto.setRatingStar(rs.getInt("R.rating_star"));
-                    myReviewDto.setRestaurantId(rs.getLong("R.restaurant_id"));
-                    myReviewDto.setUserId(rs.getLong("R.user_id"));
-                    myReviewDto.setRestaurantName(rs.getString("R2.restaurant_name"));
-                    myReviewDto.setCreatedAt(rs.getString("created_time"));
-
-                    return myReviewDto;
-                }, user_id
-        );
-
     }
 
     public List<MyHeartRestaurantDto> getMyHeartRestaurant(Long user_id) {
