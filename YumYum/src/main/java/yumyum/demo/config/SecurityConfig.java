@@ -11,8 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import yumyum.demo.jwt.*;
-
-import static org.springframework.security.config.Customizer.withDefaults;
+import yumyum.demo.src.user.service.CustomOAuth2UserService;
 
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -22,6 +21,7 @@ public class SecurityConfig {
     private final TokenProvider tokenProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -50,6 +50,8 @@ public class SecurityConfig {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
+
+
                 //토큰이 없어도 사용가능한 URI에 대한 처리
                 .and()
                 .authorizeRequests()
@@ -62,7 +64,12 @@ public class SecurityConfig {
                 .antMatchers(HttpMethod.GET,"/swagger-resources/**").permitAll()
                 .antMatchers(HttpMethod.GET,"/swagger-ui/**").permitAll()
                 .antMatchers(HttpMethod.GET,"/v2/api-docs").permitAll()
-                .anyRequest().authenticated();
+                .anyRequest().authenticated()
+
+                .and()
+                .oauth2Login()
+                .userInfoEndpoint()
+                .userService(customOAuth2UserService);
 
 
         return http.build();
