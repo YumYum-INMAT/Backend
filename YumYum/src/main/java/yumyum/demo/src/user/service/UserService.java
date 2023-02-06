@@ -36,6 +36,7 @@ public class UserService {
                 foundUserEntity.getId(),
                 foundUserEntity.getUsername(),
                 foundUserEntity.getEmail(),
+                foundUserEntity.getProfileImgUrl(),
                 foundUserEntity.getPhoneNumber(),
                 foundUserEntity.getNickName(),
                 foundUserEntity.getAge(),
