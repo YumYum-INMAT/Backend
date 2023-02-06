@@ -23,6 +23,8 @@ public class GetUserProfileDto {
 
     private String email;
 
+    private String profileImgUrl;
+
     private String phoneNumber;
 
     private String nickName;
