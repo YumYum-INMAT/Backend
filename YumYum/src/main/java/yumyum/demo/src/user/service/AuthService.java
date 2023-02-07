@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import yumyum.demo.config.BaseException;
+import yumyum.demo.config.LogInType;
 import yumyum.demo.config.Status;
 import yumyum.demo.jwt.TokenProvider;
 import yumyum.demo.src.user.dto.LoginDto;
@@ -53,11 +54,6 @@ public class AuthService {
             throw new BaseException(DUPLICATED_NICKNAME);
         }
 
-        //휴대폰 번호 중복 체크
-        if(userRepository.findUserEntityByPhoneNumberAndStatus(signUpDto.getPhoneNumber(), Status.ACTIVE).isPresent()) {
-            throw new BaseException(DUPLICATED_PHONE_NUMBER);
-        }
-
         //빌더 패턴의 장점
         Authority authority = Authority.builder()
                 .authorityName("ROLE_USER")
@@ -67,11 +63,12 @@ public class AuthService {
                 .username(signUpDto.getUsername())
                 .password(passwordEncoder.encode(signUpDto.getPassword()))
                 .email(signUpDto.getEmail())
-                .phoneNumber(signUpDto.getPhoneNumber())
                 .nickName(signUpDto.getNickName())
                 .age(signUpDto.getAge())
                 .gender(signUpDto.getGender())
                 .authorities(Collections.singleton(authority))
+                .logInType(LogInType.EMAIL)
+                .snsId(null)
                 .build();
 
         userRepository.save(user);
@@ -139,11 +136,12 @@ public class AuthService {
                 .username("anonymous" + anonymousUserSize)
                 .password(passwordEncoder.encode("1234abcd!"))
                 .email("anonymous@email.com")
-                .phoneNumber("010-0000-0000")
                 .nickName("비회원유저")
                 .age(0)
                 .gender('M')
                 .authorities(Collections.singleton(authority))
+                .logInType(LogInType.EMAIL)
+                .snsId(null)
                 .build();
 
         userRepository.save(user);
