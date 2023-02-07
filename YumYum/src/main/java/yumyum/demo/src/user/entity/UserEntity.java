@@ -1,7 +1,5 @@
 package yumyum.demo.src.user.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +9,7 @@ import yumyum.demo.config.BaseEntity;
 
 import javax.persistence.*;
 import java.util.Set;
+import yumyum.demo.config.LogInType;
 
 @Entity
 @Getter
@@ -33,9 +32,6 @@ public class UserEntity extends BaseEntity {
     private String email;
 
     @Column(nullable = false)
-    private String phoneNumber;
-
-    @Column(nullable = false)
     private String nickName;
 
     @Column(nullable = false)
@@ -47,6 +43,10 @@ public class UserEntity extends BaseEntity {
     @Column(nullable = true) //default
     private String profileImgUrl;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "loginType", nullable = false, length = 8)
+    protected LogInType logInType;
+
     @ManyToMany
     @JoinTable(
             name = "user_authority",
@@ -56,18 +56,18 @@ public class UserEntity extends BaseEntity {
 
 
     @Builder
-    public UserEntity(Long id, String username, String password, String email, String phoneNumber, String nickName,
-                      Integer age, Character gender, String profileImgUrl, Set<Authority> authorities) {
+    public UserEntity(Long id, String username, String password, String email, String nickName,
+                      Integer age, Character gender, String profileImgUrl, Set<Authority> authorities, LogInType logInType) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
-        this.phoneNumber = phoneNumber;
         this.nickName = nickName;
         this.age = age;
         this.gender = gender;
         this.profileImgUrl = profileImgUrl;
         this.authorities = authorities;
+        this.logInType = logInType;
     }
 
     // 비밀번호 암호화
