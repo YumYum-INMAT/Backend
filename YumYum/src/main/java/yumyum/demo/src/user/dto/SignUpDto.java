@@ -34,11 +34,6 @@ public class SignUpDto {
     @ApiModelProperty(example = "test123@gmail.com")
     private String email;
 
-    @NotBlank(message = "휴대폰 번호를 입력해주세요.")
-    @Pattern(regexp = "^01([0|1|6|7|8|9])-?([0-9]{3,4})-?([0-9]{4})$", message = "잘못된 휴대폰 번호입니다.")
-    @ApiModelProperty(example = "010-1234-5678")
-    private String phoneNumber;
-
     @NotBlank(message = "닉네임을 입력해주세요.")
     @Size(min = 2, max = 8, message = "닉네임은 한글 최소 2자, 최대 8자까지 입니다.")
     @Pattern(regexp = "[가-힣]{2,8}", message = "닉네임은 한글 최소 2자, 최대 8자까지 입니다.")
