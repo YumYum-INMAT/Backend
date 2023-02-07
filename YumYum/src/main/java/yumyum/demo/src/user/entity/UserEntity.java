@@ -47,6 +47,9 @@ public class UserEntity extends BaseEntity {
     @Column(name = "loginType", nullable = false, length = 8)
     protected LogInType logInType;
 
+    @Column(nullable = true)
+    private String snsId;
+
     @ManyToMany
     @JoinTable(
             name = "user_authority",
@@ -57,7 +60,7 @@ public class UserEntity extends BaseEntity {
 
     @Builder
     public UserEntity(Long id, String username, String password, String email, String nickName,
-                      Integer age, Character gender, String profileImgUrl, Set<Authority> authorities, LogInType logInType) {
+                      Integer age, Character gender, String profileImgUrl, Set<Authority> authorities, LogInType logInType, String snsId) {
         this.id = id;
         this.username = username;
         this.password = password;
@@ -68,6 +71,7 @@ public class UserEntity extends BaseEntity {
         this.profileImgUrl = profileImgUrl;
         this.authorities = authorities;
         this.logInType = logInType;
+        this.snsId = snsId;
     }
 
     // 비밀번호 암호화
