@@ -25,8 +25,6 @@ public class GetUserProfileDto {
 
     private String profileImgUrl;
 
-    private String phoneNumber;
-
     private String nickName;
 
     private Integer age;
