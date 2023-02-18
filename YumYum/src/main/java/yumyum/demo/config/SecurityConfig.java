@@ -11,7 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import yumyum.demo.jwt.*;
-import yumyum.demo.src.user.service.CustomOAuth2UserService;
+import yumyum.demo.oauth.CustomOAuth2UserService;
 
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -56,7 +56,7 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/auth/signup").permitAll()
-                .antMatchers("/auth/login").permitAll()
+                .antMatchers("/auth/login/**").permitAll()
                 .antMatchers("/auth/login-anonymous").permitAll()
                 .antMatchers("/auth/username").permitAll()
                 .antMatchers("/auth/nickname").permitAll()
@@ -68,8 +68,10 @@ public class SecurityConfig {
 
                 .and()
                 .oauth2Login()
-                .userInfoEndpoint()
-                .userService(customOAuth2UserService);
+                .authorizationEndpoint()
+                .baseUri("/oauth2/authorize")
+                .and()
+                .userInfoEndpoint().userService(customOAuth2UserService);
 
 
         return http.build();
