@@ -2,24 +2,33 @@ package yumyum.demo.src.user.service;
 
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_EMAIL;
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_NICKNAME;
-import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_PHONE_NUMBER;
 import static yumyum.demo.config.BaseResponseStatus.DUPLICATED_USERNAME;
 import static yumyum.demo.config.BaseResponseStatus.EXPIRED_REFRESH_TOKEN;
 import static yumyum.demo.config.BaseResponseStatus.FAILED_TO_LOGIN;
+import static yumyum.demo.config.BaseResponseStatus.INVALID_ACCESS_GOOGLE;
 import static yumyum.demo.config.BaseResponseStatus.INVALID_REFRESH_TOKEN;
 import static yumyum.demo.config.BaseResponseStatus.NOT_ACTIVATED_USER;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import yumyum.demo.config.BaseException;
+import yumyum.demo.config.BaseResponseStatus;
 import yumyum.demo.config.LogInType;
 import yumyum.demo.config.Status;
 import yumyum.demo.jwt.TokenProvider;
+import yumyum.demo.src.user.dto.GoogleUser;
 import yumyum.demo.src.user.dto.LoginDto;
 import yumyum.demo.src.user.dto.SignUpDto;
 import yumyum.demo.src.user.dto.TokenDto;
@@ -36,6 +45,8 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
+    private final RestTemplate restTemplate;
+    private final ObjectMapper objectMapper;
 
     @Transactional
     public void signup(SignUpDto signUpDto) throws BaseException {
@@ -196,5 +207,36 @@ public class AuthService {
         List<RefreshTokenEntity> refreshTokenList = refreshTokenRepository.findAllByUserAndStatus(foundUserEntity, Status.ACTIVE);
 
         refreshTokenRepository.deleteAll(refreshTokenList);
+    }
+
+    public UserEntity googleLogin(String accessToken) throws BaseException {
+        try{
+            String GOOGLE_USERINFO_REQUEST_URL="https://www.googleapis.com/oauth2/v1/userinfo";
+
+            //header에 accessToken을 담는다.
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Authorization","Bearer "+ accessToken);
+
+            //HttpEntity를 하나 생성해 헤더를 담아서 restTemplate으로 구글과 통신하게 된다.
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity(headers);
+            ResponseEntity<String> response = restTemplate.exchange(GOOGLE_USERINFO_REQUEST_URL, HttpMethod.GET, request, String.class);
+
+            System.out.println("response.getBody() = " + response.getBody());
+
+            if (response.getStatusCodeValue() == 200) {
+                GoogleUser googleUser = objectMapper.readValue(response.getBody(), GoogleUser.class);
+
+                UserEntity user = userRepository.findUserEntityByEmail(googleUser.getEmail())
+                        .orElse(googleUser.toEntity(passwordEncoder.encode("NONE")));
+
+                return userRepository.save(user);
+            }
+            else {
+                throw new BaseException(INVALID_ACCESS_GOOGLE);
+            }
+        }
+        catch (Exception exception){
+            throw new BaseException(BaseResponseStatus.INVALID_ACCESS_GOOGLE);
+        }
     }
 }

@@ -17,10 +17,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
@@ -28,8 +30,10 @@ import yumyum.demo.jwt.TokenProvider;
 import yumyum.demo.src.user.dto.LoginDto;
 import yumyum.demo.src.user.dto.NickNameDto;
 import yumyum.demo.src.user.dto.SignUpDto;
+import yumyum.demo.src.user.dto.SocialLoginDto;
 import yumyum.demo.src.user.dto.TokenDto;
 import yumyum.demo.src.user.dto.UsernameDto;
+import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.service.AuthService;
 import yumyum.demo.utils.SecurityUtil;
 
@@ -202,6 +206,33 @@ public class AuthController {
 
             authService.logout(currentUsername);
             return new BaseResponse<>("로그아웃 성공!");
+        } catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    @ApiOperation(value = "구글 로그인 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request")
+    })
+    @PostMapping("/login/google")
+    public BaseResponse<TokenDto> googleLogin(@RequestHeader("User-Agent") String userAgent,
+                                              @RequestHeader("Device-Identifier") String deviceIdentifier,
+                                              @Valid @RequestBody SocialLoginDto socialLoginDto) {
+        try {
+            UserEntity userEntity = authService.googleLogin(socialLoginDto.getAccessToken());
+
+            Authentication authentication = getAuthentication(userEntity.getUsername(),
+                    "NONE");
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            String accessToken = tokenProvider.createAccessToken(authentication);
+            String refreshToken = tokenProvider.createRefreshToken(authentication);
+            authService.updateRefreshToken(userEntity.getUsername(), refreshToken, userAgent, deviceIdentifier);
+
+            return new BaseResponse<>(new TokenDto(accessToken, refreshToken));
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
