@@ -72,9 +72,10 @@ public enum BaseResponseStatus {
     COMMENT_EMPTY_CONTENTS(false, 2600, "내용을 입력해주세요."),
     COMMENT_OVER_LENGTH_CONTENTS(false, 2605, "내용은 최대 100자까지 입력해주세요."),
 
-    NOT_FOUND_OAUTH_TYPE_KAKAO(false, 2700, "카카오 로그인이 아닙니다."),
-    NOT_FOUND_OAUTH_TYPE_GOOGLE(false, 2700, "구글 로그인이 아닙니다."),
-    NOT_FOUND_OAUTH_TYPE_NAVER(false, 2700, "네이버 로그인이 아닙니다."),
+    INVALID_ACCESS_KAKAO(false, 2700, "카카오 로그인에 실패하였습니다."),
+    INVALID_ACCESS_GOOGLE(false, 2701, "구글 로그인에 실패하였습니다."),
+    INVALID_ACCESS_NAVER(false, 2702, "네이버 로그인에 실패하였습니다."),
+    INVALID_ACCESS_APPLE(false, 2703, "애플 로그인에 실패하였습니다."),
 
     /**
      * 3000 : Response 오류
