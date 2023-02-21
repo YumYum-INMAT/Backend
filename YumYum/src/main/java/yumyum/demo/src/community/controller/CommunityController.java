@@ -69,10 +69,11 @@ public class CommunityController {
     public BaseResponse<String> updatePost(@PathVariable( "post_id") Long post_id, @RequestBody @Valid PostDto postDto){
 
         try {
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            communityService.updatePost(currentUsername, post_id, postDto);
+            communityService.updatePost(userId, post_id, postDto);
 
             return new BaseResponse<>("게시물을 수정했습니다");
         }

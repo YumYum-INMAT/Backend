@@ -71,8 +71,8 @@ public class CommunityService {
         }
     }*/
 
-    public void updatePost(String username, Long postId, PostDto postDto) throws BaseException{
-        UserEntity userEntityByUsername = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+    public void updatePost(Long userId, Long postId, PostDto postDto) throws BaseException{
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         PostEntity postEntity = postRepository.findById(postId)
@@ -85,7 +85,7 @@ public class CommunityService {
         }
         else if(status.equals(Status.ACTIVE)) {
             //게시글 작성자와 내가 동일인물인지 비교하기
-            if (postEntity.getUser().equals(userEntityByUsername)) {
+            if (postEntity.getUser().equals(userEntity)) {
                 try {
                     postEntity.updatePost(postDto.getImgUrl(), postDto.getTopic(), postDto.getContents());
                     postRepository.save(postEntity);
