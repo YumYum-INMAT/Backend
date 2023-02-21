@@ -55,7 +55,7 @@ public class CommunityService {
     }
 
 
-    public Long updatePost (String username, Long postId, PostDto postDto) throws BaseException{
+    /*public Long updatePost (String username, Long postId, PostDto postDto) throws BaseException{
 
         // 수정하는 게시물의 작성자가 내 계정과 같은지 검사하기
         if(username.equals(communityRepository.findUsernameByPostId(postId))){
@@ -68,9 +68,9 @@ public class CommunityService {
         else {
             throw new BaseException(FAILED_TO_UPDATE_POST);
         }
-    }
+    }*/
 
-    public void updatePost2(String username, Long postId, PostDto postDto) throws BaseException{
+    public void updatePost(String username, Long postId, PostDto postDto) throws BaseException{
         UserEntity userEntityByUsername = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
@@ -78,9 +78,9 @@ public class CommunityService {
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
 
         Status status = postEntity.getStatus();
-
+        //삭제된 게시글인지 확인하기
         if(status.equals(Status.INACTIVE)){
-            throw new BaseException(FAILED_TO_UPDATE_POST);
+            throw new BaseException(DELETED_POST);
         }
         else if(status.equals(Status.ACTIVE)) {
             //게시글 작성자와 내가 동일인물인지 비교하기

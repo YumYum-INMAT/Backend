@@ -134,7 +134,7 @@ public enum BaseResponseStatus {
 
     COMMENT_LIKE_EMPTY(false,3600,"댓글 좋아요를 먼저 해야합니다."),
 
-
+    DELETED_POST(false, 3700, "삭제된 게시글 입니다"),
     /**
      * 4000 : Database, Server 오류
      */
