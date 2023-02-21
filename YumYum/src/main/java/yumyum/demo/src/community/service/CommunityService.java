@@ -38,12 +38,13 @@ public class CommunityService {
        }
     }*/
 
-    public void createPost(String username, PostDto postDto) throws BaseException{
+    public void createPost(Long userId, PostDto postDto) throws BaseException{
         try{
-            UserEntity userEntityByUsername = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+            UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
             PostEntity postEntity = new PostEntity(
-                    userEntityByUsername,
+                    userEntity,
                     postDto.getImgUrl(),
                     postDto.getTopic(),
                     postDto.getContents());

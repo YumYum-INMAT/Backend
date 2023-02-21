@@ -40,10 +40,12 @@ public class CommunityController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<String> createPost(@RequestBody @Valid PostDto postDto){
         try {
-            String currentUsername = SecurityUtil.getCurrentUsername()
-                    .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-            communityService.createPost(currentUsername, postDto);
+            String currentUserId = SecurityUtil.getCurrentUserId()
+                    .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
+
+            communityService.createPost(userId, postDto);
 
             return new BaseResponse<>("게시물을 작성했습니다");
         }
