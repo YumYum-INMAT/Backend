@@ -29,8 +29,8 @@ import yumyum.demo.config.LogInType;
 import yumyum.demo.config.Status;
 import yumyum.demo.jwt.TokenProvider;
 import yumyum.demo.src.user.dto.GoogleUser;
+import yumyum.demo.src.user.dto.GuestLoginDto;
 import yumyum.demo.src.user.dto.KakaoUser;
-import yumyum.demo.src.user.dto.LoginDto;
 import yumyum.demo.src.user.dto.SignUpDto;
 import yumyum.demo.src.user.dto.TokenDto;
 import yumyum.demo.src.user.entity.Authority;
@@ -79,17 +79,16 @@ public class AuthService {
         userRepository.save(user);
     }
 
+    public Long getUserId(String email) throws BaseException {
+        UserEntity user = userRepository.findUserEntityByEmailAndStatus(email, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+        return user.getId();
+    }
+
     //아이디 존재 여부 체크 -> 로그인에서 사용
     public void checkEmail(String email) throws BaseException {
         if(userRepository.findUserEntityByEmail(email).isEmpty()) {
             throw new BaseException(FAILED_TO_LOGIN);
-        }
-    }
-
-    //아이디 중복 여부 체크
-    public void checkUsernameDuplicate(String username) throws BaseException {
-        if(userRepository.findUserEntityByUsername(username).isPresent()) {
-            throw new BaseException(DUPLICATED_USERNAME);
         }
     }
 
@@ -146,7 +145,7 @@ public class AuthService {
         }
     }
 
-    public LoginDto guestLogin() throws BaseException {
+    public GuestLoginDto guestLogin() throws BaseException {
         List<UserEntity> guestUserEntities = userRepository.findAllByLogInType(LogInType.GUEST);
 
         int guestUserSize = guestUserEntities.size() + 1;
@@ -169,9 +168,9 @@ public class AuthService {
                 .snsId(null)
                 .build();
 
-        userRepository.save(user);
+        UserEntity saveUser = userRepository.save(user);
 
-        return new LoginDto("anonymous" + guestUserSize, "NONE");
+        return new GuestLoginDto(saveUser.getId(), guestEmail, "NONE");
     }
 
     public TokenDto reissueAccessToken(String refreshToken, String userAgent, String deviceIdentifier) throws BaseException {
@@ -214,8 +213,8 @@ public class AuthService {
         return false;
     }
 
-    public void logout(String email) {
-        UserEntity foundUserEntity = userRepository.findUserEntityByEmailAndStatus(email, Status.ACTIVE)
+    public void logout(Long userId) {
+        UserEntity foundUserEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         List<RefreshTokenEntity> refreshTokenList = refreshTokenRepository.findAllByUserAndStatus(foundUserEntity, Status.ACTIVE);

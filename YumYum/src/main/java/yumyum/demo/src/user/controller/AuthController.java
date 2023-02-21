@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
 import yumyum.demo.jwt.TokenProvider;
+import yumyum.demo.src.user.dto.GuestLoginDto;
 import yumyum.demo.src.user.dto.LoginDto;
 import yumyum.demo.src.user.dto.NickNameDto;
 import yumyum.demo.src.user.dto.SignUpDto;
@@ -93,7 +94,9 @@ public class AuthController {
 
             authService.checkPassword(loginDto.getEmail(), loginDto.getPassword()); //비밀번호 일치 체크
 
-            Authentication authentication = getAuthentication(loginDto.getEmail(), loginDto.getPassword());
+            Long userId = authService.getUserId(loginDto.getEmail());
+
+            Authentication authentication = getAuthentication(userId, loginDto.getPassword());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -119,18 +122,16 @@ public class AuthController {
     public BaseResponse<TokenDto> guestLogin(@RequestHeader("User-Agent") String userAgent,
                                                  @RequestHeader(value = "Device-Identifier") String deviceIdentifier) {
         try {
-            LoginDto anonymousLoginDto = authService.guestLogin();
+            GuestLoginDto guestLoginDto = authService.guestLogin();
 
-            authService.checkEmail(anonymousLoginDto.getEmail()); //이메일 존재여부 체크
-
-            Authentication authentication = getAuthentication(anonymousLoginDto.getEmail(),
-                    anonymousLoginDto.getPassword());
+            Authentication authentication = getAuthentication(guestLoginDto.getUserId(),
+                    guestLoginDto.getPassword());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             String accessToken = tokenProvider.createAccessToken(authentication);
             String refreshToken = tokenProvider.createRefreshToken(authentication);
-            authService.updateRefreshToken(anonymousLoginDto.getEmail(), refreshToken, userAgent, deviceIdentifier);
+            authService.updateRefreshToken(guestLoginDto.getEmail(), refreshToken, userAgent, deviceIdentifier);
 
             return new BaseResponse<>(new TokenDto(accessToken, refreshToken));
 
@@ -182,10 +183,14 @@ public class AuthController {
     @DeleteMapping("/logout")
     public BaseResponse<String> logout() {
         try {
-            String currentEmail = SecurityUtil.getCurrentEmail()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-            authService.logout(currentEmail);
+            Long userId = Long.parseLong(currentUserId);
+
+            System.out.println("userId : " + userId);
+
+            authService.logout(userId);
             return new BaseResponse<>("로그아웃 성공!");
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
@@ -204,7 +209,7 @@ public class AuthController {
         try {
             UserEntity userEntity = authService.googleLogin(socialLoginDto.getAccessToken());
 
-            Authentication authentication = getAuthentication(userEntity.getEmail(), "NONE");
+            Authentication authentication = getAuthentication(userEntity.getId(), "NONE");
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -230,7 +235,7 @@ public class AuthController {
         try {
             UserEntity userEntity = authService.kakaoLogin(socialLoginDto.getAccessToken());
 
-            Authentication authentication = getAuthentication(userEntity.getEmail(), "NONE");
+            Authentication authentication = getAuthentication(userEntity.getId(), "NONE");
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -244,9 +249,9 @@ public class AuthController {
         }
     }
 
-    private Authentication getAuthentication(String email, String password) {
+    private Authentication getAuthentication(Long userId, String password) {
         return authenticationManagerBuilder.getObject()
-                .authenticate(new UsernamePasswordAuthenticationToken(email, password));
+                .authenticate(new UsernamePasswordAuthenticationToken(String.valueOf(userId), password));
     }
 
 }
