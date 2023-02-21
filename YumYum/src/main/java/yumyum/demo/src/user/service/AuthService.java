@@ -29,6 +29,7 @@ import yumyum.demo.config.LogInType;
 import yumyum.demo.config.Status;
 import yumyum.demo.jwt.TokenProvider;
 import yumyum.demo.src.user.dto.GoogleUser;
+import yumyum.demo.src.user.dto.KakaoUser;
 import yumyum.demo.src.user.dto.LoginDto;
 import yumyum.demo.src.user.dto.SignUpDto;
 import yumyum.demo.src.user.dto.TokenDto;
@@ -50,11 +51,6 @@ public class AuthService {
 
     @Transactional
     public void signup(SignUpDto signUpDto) throws BaseException {
-        //아이디 중복 체크
-        if (userRepository.findUserEntityByUsername(signUpDto.getUsername()).isPresent()) {
-            throw new BaseException(DUPLICATED_USERNAME);
-        }
-
         //이메일 중복 체크
         if (userRepository.findUserEntityByEmail(signUpDto.getEmail()).isPresent()) {
             throw new BaseException(DUPLICATED_EMAIL);
@@ -65,13 +61,11 @@ public class AuthService {
             throw new BaseException(DUPLICATED_NICKNAME);
         }
 
-        //빌더 패턴의 장점
         Authority authority = Authority.builder()
                 .authorityName("ROLE_USER")
                 .build();
 
         UserEntity user = UserEntity.builder()
-                .username(signUpDto.getUsername())
                 .password(passwordEncoder.encode(signUpDto.getPassword()))
                 .email(signUpDto.getEmail())
                 .nickName(signUpDto.getNickName())
@@ -86,8 +80,8 @@ public class AuthService {
     }
 
     //아이디 존재 여부 체크 -> 로그인에서 사용
-    public void checkUsername(String username) throws BaseException {
-        if(userRepository.findUserEntityByUsername(username).isEmpty()) {
+    public void checkEmail(String email) throws BaseException {
+        if(userRepository.findUserEntityByEmail(email).isEmpty()) {
             throw new BaseException(FAILED_TO_LOGIN);
         }
     }
@@ -99,8 +93,8 @@ public class AuthService {
         }
     }
 
-    public void checkPassword(String username, String password) throws BaseException {
-        UserEntity user = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+    public void checkPassword(String email, String password) throws BaseException {
+        UserEntity user = userRepository.findUserEntityByEmailAndStatus(email, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         if(!passwordEncoder.matches(password, user.getPassword())) {
@@ -114,8 +108,8 @@ public class AuthService {
         }
     }
 
-    public void updateRefreshToken(String username, String refreshToken, String userAgent, String deviceIdentifier) throws BaseException {
-        UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+    public void updateRefreshToken(String email, String refreshToken, String userAgent, String deviceIdentifier) throws BaseException {
+        UserEntity foundUserEntity = userRepository.findUserEntityByEmailAndStatus(email, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         Optional<RefreshTokenEntity> refreshTokenEntity = refreshTokenRepository.findRefreshTokenEntityByUserAndStatus(foundUserEntity, Status.ACTIVE);
@@ -133,10 +127,31 @@ public class AuthService {
         }
     }
 
-    public LoginDto anonymousLogin() throws BaseException {
-        List<UserEntity> anonymousUserEntities = userRepository.findAllByEmail("anonymous@email.com");
+    public void updateSnsUserRefreshToken(String snsId, String refreshToken, String userAgent, String deviceIdentifier) throws BaseException {
+        UserEntity foundUserEntity = userRepository.findUserEntityBySnsIdAndStatus(snsId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        int anonymousUserSize = anonymousUserEntities.size() + 1;
+        Optional<RefreshTokenEntity> refreshTokenEntity = refreshTokenRepository.findRefreshTokenEntityByUserAndStatus(foundUserEntity, Status.ACTIVE);
+
+        //첫 로그인인 경우 -> 디비에 저장된 refresh 토큰 칼럼이 없음
+        if (refreshTokenEntity.isEmpty()) {
+            RefreshTokenEntity createdRefreshTokenEntity = new RefreshTokenEntity(foundUserEntity, refreshToken, userAgent, deviceIdentifier);
+            refreshTokenRepository.save(createdRefreshTokenEntity);
+        }
+        else {
+            refreshTokenEntity.get().updateRefreshToken(refreshToken);
+            refreshTokenEntity.get().updateDeviceIdentifier(deviceIdentifier);
+            refreshTokenEntity.get().updateUserAgent(userAgent);
+            refreshTokenRepository.save(refreshTokenEntity.get());
+        }
+    }
+
+    public LoginDto guestLogin() throws BaseException {
+        List<UserEntity> guestUserEntities = userRepository.findAllByLogInType(LogInType.GUEST);
+
+        int guestUserSize = guestUserEntities.size() + 1;
+
+        String guestEmail = "anonymous" + guestUserSize + "@email.com";
 
         //빌더 패턴의 장점
         Authority authority = Authority.builder()
@@ -144,20 +159,19 @@ public class AuthService {
                 .build();
 
         UserEntity user = UserEntity.builder()
-                .username("anonymous" + anonymousUserSize)
-                .password(passwordEncoder.encode("1234abcd!"))
-                .email("anonymous@email.com")
+                .password(passwordEncoder.encode("NONE"))
+                .email(guestEmail)
                 .nickName("비회원유저")
                 .age(0)
                 .gender('M')
                 .authorities(Collections.singleton(authority))
-                .logInType(LogInType.EMAIL)
+                .logInType(LogInType.GUEST)
                 .snsId(null)
                 .build();
 
         userRepository.save(user);
 
-        return new LoginDto("anonymous" + anonymousUserSize, "1234abcd!");
+        return new LoginDto("anonymous" + guestUserSize, "NONE");
     }
 
     public TokenDto reissueAccessToken(String refreshToken, String userAgent, String deviceIdentifier) throws BaseException {
@@ -200,8 +214,8 @@ public class AuthService {
         return false;
     }
 
-    public void logout(String username) {
-        UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+    public void logout(String email) {
+        UserEntity foundUserEntity = userRepository.findUserEntityByEmailAndStatus(email, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         List<RefreshTokenEntity> refreshTokenList = refreshTokenRepository.findAllByUserAndStatus(foundUserEntity, Status.ACTIVE);
@@ -226,8 +240,39 @@ public class AuthService {
             if (response.getStatusCodeValue() == 200) {
                 GoogleUser googleUser = objectMapper.readValue(response.getBody(), GoogleUser.class);
 
-                UserEntity user = userRepository.findUserEntityByEmail(googleUser.getEmail())
+                UserEntity user = userRepository.findUserEntityBySnsId(googleUser.getId())
                         .orElse(googleUser.toEntity(passwordEncoder.encode("NONE")));
+
+                return userRepository.save(user);
+            }
+            else {
+                throw new BaseException(INVALID_ACCESS_GOOGLE);
+            }
+        }
+        catch (Exception exception){
+            throw new BaseException(BaseResponseStatus.INVALID_ACCESS_GOOGLE);
+        }
+    }
+
+    public UserEntity kakaoLogin(String accessToken) throws BaseException {
+        try{
+            String GOOGLE_USERINFO_REQUEST_URL="https://kapi.kakao.com/v2/user/me";
+
+            //header에 accessToken을 담는다.
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Authorization","Bearer "+ accessToken);
+
+            //HttpEntity를 하나 생성해 헤더를 담아서 restTemplate으로 구글과 통신하게 된다.
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity(headers);
+            ResponseEntity<String> response = restTemplate.exchange(GOOGLE_USERINFO_REQUEST_URL, HttpMethod.GET, request, String.class);
+
+            System.out.println("response.getBody() = " + response.getBody());
+
+            if (response.getStatusCodeValue() == 200) {
+                KakaoUser kakaoUser = objectMapper.readValue(response.getBody(), KakaoUser.class);
+
+                UserEntity user = userRepository.findUserEntityBySnsId(kakaoUser.getId())
+                        .orElse(kakaoUser.toEntity(passwordEncoder.encode("NONE")));
 
                 return userRepository.save(user);
             }

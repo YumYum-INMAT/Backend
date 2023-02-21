@@ -17,12 +17,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
@@ -32,7 +30,6 @@ import yumyum.demo.src.user.dto.NickNameDto;
 import yumyum.demo.src.user.dto.SignUpDto;
 import yumyum.demo.src.user.dto.SocialLoginDto;
 import yumyum.demo.src.user.dto.TokenDto;
-import yumyum.demo.src.user.dto.UsernameDto;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.service.AuthService;
 import yumyum.demo.utils.SecurityUtil;
@@ -81,22 +78,6 @@ public class AuthController {
         }
     }
 
-    @ApiOperation(value = "아이디 중복 체크 API (회원 가입 시 사용)")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
-            @ApiResponse(code = 400, message = "Bad Request")
-    })
-    @PostMapping("/username")
-    public BaseResponse<String> checkUsername(@Valid @RequestBody UsernameDto usernameDto) {
-        try {
-            authService.checkUsernameDuplicate(usernameDto.getUsername());
-
-            return new BaseResponse<>("아이디 사용가능!");
-        } catch (BaseException e) {
-            return new BaseResponse<>(e.getStatus());
-        }
-    }
-
     @ApiOperation(value = "로그인 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
@@ -108,11 +89,11 @@ public class AuthController {
                                         @Valid @RequestBody LoginDto loginDto) {
 
         try {
-            authService.checkUsername(loginDto.getUsername()); //아이디 존재여부 체크
+            authService.checkEmail(loginDto.getEmail()); //이메일 존재여부 체크
 
-            authService.checkPassword(loginDto.getUsername(), loginDto.getPassword()); //비밀번호 일치 체크
+            authService.checkPassword(loginDto.getEmail(), loginDto.getPassword()); //비밀번호 일치 체크
 
-            Authentication authentication = getAuthentication(loginDto.getUsername(), loginDto.getPassword());
+            Authentication authentication = getAuthentication(loginDto.getEmail(), loginDto.getPassword());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -120,7 +101,7 @@ public class AuthController {
             String refreshToken = tokenProvider.createRefreshToken(authentication);
 
             //발급받은 리프레쉬 토큰을 디비에 저장
-            authService.updateRefreshToken(loginDto.getUsername(), refreshToken, userAgent, deviceIdentifier);
+            authService.updateRefreshToken(loginDto.getEmail(), refreshToken, userAgent, deviceIdentifier);
 
             return new BaseResponse<>(new TokenDto(accessToken, refreshToken));
 
@@ -134,22 +115,22 @@ public class AuthController {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
             @ApiResponse(code = 400, message = "Bad Request")
     })
-    @PostMapping("/login-anonymous")
-    public BaseResponse<TokenDto> anonymousLogin(@RequestHeader("User-Agent") String userAgent,
+    @PostMapping("/login-guest")
+    public BaseResponse<TokenDto> guestLogin(@RequestHeader("User-Agent") String userAgent,
                                                  @RequestHeader(value = "Device-Identifier") String deviceIdentifier) {
         try {
-            LoginDto anonymousLoginDto = authService.anonymousLogin();
+            LoginDto anonymousLoginDto = authService.guestLogin();
 
-            authService.checkUsername(anonymousLoginDto.getUsername()); //아이디 존재여부 체크
+            authService.checkEmail(anonymousLoginDto.getEmail()); //이메일 존재여부 체크
 
-            Authentication authentication = getAuthentication(anonymousLoginDto.getUsername(),
+            Authentication authentication = getAuthentication(anonymousLoginDto.getEmail(),
                     anonymousLoginDto.getPassword());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             String accessToken = tokenProvider.createAccessToken(authentication);
             String refreshToken = tokenProvider.createRefreshToken(authentication);
-            authService.updateRefreshToken(anonymousLoginDto.getUsername(), refreshToken, userAgent, deviceIdentifier);
+            authService.updateRefreshToken(anonymousLoginDto.getEmail(), refreshToken, userAgent, deviceIdentifier);
 
             return new BaseResponse<>(new TokenDto(accessToken, refreshToken));
 
@@ -201,10 +182,10 @@ public class AuthController {
     @DeleteMapping("/logout")
     public BaseResponse<String> logout() {
         try {
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentEmail = SecurityUtil.getCurrentEmail()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-            authService.logout(currentUsername);
+            authService.logout(currentEmail);
             return new BaseResponse<>("로그아웃 성공!");
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
@@ -223,14 +204,13 @@ public class AuthController {
         try {
             UserEntity userEntity = authService.googleLogin(socialLoginDto.getAccessToken());
 
-            Authentication authentication = getAuthentication(userEntity.getUsername(),
-                    "NONE");
+            Authentication authentication = getAuthentication(userEntity.getEmail(), "NONE");
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             String accessToken = tokenProvider.createAccessToken(authentication);
             String refreshToken = tokenProvider.createRefreshToken(authentication);
-            authService.updateRefreshToken(userEntity.getUsername(), refreshToken, userAgent, deviceIdentifier);
+            authService.updateSnsUserRefreshToken(userEntity.getSnsId(), refreshToken, userAgent, deviceIdentifier);
 
             return new BaseResponse<>(new TokenDto(accessToken, refreshToken));
         } catch (BaseException e) {
@@ -238,9 +218,35 @@ public class AuthController {
         }
     }
 
-    private Authentication getAuthentication(String username, String password) {
+    @ApiOperation(value = "카카오 로그인 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request")
+    })
+    @PostMapping("/login/kakao")
+    public BaseResponse<TokenDto> kakaoLogin(@RequestHeader("User-Agent") String userAgent,
+                                              @RequestHeader("Device-Identifier") String deviceIdentifier,
+                                              @Valid @RequestBody SocialLoginDto socialLoginDto) {
+        try {
+            UserEntity userEntity = authService.kakaoLogin(socialLoginDto.getAccessToken());
+
+            Authentication authentication = getAuthentication(userEntity.getEmail(), "NONE");
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            String accessToken = tokenProvider.createAccessToken(authentication);
+            String refreshToken = tokenProvider.createRefreshToken(authentication);
+            authService.updateSnsUserRefreshToken(userEntity.getSnsId(), refreshToken, userAgent, deviceIdentifier);
+
+            return new BaseResponse<>(new TokenDto(accessToken, refreshToken));
+        } catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    private Authentication getAuthentication(String email, String password) {
         return authenticationManagerBuilder.getObject()
-                .authenticate(new UsernamePasswordAuthenticationToken(username, password));
+                .authenticate(new UsernamePasswordAuthenticationToken(email, password));
     }
 
 }
