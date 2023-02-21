@@ -74,7 +74,6 @@ public class OAuthAttributes {
                 .age(20) //일단 넣어두기, 나중에 빼야함!!
                 .gender('F') //일단 넣어두기, 나중에 빼야함!!
                 .nickName("구글유저") //일단 넣어두기, 나중에 빼야함!!
-                .username(email.substring(0, email.indexOf("@"))) //일단 넣어두기, 나중에 빼야함!!
                 .snsId(snsId)
                 .build();
     }
