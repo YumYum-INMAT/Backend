@@ -7,7 +7,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 import java.util.List;
-import java.util.Optional;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,10 +41,11 @@ public class RestaurantController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<GetRestaurantsDto> getRestaurants(@RequestParam(value = "sort", defaultValue = "1") int sortType) {
         try {
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            return new BaseResponse<>(restaurantService.getRestaurants(currentUsername, sortType));
+            return new BaseResponse<>(restaurantService.getRestaurants(userId, sortType));
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
@@ -82,10 +82,11 @@ public class RestaurantController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<String> addRestaurantHeart(@PathVariable("restaurantId") Long restaurantId) {
         try {
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            restaurantService.addRestaurantHeart(currentUsername, restaurantId);
+            restaurantService.addRestaurantHeart(userId, restaurantId);
 
             return new BaseResponse<>("음식점 좋아요 설정 완료!");
         } catch (BaseException e) {
@@ -104,10 +105,11 @@ public class RestaurantController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<String> updateRestaurantHeart(@PathVariable("restaurantId") Long restaurantId) {
         try {
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            restaurantService.updateRestaurantHeart(currentUsername, restaurantId);
+            restaurantService.updateRestaurantHeart(userId, restaurantId);
 
             return new BaseResponse<>("음식점 좋아요 해제 완료!");
         } catch (BaseException e) {
@@ -126,10 +128,11 @@ public class RestaurantController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<GetRestaurantDetailDto> getRestaurantDetails(@PathVariable("restaurantId") Long restaurantId) {
         try {
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            return new BaseResponse<>(restaurantService.getRestaurantDetails(currentUsername, restaurantId));
+            return new BaseResponse<>(restaurantService.getRestaurantDetails(userId, restaurantId));
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
@@ -147,10 +150,11 @@ public class RestaurantController {
     public BaseResponse<String> createReview(@PathVariable("restaurantId") Long restaurantId,
                                              @Valid @RequestBody CreateReviewDto createReviewDto) {
         try {
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            restaurantService.createReview(currentUsername, restaurantId, createReviewDto);
+            restaurantService.createReview(userId, restaurantId, createReviewDto);
 
             return new BaseResponse<>("음식점 리뷰 작성 완료!");
         } catch (BaseException e) {
@@ -186,10 +190,11 @@ public class RestaurantController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<List<RestaurantDto>> getSearchResult(@RequestParam(value = "query")String query, @RequestParam(value = "sort", defaultValue = "1")Integer sort){
         try {
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            return new BaseResponse<>(restaurantService.getSearchResult(currentUsername,query, sort));
+            return new BaseResponse<>(restaurantService.getSearchResult(userId,query, sort));
         } catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
@@ -206,10 +211,11 @@ public class RestaurantController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<List<GetReviewDto>> getReviews(@PathVariable("restaurantId") Long restaurantId) {
         try {
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            return new BaseResponse<>(restaurantService.getReviews(currentUsername, restaurantId));
+            return new BaseResponse<>(restaurantService.getReviews(userId, restaurantId));
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }

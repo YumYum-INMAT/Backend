@@ -76,8 +76,8 @@ public class RestaurantService {
         restaurantRepository.save(restaurantEntity);
     }
 
-    public void addRestaurantHeart(String username, Long restaurantId) throws BaseException {
-        UserEntity userEntityByUsername = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+    public void addRestaurantHeart(Long userId, Long restaurantId) throws BaseException {
+        UserEntity userEntityByUsername = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         RestaurantEntity restaurantEntityById = restaurantRepository.findRestaurantEntityByIdAndStatus(restaurantId, Status.ACTIVE)
@@ -109,8 +109,8 @@ public class RestaurantService {
         restaurantRepository.save(restaurantEntityById);
     }
 
-    public void updateRestaurantHeart(String username, Long restaurantId) throws BaseException {
-        UserEntity userEntityByUsername = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+    public void updateRestaurantHeart(Long userId, Long restaurantId) throws BaseException {
+        UserEntity userEntityByUsername = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         RestaurantEntity restaurantEntityById = restaurantRepository.findRestaurantEntityByIdAndStatus(restaurantId, Status.ACTIVE)
@@ -129,11 +129,9 @@ public class RestaurantService {
         restaurantRepository.save(restaurantEntityById);
     }
 
-    public GetRestaurantsDto getRestaurants(String username, int sortType) {
-        UserEntity userEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+    public GetRestaurantsDto getRestaurants(Long userId, int sortType) {
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
-
-        Long userId = userEntity.getId();
 
         List<BannerEntity> bannerEntities = bannerRepository.findAllByStatus(Status.ACTIVE);
         List<BannerDto> bannerList = new ArrayList<>();
@@ -179,11 +177,9 @@ public class RestaurantService {
         return new GetRestaurantsDto(bannerList, todayRecommendList, recentReviewList, restaurantList);
     }
 
-    public GetRestaurantDetailDto getRestaurantDetails(String username, Long restaurantId) throws BaseException {
-        UserEntity userEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+    public GetRestaurantDetailDto getRestaurantDetails(Long userId, Long restaurantId) throws BaseException {
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
-
-        Long userId = userEntity.getId();
 
         RestaurantEntity restaurantEntity = restaurantRepository.findRestaurantEntityByIdAndStatus(restaurantId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_RESTAURANT));
@@ -252,8 +248,8 @@ public class RestaurantService {
                 reviewList);
     }
 
-    public void createReview(String username, Long restaurantId, CreateReviewDto createReviewDto) {
-        UserEntity userEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+    public void createReview(Long userId, Long restaurantId, CreateReviewDto createReviewDto) {
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         RestaurantEntity restaurantEntity = restaurantRepository.findRestaurantEntityByIdAndStatus(restaurantId, Status.ACTIVE)
@@ -283,30 +279,31 @@ public class RestaurantService {
 
     }
 
-    public List<RestaurantDto> getSearchResult(String username, String query, Integer sort) throws BaseException{
+    public List<RestaurantDto> getSearchResult(Long userId, String query, Integer sort) throws BaseException{
         restaurantJdbcTempRepository.postSearch(query);
+
         if(sort == 1){
-           return restaurantJdbcTempRepository.getSearchResult1(username, query);
+           return restaurantJdbcTempRepository.getSearchResult1(userId, query);
         }
         else if(sort == 2){
-           return restaurantJdbcTempRepository.getSearchResult2(username, query);
+           return restaurantJdbcTempRepository.getSearchResult2(userId, query);
         }
         else if(sort == 3){
-           return restaurantJdbcTempRepository.getSearchResult3(username, query);
+           return restaurantJdbcTempRepository.getSearchResult3(userId, query);
         }
         else if(sort == 4){
-           return restaurantJdbcTempRepository.getSearchResult4(username, query);
+           return restaurantJdbcTempRepository.getSearchResult4(userId, query);
         }
         else if(sort == 5){
-           return restaurantJdbcTempRepository.getSearchResult5(username, query);
+           return restaurantJdbcTempRepository.getSearchResult5(userId, query);
         }
         else{
            throw new BaseException(DATABASE_ERROR);
         }
     }
 
-    public List<GetReviewDto> getReviews(String username, Long restaurantId) throws BaseException {
-        UserEntity userEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+    public List<GetReviewDto> getReviews(Long userId, Long restaurantId) throws BaseException {
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         RestaurantEntity restaurantEntity = restaurantRepository.findRestaurantEntityByIdAndStatus(restaurantId, Status.ACTIVE)
