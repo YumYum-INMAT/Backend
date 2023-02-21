@@ -125,12 +125,15 @@ public enum BaseResponseStatus {
     FAILED_TO_REPORT_POST(false,3210,"게시글 신고에 실패하였습니다."),
     FAILED_TO_REPORT_COMMENT(false,3220,"댓글 신고에 실패하였습니다."),
 
+    NOT_ACTIVATED_POST(false,3230,"유효한 게시글이 아닙니다."),
+
     INVALID_KAKAO_USER(false,3500,"잘못된 카카오 로그인입니다."),
 
     //댓글 관련 오류
     FAILED_TO_UPDATE_COMMENT(false,3510,"댓글 수정에 실패하였습니다."),
 
     COMMENT_LIKE_EMPTY(false,3600,"댓글 좋아요를 먼저 해야합니다."),
+
 
     /**
      * 4000 : Database, Server 오류
