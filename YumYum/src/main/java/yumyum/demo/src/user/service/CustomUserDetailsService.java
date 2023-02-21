@@ -31,25 +31,25 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String email) {
-        Optional<UserEntity> foundUser = userRepository.findOneWithAuthoritiesByEmail(email);
+    public UserDetails loadUserByUsername(String id) {
+        Optional<UserEntity> foundUser = userRepository.findOneWithAuthoritiesById(Long.parseLong(id));
         if(foundUser.isPresent()) {
-            return createUser(email, foundUser.get());
+            return createUser(id, foundUser.get());
         }
         else {
-            throw new UsernameNotFoundException(email + " -> 데이터베이스에서 찾을 수 없습니다.");
+            throw new UsernameNotFoundException(id + " -> 데이터베이스에서 찾을 수 없습니다.");
         }
     }
 
-    private org.springframework.security.core.userdetails.User createUser(String email, UserEntity userEntity) {
+    private org.springframework.security.core.userdetails.User createUser(String id, UserEntity userEntity) {
         if (userEntity.getStatus() != Status.ACTIVE) {
-            throw new RuntimeException(email + " -> 활성화되어 있지 않습니다.");
+            throw new RuntimeException(id + " -> 활성화되어 있지 않습니다.");
         }
         List<GrantedAuthority> grantedAuthorityList = userEntity.getAuthorities().stream()
                 .map(authority -> new SimpleGrantedAuthority(authority.getAuthorityName()))
                 .collect(Collectors.toList());
 
-        return new org.springframework.security.core.userdetails.User(userEntity.getEmail(),
+        return new org.springframework.security.core.userdetails.User(String.valueOf(userEntity.getId()),
                 userEntity.getPassword(),
                 grantedAuthorityList);
     }
