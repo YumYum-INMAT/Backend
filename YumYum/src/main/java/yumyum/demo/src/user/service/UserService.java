@@ -28,13 +28,12 @@ public class UserService {
     private final ReviewRepository reviewRepository;
     private final UserJdbcTempRepository userJdbcTempRepository;
 
-    public GetUserProfileDto getUserProfile(String username) throws BaseException {
-        UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+    public GetUserProfileDto getUserProfile(Long userId) throws BaseException {
+        UserEntity foundUserEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         return new GetUserProfileDto(
                 foundUserEntity.getId(),
-                foundUserEntity.getUsername(),
                 foundUserEntity.getEmail(),
                 foundUserEntity.getProfileImgUrl(),
                 foundUserEntity.getNickName(),
@@ -42,8 +41,8 @@ public class UserService {
                 foundUserEntity.getGender());
     }
 
-    public void updateUserProfile(String username, UpdateUserProfileDto userProfileDto) throws BaseException {
-        UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+    public void updateUserProfile(Long userId, UpdateUserProfileDto userProfileDto) throws BaseException {
+        UserEntity foundUserEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         //이 전 닉네임과 다른 닉네임으로 바꿀때는 중복 검사 진행
@@ -65,18 +64,16 @@ public class UserService {
         }
     }
 
-    public List<CommunityMainDto> getPost(String username) throws BaseException {
-        Long user_id = userJdbcTempRepository.findUserIdByUsername(username);
-
+    public List<CommunityMainDto> getPost(Long userId) throws BaseException {
         try{
-            return userJdbcTempRepository.getPost(user_id);
+            return userJdbcTempRepository.getPost(userId);
         }catch (Exception exception){
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
     }
 
-    public List<MyReviewDto> getMyReview(String username) throws BaseException{
-        UserEntity foundUserEntity = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+    public List<MyReviewDto> getMyReview(Long userId) throws BaseException{
+        UserEntity foundUserEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         List<ReviewEntity> reviewEntityList = reviewRepository.findAllByUserAndStatus(foundUserEntity, Status.ACTIVE);
@@ -106,14 +103,11 @@ public class UserService {
         return result;
     }
 
-    public List<MyHeartRestaurantDto> getMyHeartRestaurant(String username) throws BaseException{
-        Long user_id = userJdbcTempRepository.findUserIdByUsername(username);
-
+    public List<MyHeartRestaurantDto> getMyHeartRestaurant(Long userId) throws BaseException{
         try{
-            return userJdbcTempRepository.getMyHeartRestaurant(user_id);
+            return userJdbcTempRepository.getMyHeartRestaurant(userId);
         }catch (Exception exception){
             throw new BaseException(DATABASE_ERROR);
         }
-
     }
 }
