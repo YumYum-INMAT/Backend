@@ -42,4 +42,13 @@ public class CommentEntity extends BaseEntity {
 
     @Column(nullable = false, columnDefinition = "varchar(100)")
     private String contents;
+
+    public void setContents(String contents){
+
+    }
+    public CommentEntity(UserEntity userEntity, PostEntity postEntity, String contents){
+        this.user = userEntity;
+        this.post = postEntity;
+        this.contents = contents;
+    }
 }

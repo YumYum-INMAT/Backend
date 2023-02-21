@@ -1,10 +1,18 @@
 package yumyum.demo.src.community.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import yumyum.demo.config.BaseException;
+import yumyum.demo.config.Status;
 import yumyum.demo.src.community.dto.*;
+import yumyum.demo.src.community.entity.CommentEntity;
+import yumyum.demo.src.community.entity.PostEntity;
+import yumyum.demo.src.community.repository.CommentRepository;
 import yumyum.demo.src.community.repository.CommunityRepository;
+import yumyum.demo.src.community.repository.PostRepository;
+import yumyum.demo.src.user.entity.UserEntity;
+import yumyum.demo.src.user.repository.UserRepository;
 
 import javax.transaction.Transactional;
 
@@ -15,28 +23,99 @@ import static yumyum.demo.config.BaseResponseStatus.*;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class CommunityService {
     private final CommunityRepository communityRepository;
+    private final UserRepository userRepository;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
 
-    @Autowired
-    public CommunityService(CommunityRepository communityRepository){
-        this.communityRepository = communityRepository;
-    }
-
-    public void createPost(String username, PostDto postDto) throws BaseException {
+    /*public void createPost(String username, PostDto postDto) throws BaseException {
        try {
            communityRepository.createPost(username, postDto);
        } catch (Exception exception){
            throw new BaseException(DATABASE_ERROR);
        }
+    }*/
+
+    public void createPost(String username, PostDto postDto) throws BaseException{
+        try{
+            UserEntity userEntityByUsername = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+                    .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            PostEntity postEntity = new PostEntity(
+                    userEntityByUsername,
+                    postDto.getImgUrl(),
+                    postDto.getTopic(),
+                    postDto.getContents());
+
+            postRepository.save(postEntity);
+        } catch (Exception exception){
+            throw new BaseException(DATABASE_ERROR);
+        }
     }
-    public Long updatePost (String username, Long post_id, PostDto postDto) throws BaseException{
+
+
+    /*public Long updatePost (String username, Long postId, PostDto postDto) throws BaseException{
 
         // 수정하는 게시물의 작성자가 내 계정과 같은지 검사하기
-        if(username.equals(communityRepository.findUsernameByPostId(post_id))){
+        if(username.equals(communityRepository.findUsernameByPostId(postId))){
             try {
-                return communityRepository.updatePost(post_id, postDto);
+                return communityRepository.updatePost(postId, postDto);
             } catch (Exception exception){
+                throw new BaseException(DATABASE_ERROR);
+            }
+        }
+        else {
+            throw new BaseException(FAILED_TO_UPDATE_POST);
+        }
+    }*/
+
+    public void updatePost(String username, Long postId, PostDto postDto) throws BaseException{
+        UserEntity userEntityByUsername = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        PostEntity postEntity = postRepository.findById(postId)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
+
+        Status status = postEntity.getStatus();
+        //삭제된 게시글인지 확인하기
+        if(status.equals(Status.INACTIVE)){
+            throw new BaseException(DELETED_POST);
+        }
+        else if(status.equals(Status.ACTIVE)) {
+            //게시글 작성자와 내가 동일인물인지 비교하기
+            if (postEntity.getUser().equals(userEntityByUsername)) {
+                try {
+                    postEntity.updatePost(postDto.getImgUrl(), postDto.getTopic(), postDto.getContents());
+                    postRepository.save(postEntity);
+
+                } catch (Exception exception) {
+                    throw new BaseException(DATABASE_ERROR);
+                }
+            } else {
+                throw new BaseException(FAILED_TO_UPDATE_POST);
+            }
+        }
+        else{
+            throw new BaseException(DATABASE_ERROR);
+        }
+
+    }
+
+    public void deletePost2(String username, Long postId){
+        UserEntity userEntityByUsername = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        PostEntity postEntity = postRepository.findById(postId)
+                .orElseThrow(() -> new BaseException(DATABASE_ERROR));
+
+        if(postEntity.getUser().equals(userEntityByUsername)){
+            try{
+               PostEntity deletePostEntity = postEntity;
+               deletePostEntity.setStatus(Status.INACTIVE);
+
+               postRepository.save(deletePostEntity);
+            }catch (Exception exception){
                 throw new BaseException(DATABASE_ERROR);
             }
         }
@@ -50,12 +129,12 @@ public class CommunityService {
     }
 
     @Transactional
-    public Long createComment(String username, Long post_id, CommentDto commentDto) throws BaseException {
-       String status = checkPostStatus(post_id);
+    public Long createComment(String username, Long postId, CommentDto commentDto) throws BaseException {
+       String status = checkPostStatus(postId);
         if(status.equals("ACTIVE")) {
            try {
-               Long commentId = communityRepository.createComment(username, post_id, commentDto);
-               communityRepository.increaseCountComment(post_id);
+               Long commentId = communityRepository.createComment(username, postId, commentDto);
+               communityRepository.increaseCountComment(postId);
                return commentId;
            } catch (Exception exception) {
                throw new BaseException(DATABASE_ERROR);
@@ -66,6 +145,30 @@ public class CommunityService {
         else {
             throw new BaseException(DATABASE_ERROR);
        }
+    }
+
+    public void createComment2(String username, Long postId, CommentDto commentDto) throws BaseException{
+        UserEntity userEntityByUsername = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        PostEntity postEntityByPostId = postRepository.findById(postId)
+                .orElseThrow(() -> new BaseException(DATABASE_ERROR));
+
+        CommentEntity commentEntityByUserAndPost = new CommentEntity(
+                userEntityByUsername,
+                postEntityByPostId,
+                commentDto.getContents());
+
+        if(postEntityByPostId.getStatus().equals(Status.ACTIVE)){
+            postEntityByPostId.increaseCountComment();
+
+            postRepository.save(postEntityByPostId);
+            commentRepository.save(commentEntityByUserAndPost);
+
+        }
+        else if(postEntityByPostId.getStatus().equals(Status.INACTIVE)){
+            throw new BaseException(UNEXPECTED_ERROR);
+        }
     }
 
     @Transactional
