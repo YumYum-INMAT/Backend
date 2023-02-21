@@ -95,10 +95,11 @@ public class CommunityController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<String> deletePost(@PathVariable("post_id")Long post_id){
         try{
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            communityService.deletePost(currentUsername, post_id);
+            communityService.deletePost(userId, post_id);
 
             return new BaseResponse<>("게시물을 삭제했습니다");
         } catch (BaseException e){
@@ -106,28 +107,6 @@ public class CommunityController {
         }
     }
 
-    @ApiOperation(value = "게시글 삭제 API")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
-            @ApiResponse(code = 4000, message = "데이터베이스 연결에 실패하였습니다."),
-
-            @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
-            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
-    })
-    //게시글 삭제 api
-    @PatchMapping("/{post_id}/delete2")
-    @PreAuthorize("hasAnyRole('USER')")
-    public BaseResponse<String> deletePost2(@PathVariable("post_id")Long post_id){
-        try{
-            Optional<String> currentUsername = SecurityUtil.getCurrentUsername();
-            communityService.deletePost2(currentUsername.get(), post_id);
-            String result = "게시물을 삭제했습니다";
-            return new BaseResponse<>(result);
-        } catch (BaseException e){
-            return new BaseResponse<>(e.getStatus());
-        }
-    }
 
     @ApiOperation(value = "댓글,대댓글 작성 API")
     @ApiResponses(value = {

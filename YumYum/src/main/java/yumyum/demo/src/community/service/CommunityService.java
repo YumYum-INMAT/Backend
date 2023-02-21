@@ -103,25 +103,33 @@ public class CommunityService {
 
     }
 
-    public void deletePost2(String username, Long postId){
-        UserEntity userEntityByUsername = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+    public void deletePost(Long userId, Long postId) {
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         PostEntity postEntity = postRepository.findById(postId)
                 .orElseThrow(() -> new BaseException(DATABASE_ERROR));
 
-        if(postEntity.getUser().equals(userEntityByUsername)){
-            try{
-               PostEntity deletePostEntity = postEntity;
-               deletePostEntity.setStatus(Status.INACTIVE);
+        Status status = postEntity.getStatus();
 
-               postRepository.save(deletePostEntity);
-            }catch (Exception exception){
-                throw new BaseException(DATABASE_ERROR);
+        if (status.equals(Status.ACTIVE)) {
+            if (postEntity.getUser().equals(userEntity)) {
+                try {
+                    postEntity.setStatus(Status.INACTIVE);
+
+                    postRepository.save(postEntity);
+                } catch (Exception exception) {
+                    throw new BaseException(DATABASE_ERROR);
+                }
+            } else {
+                throw new BaseException(FAILED_TO_DELETE_POST);
             }
         }
+        else if(status.equals(Status.INACTIVE)){
+            throw new BaseException(DELETED_POST);
+        }
         else {
-            throw new BaseException(FAILED_TO_UPDATE_POST);
+            throw new BaseException(DATABASE_ERROR);
         }
     }
 
@@ -259,7 +267,7 @@ public class CommunityService {
         }
     }
 
-    @Transactional
+   /* @Transactional
     public void deletePost(String username, Long post_id) throws BaseException{
         // 수정하는 게시물의 작성자가 내 계정과 같은지 검사하기
         if(username.equals(communityRepository.findUsernameByPostId(post_id))){
@@ -273,7 +281,7 @@ public class CommunityService {
             throw new BaseException(FAILED_TO_DELETE_POST);
         }
 
-    }
+    }*/
 
     public void updateComment(Long comment_id, String username, CommentDto commentDto) throws BaseException{
         //댓글 작성자와 사용자가 일치하는지 유효성 검사
