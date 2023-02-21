@@ -14,7 +14,7 @@ public class SecurityUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(SecurityUtil.class);
 
-    public static Optional<String> getCurrentUsername() {
+    public static Optional<String> getCurrentEmail() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null) {
@@ -22,15 +22,15 @@ public class SecurityUtil {
             return Optional.empty();
         }
 
-        String username = null;
+        String email = null;
         if (authentication.getPrincipal() instanceof UserDetails) {
             UserDetails springSecurityUser = (UserDetails) authentication.getPrincipal();
-            username = springSecurityUser.getUsername();
+            email = springSecurityUser.getUsername();
         } else if (authentication.getPrincipal() instanceof String) {
-            username = (String) authentication.getPrincipal();
+            email = (String) authentication.getPrincipal();
         }
 
-        return Optional.ofNullable(username);
+        return Optional.ofNullable(email);
     }
 
 }
