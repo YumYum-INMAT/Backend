@@ -126,6 +126,7 @@ public enum BaseResponseStatus {
     FAILED_TO_REPORT_COMMENT(false,3220,"댓글 신고에 실패하였습니다."),
 
     NOT_ACTIVATED_POST(false,3230,"유효한 게시글이 아닙니다."),
+    NOT_ACTIVATED_COMMENT(false,3235, "유요한 댓글이 아닙니다."),
 
     INVALID_KAKAO_USER(false,3500,"잘못된 카카오 로그인입니다."),
 

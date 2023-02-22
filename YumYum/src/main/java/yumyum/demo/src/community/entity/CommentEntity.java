@@ -44,7 +44,7 @@ public class CommentEntity extends BaseEntity {
     private String contents;
 
     public void setContents(String contents){
-
+        this.contents = contents;
     }
     public CommentEntity(UserEntity userEntity, PostEntity postEntity, String contents){
         this.user = userEntity;

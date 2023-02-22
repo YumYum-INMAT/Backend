@@ -157,16 +157,19 @@ public class CommunityController {
     public BaseResponse<String> updateComment(@PathVariable("comment_id")Long comment_id, @RequestBody @Valid CommentDto commentDto){
 
         try{
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            communityService.updateComment(comment_id, currentUsername, commentDto);
+            communityService.updateComment(comment_id, userId, commentDto);
 
             return new BaseResponse<>("댓글을 수정했습니다");
         } catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
     }
+
+
     @ApiOperation(value = "댓글 삭제 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
