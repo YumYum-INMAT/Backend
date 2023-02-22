@@ -329,18 +329,37 @@ public class CommunityService {
 
     }
 
-    public void deleteComment( Long comment_id, String username) throws BaseException{
-        //댓글 작성자와 사용자가 일치하는지 유효성 검사
-        if(username.equals(communityRepository.findUsernameByCommentId(comment_id))){
-            try{
-                communityRepository.deleteComment(comment_id);
-                communityRepository.decreaseCountComment(communityRepository.findPostIdByCommentId(comment_id));
-            } catch (Exception exception){
-                throw new BaseException(DATABASE_ERROR);
+    public void deleteComment(Long commentId, Long userId) throws BaseException{
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        //삭제된 댓글인지 확인
+        CommentEntity commentEntity = commentRepository.findCommentEntityByIdAndStatus(commentId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_COMMENT));
+
+        Status status = commentEntity.getPost().getStatus();
+
+        //삭제된 게시글인지 확인
+        if(status.equals(Status.ACTIVE)){
+            //댓글 작성자와 내가 같은 인물인지 확인
+            if(commentEntity.getUser().equals(userEntity)){
+                commentEntity.setStatus(Status.INACTIVE);
+
+                PostEntity postEntity = commentEntity.getPost();
+                postEntity.decreaseCountComment();
+
+                commentRepository.save(commentEntity);
+                postRepository.save(postEntity);
+            }
+            else{
+                throw new BaseException(FAILED_TO_DELETE_COMMENT);
             }
         }
-        else{
-            throw new BaseException(FAILED_TO_DELETE_COMMENT);
+        else if(status.equals(Status.INACTIVE)){
+            throw new BaseException(DELETED_POST);
+        }
+        else {
+            throw new BaseException(DATABASE_ERROR);
         }
 
     }

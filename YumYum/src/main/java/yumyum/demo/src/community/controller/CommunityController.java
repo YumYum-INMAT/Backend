@@ -182,10 +182,11 @@ public class CommunityController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<String> deleteComment( @PathVariable("comment_id")Long comment_id){
         try{
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            communityService.deleteComment(comment_id, currentUsername);
+            communityService.deleteComment(comment_id, userId);
 
             return new BaseResponse<>("댓글을 삭제했습니다");
         }  catch (BaseException e){

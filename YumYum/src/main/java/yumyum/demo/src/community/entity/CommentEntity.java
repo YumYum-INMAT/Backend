@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import yumyum.demo.config.BaseEntity;
+import yumyum.demo.config.Status;
 import yumyum.demo.src.user.entity.UserEntity;
 
 import javax.persistence.*;
@@ -45,6 +46,9 @@ public class CommentEntity extends BaseEntity {
 
     public void setContents(String contents){
         this.contents = contents;
+    }
+    public void setStatus(Status status){
+        this.status = status;
     }
     public CommentEntity(UserEntity userEntity, PostEntity postEntity, String contents){
         this.user = userEntity;
