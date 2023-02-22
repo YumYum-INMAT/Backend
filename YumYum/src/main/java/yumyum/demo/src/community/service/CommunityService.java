@@ -319,6 +319,51 @@ public class CommunityService {
         }
     }
 
+    public void unLikePost(Long userId, Long postId) {
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        PostEntity postEntity = postRepository.findById(postId)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
+
+        //삭제된 게시글인지 확인하기
+        if(postEntity.getStatus().equals(Status.ACTIVE)){
+            Long count = postLikeRepository.countPostLikeEntityByUserAndPost(userEntity, postEntity);
+            //전에 좋아요를 했는지 확인하기
+            if(count == 0){
+                throw new BaseException(DATABASE_ERROR);
+            }
+            else if(count == 1) {
+                PostLikeEntity postLikeEntity = postLikeRepository.findPostLikeEntityByUserAndPost(userEntity, postEntity)
+                        .orElseThrow(() -> new BaseException(DATABASE_ERROR));
+                Status status = postLikeEntity.getStatus();
+
+                //삭제된 좋아요의 status 확인하기
+                if(status.equals(Status.INACTIVE)){
+                    throw new BaseException(ALREADY_POST_UNLIKE);
+                }
+                else if(status.equals(Status.ACTIVE)){
+                    postLikeEntity.setStatus(Status.ACTIVE);
+                    postEntity.decreaseCountLike();
+
+                    postLikeRepository.save(postLikeEntity);
+                    postRepository.save(postEntity);
+                }
+                else{
+                    throw new BaseException(DATABASE_ERROR);
+                }
+            }
+            else {
+                throw new BaseException(DELETED_POST);
+            }
+        }
+        else{
+            throw new BaseException(DELETED_POST);
+        }
+
+
+    }
+
    /* @Transactional
     public void deletePost(String username, Long post_id) throws BaseException{
         // 수정하는 게시물의 작성자가 내 계정과 같은지 검사하기
@@ -525,7 +570,6 @@ public class CommunityService {
         }
 
     }
-
 }
 
 
