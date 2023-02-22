@@ -206,10 +206,11 @@ public class CommunityController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<String> likePost(@PathVariable("post_id") Long post_id ){
         try{
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            communityService.likePost(currentUsername, post_id);
+            communityService.likePost(userId, post_id);
 
             return new BaseResponse<>("게시글 좋아요를 했어요");
         } catch (BaseException e){

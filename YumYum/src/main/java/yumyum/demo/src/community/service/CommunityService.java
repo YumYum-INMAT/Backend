@@ -8,8 +8,10 @@ import yumyum.demo.config.Status;
 import yumyum.demo.src.community.dto.*;
 import yumyum.demo.src.community.entity.CommentEntity;
 import yumyum.demo.src.community.entity.PostEntity;
+import yumyum.demo.src.community.entity.PostLikeEntity;
 import yumyum.demo.src.community.repository.CommentRepository;
 import yumyum.demo.src.community.repository.CommunityRepository;
+import yumyum.demo.src.community.repository.PostLikeRepository;
 import yumyum.demo.src.community.repository.PostRepository;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.repository.UserRepository;
@@ -29,6 +31,7 @@ public class CommunityService {
     private final UserRepository userRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final PostLikeRepository postLikeRepository;
 
     /*public void createPost(String username, PostDto postDto) throws BaseException {
        try {
@@ -199,7 +202,7 @@ public class CommunityService {
         }
     }
 
-    @Transactional
+   /* @Transactional
     public void likePost(String username, Long post_id) throws BaseException {
         Long user_id = communityRepository.findUserIdByUsername(username);
         Long postLike = communityRepository.countPostLike(post_id, user_id);
@@ -212,7 +215,8 @@ public class CommunityService {
                 } catch (Exception exception) {
                     throw new BaseException(DATABASE_ERROR);
                 }
-            } else if (postLike == 1) {
+            }
+            else if (postLike == 1) {
                 String status = communityRepository.statusPostLike(post_id, user_id);
                 if (status.equals("INACTIVE")) {
                     try {
@@ -226,14 +230,62 @@ public class CommunityService {
                 } else {
                     throw new BaseException(DATABASE_ERROR);
                 }
-
-            } else {
+            }
+            else {
                 throw new BaseException(DATABASE_ERROR);
             }
         }
         else {
             throw new BaseException(DATABASE_ERROR);
         }
+    }*/
+
+    public void likePost(Long userId, Long postId) {
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        PostEntity postEntity = postRepository.findById(postId)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
+
+        //삭제된 게시글인지 확인하기
+        if(postEntity.getStatus().equals(Status.ACTIVE)){
+            Long count = postLikeRepository.countPostLikeEntityByUserAndPost(userEntity, postEntity);
+            //전에 좋아요를 했는지 확인하기
+            if(count == 0){
+                PostLikeEntity postLikeEntity = new PostLikeEntity(postEntity, userEntity);
+                postEntity.increaseCountLike();
+
+                postLikeRepository.save(postLikeEntity);
+                postRepository.save(postEntity);
+            }
+            else if(count == 1){
+                PostLikeEntity postLikeEntity = postLikeRepository.findPostLikeEntityByUserAndPost(userEntity, postEntity)
+                        .orElseThrow(() -> new BaseException(DATABASE_ERROR));
+                Status status = postLikeEntity.getStatus();
+
+                //삭제된 좋아요의 status 확인하기
+                if(status.equals(Status.INACTIVE)){
+                    postLikeEntity.setStatus(Status.ACTIVE);
+                    postEntity.increaseCountLike();
+
+                    postLikeRepository.save(postLikeEntity);
+                    postRepository.save(postEntity);
+                }
+                else if(status.equals(Status.ACTIVE)){
+                    throw new BaseException(ALREADY_POST_LIKE);
+                }
+                else{
+                    throw new BaseException(DATABASE_ERROR);
+                }
+            }
+            else {
+                throw new BaseException(DATABASE_ERROR);
+            }
+        }
+        else{
+            throw new BaseException(DELETED_POST);
+        }
+
     }
 
     @Transactional
@@ -324,8 +376,6 @@ public class CommunityService {
         else {
             throw new BaseException(DATABASE_ERROR);
         }
-
-
 
     }
 
@@ -475,8 +525,6 @@ public class CommunityService {
         }
 
     }
-
-
 
 }
 
