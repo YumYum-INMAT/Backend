@@ -122,10 +122,11 @@ public class CommunityController {
 
         if(parent_id == null){
             try{
-                String currentUsername = SecurityUtil.getCurrentUsername()
+                String currentUserId = SecurityUtil.getCurrentUserId()
                         .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+                Long userId = Long.parseLong(currentUserId);
 
-                return new BaseResponse<>(new GetCommentIdDto(communityService.createComment(currentUsername, post_id, commentDto)));
+                return new BaseResponse<>(new GetCommentIdDto(communityService.createComment(userId, post_id, commentDto)));
             } catch(BaseException e){
                 return new BaseResponse<>(e.getStatus());
             }
@@ -133,10 +134,11 @@ public class CommunityController {
         }
         else{
             try{
-                String currentUsername = SecurityUtil.getCurrentUsername()
+                String currentUserId = SecurityUtil.getCurrentUserId()
                         .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+                Long userId = Long.parseLong(currentUserId);
 
-                return new BaseResponse<>(new GetCommentIdDto(communityService.createReplyComment(currentUsername, post_id, parent_id, commentDto)));
+                return new BaseResponse<>(new GetCommentIdDto(communityService.createReplyComment(userId, post_id, parent_id, commentDto)));
             }
             catch (BaseException e){
                 return new BaseResponse<>(e.getStatus());

@@ -139,7 +139,7 @@ public class CommunityService {
         return communityRepository.checkPostStatus(post_id);
     }
 
-    @Transactional
+    /*@Transactional
     public Long createComment(String username, Long postId, CommentDto commentDto) throws BaseException {
        String status = checkPostStatus(postId);
         if(status.equals("ACTIVE")) {
@@ -156,33 +156,41 @@ public class CommunityService {
         else {
             throw new BaseException(DATABASE_ERROR);
        }
-    }
+    }*/
 
-    public void createComment2(String username, Long postId, CommentDto commentDto) throws BaseException{
-        UserEntity userEntityByUsername = userRepository.findUserEntityByUsernameAndStatus(username, Status.ACTIVE)
+    public Long createComment(Long userId, Long postId, CommentDto commentDto) throws BaseException{
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         PostEntity postEntityByPostId = postRepository.findById(postId)
-                .orElseThrow(() -> new BaseException(DATABASE_ERROR));
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
 
-        CommentEntity commentEntityByUserAndPost = new CommentEntity(
-                userEntityByUsername,
-                postEntityByPostId,
-                commentDto.getContents());
+        Status status = postEntityByPostId.getStatus();
+        if(status.equals(Status.ACTIVE)){
+            CommentEntity commentEntityByUserAndPost = new CommentEntity(
+                    userEntity,
+                    postEntityByPostId,
+                    commentDto.getContents(),
+                    postEntityByPostId.getCountParentComment()+1
+            );
 
-        if(postEntityByPostId.getStatus().equals(Status.ACTIVE)){
+            postEntityByPostId.increaseCountParentComment();
             postEntityByPostId.increaseCountComment();
 
             postRepository.save(postEntityByPostId);
             commentRepository.save(commentEntityByUserAndPost);
 
+            return commentEntityByUserAndPost.getId();
         }
-        else if(postEntityByPostId.getStatus().equals(Status.INACTIVE)){
-            throw new BaseException(UNEXPECTED_ERROR);
+        else if(status.equals(Status.INACTIVE)){
+            throw new BaseException(DELETED_POST);
+        }
+        else{
+            throw new BaseException(DATABASE_ERROR);
         }
     }
 
-    @Transactional
+    /*@Transactional
     public Long createReplyComment(String username, Long post_id, Long parent_id, CommentDto commentDto) throws BaseException{
         String status = checkPostStatus(post_id);
         if(status.equals("ACTIVE")) {
@@ -197,6 +205,41 @@ public class CommunityService {
             throw new BaseException(UNEXPECTED_ERROR);
         }
         else {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }*/
+
+    public Long createReplyComment(Long userId, Long postId, Long parentId, CommentDto commentDto) throws BaseException{
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        PostEntity postEntityByPostId = postRepository.findById(postId)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
+
+        Status status = postEntityByPostId.getStatus();
+        if(status.equals(Status.ACTIVE)){
+            CommentEntity commentEntityByUserAndPost = new CommentEntity(
+                    userEntity,
+                    postEntityByPostId,
+                    commentDto.getContents(),
+                    parentId,
+                    1
+            );
+
+            Integer groupNumber = commentRepository.findGroupNumberByParentId(parentId);
+            commentEntityByUserAndPost.setGroupNumber(groupNumber);
+
+            postEntityByPostId.increaseCountComment();
+
+            postRepository.save(postEntityByPostId);
+            commentRepository.save(commentEntityByUserAndPost);
+
+            return commentEntityByUserAndPost.getId();
+        }
+        else if(status.equals(Status.INACTIVE)){
+            throw new BaseException(DELETED_POST);
+        }
+        else{
             throw new BaseException(DATABASE_ERROR);
         }
     }
@@ -342,7 +385,7 @@ public class CommunityService {
                     throw new BaseException(ALREADY_POST_UNLIKE);
                 }
                 else if(status.equals(Status.ACTIVE)){
-                    postLikeEntity.setStatus(Status.ACTIVE);
+                    postLikeEntity.setStatus(Status.INACTIVE);
                     postEntity.decreaseCountLike();
 
                     postLikeRepository.save(postLikeEntity);

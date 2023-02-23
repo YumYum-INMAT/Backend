@@ -38,7 +38,10 @@ public class PostEntity extends BaseEntity {
 
     @Column(nullable = false, columnDefinition = "int default 0")
     private Integer countComment;
+
     //countParentComment
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private Integer countParentComment;
     /**
      * 비즈니스 로직
      */
@@ -57,6 +60,7 @@ public class PostEntity extends BaseEntity {
         this.topic = topic;
         this.contents = contents;
     }
+    public void increaseCountParentComment(){this.countParentComment++;}
 
 
     //좋아요 수 증가

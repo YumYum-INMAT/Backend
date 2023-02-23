@@ -55,9 +55,23 @@ public class CommentEntity extends BaseEntity {
     public void setStatus(Status status){
         this.status = status;
     }
-    public CommentEntity(UserEntity userEntity, PostEntity postEntity, String contents){
+    public void setGroupNumber(Integer groupNumber){
+        this.groupNumber = groupNumber;
+    }
+
+    public CommentEntity(UserEntity userEntity, PostEntity postEntity, String contents, Integer groupNumber){
         this.user = userEntity;
         this.post = postEntity;
+        this.contents = contents;
+        this.groupNumber = groupNumber;
+        this.commentLevel = 0;
+    }
+
+    public CommentEntity(UserEntity user, PostEntity post, String contents, Long parentId, Integer commentLevel){
+        this.user = user;
+        this.post = post;
+        this.parent_id = parentId;
+        this.commentLevel = commentLevel;
         this.contents = contents;
     }
 }
