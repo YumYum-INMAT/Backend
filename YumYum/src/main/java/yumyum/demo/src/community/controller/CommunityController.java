@@ -259,7 +259,7 @@ public class CommunityController {
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
             Long userId = Long.parseLong(currentUserId);
 
-            communityService.likeComment2(userId, comment_id);
+            communityService.likeComment(userId, comment_id);
 
             return new BaseResponse<>("댓글 좋아요를 했어요");
         }catch (BaseException e){
@@ -280,10 +280,11 @@ public class CommunityController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<String> unLikeComment( @PathVariable("comment_id")Long comment_id){
         try{
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            communityService.unLikeComment(currentUsername, comment_id);
+            communityService.unLikeComment(userId, comment_id);
 
             return new BaseResponse<>("댓글 좋아요를 취소했어요");
         }catch (BaseException e){

@@ -135,6 +135,7 @@ public enum BaseResponseStatus {
     FAILED_TO_LIKE_COMMENT(false,3520, "댓글 좋아요에 실패하였습니다"),
 
     COMMENT_LIKE_EMPTY(false,3600,"댓글 좋아요를 먼저 해야합니다."),
+    POST_LIKE_EMPTY(false,3605, "게시글 좋아요를 먼저 해야합니다"),
 
     DELETED_POST(false, 3700, "삭제된 게시글 입니다"),
     /**

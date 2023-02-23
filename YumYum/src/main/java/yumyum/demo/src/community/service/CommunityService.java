@@ -330,7 +330,7 @@ public class CommunityService {
             Long count = postLikeRepository.countPostLikeEntityByUserAndPost(userEntity, postEntity);
             //전에 좋아요를 했는지 확인하기
             if(count == 0){
-                throw new BaseException(DATABASE_ERROR);
+                throw new BaseException(POST_LIKE_EMPTY);
             }
             else if(count == 1) {
                 PostLikeEntity postLikeEntity = postLikeRepository.findPostLikeEntityByUserAndPost(userEntity, postEntity)
@@ -458,7 +458,7 @@ public class CommunityService {
 
     }
 
-    public void likeComment(String username, Long comment_id) throws BaseException {
+   /* public void likeComment(String username, Long comment_id) throws BaseException {
         Long user_id = communityRepository.findUserIdByUsername(username);
         Long commentLike = communityRepository.countCommentLike(user_id, comment_id);
 
@@ -490,9 +490,9 @@ public class CommunityService {
             else {
                 throw new BaseException(DATABASE_ERROR);
             }
-        }
+        }*/
 
-    public void likeComment2(Long userId, Long commentId) throws BaseException{
+    public void likeComment(Long userId, Long commentId) throws BaseException{
         UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
@@ -543,7 +543,7 @@ public class CommunityService {
     }
 
 
-    public void unLikeComment(String username, Long comment_id) throws BaseException{
+    /*public void unLikeComment(String username, Long comment_id) throws BaseException{
         Long user_id = communityRepository.findUserIdByUsername(username);
         Long commentLike = communityRepository.countCommentLike(user_id, comment_id);
 
@@ -570,8 +570,54 @@ public class CommunityService {
         else {
             throw new BaseException(DATABASE_ERROR);
         }
-    }
+    }*/
 
+    public void unLikeComment(Long userId, Long commentId) throws BaseException{
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        //삭제된 댓글인지 확인
+        CommentEntity commentEntity = commentRepository.findCommentEntityByIdAndStatus(commentId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_COMMENT));
+
+        Status status = commentEntity.getPost().getStatus();
+
+        //삭제된 게시글인지 확인
+        if(status.equals(Status.ACTIVE)){
+            Long count = commentLikeRepository.countCommentLikeEntityByUserAndComment(userEntity, commentEntity);
+
+            if(count == 0){
+                throw new BaseException(COMMENT_LIKE_EMPTY);
+            }
+            else if(count == 1){
+                CommentLikeEntity commentLikeEntity = commentLikeRepository.findCommentLikeEntityByUserAndComment(userEntity, commentEntity)
+                        .orElseThrow(() -> new BaseException(DATABASE_ERROR));
+
+                if(commentLikeEntity.getStatus().equals(Status.INACTIVE)){
+                    throw new BaseException(ALREADY_COMMENT_UNLIKE);
+                }
+                else if(commentLikeEntity.getStatus().equals(Status.ACTIVE)){
+                    commentLikeEntity.setStatus(Status.INACTIVE);
+                    commentEntity.decreaseCountLike();
+
+                    commentLikeRepository.save(commentLikeEntity);
+                    commentRepository.save(commentEntity);
+                }
+                else{
+                    throw new BaseException(DATABASE_ERROR);
+                }
+            }
+            else{
+                throw new BaseException(DATABASE_ERROR);
+            }
+        }
+        else if(status.equals(Status.INACTIVE)){
+            throw new BaseException(DELETED_POST);
+        }
+        else {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
 
     public List<CommunityMainDto> getCommunityScreen() throws BaseException{
         try{
