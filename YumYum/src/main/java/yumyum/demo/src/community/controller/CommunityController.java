@@ -323,10 +323,11 @@ public class CommunityController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<PostScreenDto> getPostScreen(@PathVariable("post_id") Long post_id){
         try{
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);;
 
-            return new BaseResponse<>(communityService.getPostScreen(post_id, currentUsername));
+            return new BaseResponse<>(communityService.getPostScreen(post_id, userId));
         }catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }

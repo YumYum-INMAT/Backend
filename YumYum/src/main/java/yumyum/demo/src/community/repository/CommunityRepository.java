@@ -301,7 +301,7 @@ public class CommunityRepository {
                         "                                                                     (\n" +
                         "                                                                      case\n" +
                         "                                                                      when timestampdiff(YEAR, C.created_at, now()) >= 1 then concat(timestampdiff(YEAR, C.created_at, now())  , '년 전')\n" +
-                        "                                                                      when timestampdiff(MONTH, C.created_at, now()) >= 1 then concat(timestampdiff(MONTH, C.created_at, now()) , '월 전')\n" +
+                        "                                                                      when timestampdiff(MONTH, C.created_at, now()) >= 1 then concat(timestampdiff(MONTH, C.created_at, now()) , '개월 전')\n" +
                         "                                                                      when timestampdiff(DAY, C.created_at, now()) >=1 then concat(timestampdiff(DAY, C.created_at, now()) , '일 전')\n" +
                         "                                                                      when timestampdiff(HOUR, C.created_at, now()) >=1 then concat(timestampdiff(HOUR, C.created_at, now()) , '시간 전')\n" +
                         "                                                                      when timestampdiff(MINUTE, C.created_at, now()) >= 1 then concat(timestampdiff(MINUTE, C.created_at, now()) , '분 전')\n" +
@@ -380,7 +380,7 @@ public class CommunityRepository {
                         "                                                      (\n" +
                         "                                                           case\n" +
                         "                                                            when timestampdiff(YEAR, P.created_at, now()) >= 1 then concat(timestampdiff(YEAR, P.created_at, now())  , '년 전')\n" +
-                        "                                                            when timestampdiff(MONTH, P.created_at, now()) >= 1 then concat(timestampdiff(MONTH, P.created_at, now()) , '월 전')\n" +
+                        "                                                            when timestampdiff(MONTH, P.created_at, now()) >= 1 then concat(timestampdiff(MONTH, P.created_at, now()) , '개월 전')\n" +
                         "                                                            when timestampdiff(DAY, P.created_at, now()) >=1 then concat(timestampdiff(DAY, P.created_at, now()) , '일 전')\n" +
                         "                                                            when timestampdiff(HOUR, P.created_at, now()) >=1 then concat(timestampdiff(HOUR, P.created_at, now()) , '시간 전')\n" +
                         "                                                            when timestampdiff(MINUTE, P.created_at, now()) >= 1 then concat(timestampdiff(MINUTE, P.created_at, now()) , '분 전')\n" +
@@ -434,7 +434,7 @@ public class CommunityRepository {
                         "                               (\n" +
                         "                                   case\n" +
                         "                                                           when timestampdiff(YEAR, P.created_at, now()) >= 1 then concat(timestampdiff(YEAR, P.created_at, now())  , '년 전')\n" +
-                        "                                                            when timestampdiff(MONTH, P.created_at, now()) >= 1 then concat(timestampdiff(MONTH, P.created_at, now()) , '월 전')\n" +
+                        "                                                            when timestampdiff(MONTH, P.created_at, now()) >= 1 then concat(timestampdiff(MONTH, P.created_at, now()) , '개월 전')\n" +
                         "                                                            when timestampdiff(DAY, P.created_at, now()) >=1 then concat(timestampdiff(DAY, P.created_at, now()) , '일 전')\n" +
                         "                                                            when timestampdiff(HOUR, P.created_at, now()) >=1 then concat(timestampdiff(HOUR, P.created_at, now()) , '시간 전')\n" +
                         "                                                            when timestampdiff(MINUTE, P.created_at, now()) >= 1 then concat(timestampdiff(MINUTE, P.created_at, now()) , '분 전')\n" +

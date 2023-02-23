@@ -631,10 +631,10 @@ public class CommunityService {
 
     }
 
-    public PostScreenDto getPostScreen(Long post_id, String username) {
-        Long user_id = communityRepository.findUserIdByUsername(username);
+    public PostScreenDto getPostScreen(Long postId, Long userId) {
+        //Long user_id = communityRepository.findUserIdByUsername(username);
         try {
-          List<CommentInfoDto> commentInfoDtoList = new ArrayList<>(communityRepository.getCommentInfo(post_id, user_id));
+          List<CommentInfoDto> commentInfoDtoList = new ArrayList<>(communityRepository.getCommentInfo(postId, userId));
           List<List<CommentInfoDto>> commentInfoDtoMultiList = new ArrayList<>();
 
           int i = 0;
@@ -658,15 +658,17 @@ public class CommunityService {
               commentInfoDtoMultiList.add(commentInfoDtoList1);
           }
 
-          PostScreenDto PostScreenDto = new PostScreenDto(communityRepository.getPostInfo(post_id, user_id), commentInfoDtoMultiList);
+          PostScreenDto PostScreenDto = new PostScreenDto(communityRepository.getPostInfo(postId, userId), commentInfoDtoMultiList);
 
             return PostScreenDto;
         }catch (Exception exception){
             throw new BaseException(DATABASE_ERROR);
         }
-
     }
 
+    /*public PostScreenDto getPostScreen(Long postId, Long userId){
+
+    }*/
 
 }
 

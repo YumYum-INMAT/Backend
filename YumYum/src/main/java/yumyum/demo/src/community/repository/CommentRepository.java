@@ -7,11 +7,12 @@ import yumyum.demo.src.community.entity.CommentEntity;
 import yumyum.demo.src.community.entity.PostEntity;
 import yumyum.demo.src.user.entity.UserEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
     CommentEntity findCommentEntityByUserAndPost(UserEntity userEntity, PostEntity postEntity);
-
     Optional<CommentEntity> findCommentEntityByIdAndStatus(Long commentId, Status status);
+
 }
