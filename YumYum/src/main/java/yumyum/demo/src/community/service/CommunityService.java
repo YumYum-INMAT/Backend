@@ -7,12 +7,10 @@ import yumyum.demo.config.BaseException;
 import yumyum.demo.config.Status;
 import yumyum.demo.src.community.dto.*;
 import yumyum.demo.src.community.entity.CommentEntity;
+import yumyum.demo.src.community.entity.CommentLikeEntity;
 import yumyum.demo.src.community.entity.PostEntity;
 import yumyum.demo.src.community.entity.PostLikeEntity;
-import yumyum.demo.src.community.repository.CommentRepository;
-import yumyum.demo.src.community.repository.CommunityRepository;
-import yumyum.demo.src.community.repository.PostLikeRepository;
-import yumyum.demo.src.community.repository.PostRepository;
+import yumyum.demo.src.community.repository.*;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.repository.UserRepository;
 
@@ -32,6 +30,7 @@ public class CommunityService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final PostLikeRepository postLikeRepository;
+    private final CommentLikeRepository commentLikeRepository;
 
     /*public void createPost(String username, PostDto postDto) throws BaseException {
        try {
@@ -288,7 +287,7 @@ public class CommunityService {
 
     }
 
-    @Transactional
+   /* @Transactional
     public void unLikePost(String username, Long post_id) throws BaseException{
         Long user_id = communityRepository.findUserIdByUsername(username);
         Long postLike = communityRepository.countPostLike(post_id, user_id);
@@ -317,7 +316,7 @@ public class CommunityService {
         else {
             throw new BaseException(DATABASE_ERROR);
         }
-    }
+    }*/
 
     public void unLikePost(Long userId, Long postId) {
         UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
@@ -493,6 +492,57 @@ public class CommunityService {
             }
         }
 
+    public void likeComment2(Long userId, Long commentId) throws BaseException{
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        //삭제된 댓글인지 확인
+        CommentEntity commentEntity = commentRepository.findCommentEntityByIdAndStatus(commentId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_COMMENT));
+
+        Status status = commentEntity.getPost().getStatus();
+        //삭제된 게시글인지 확인
+        if(status.equals(Status.ACTIVE)){
+            Long count = commentLikeRepository.countCommentLikeEntityByUserAndComment(userEntity, commentEntity);
+
+            if(count == 0){
+                CommentLikeEntity commentLikeEntity = new CommentLikeEntity(commentEntity, userEntity);
+                commentEntity.increaseCountLike();
+
+                commentLikeRepository.save(commentLikeEntity);
+                commentRepository.save(commentEntity);
+            }
+            else if(count == 1){
+                CommentLikeEntity commentLikeEntity = commentLikeRepository.findCommentLikeEntityByUserAndComment(userEntity, commentEntity)
+                        .orElseThrow(() -> new BaseException(DATABASE_ERROR));
+
+                if(commentLikeEntity.getStatus().equals(Status.INACTIVE)){
+                    commentLikeEntity.setStatus(Status.ACTIVE);
+                    commentEntity.increaseCountLike();
+
+                    commentLikeRepository.save(commentLikeEntity);
+                    commentRepository.save(commentEntity);
+                }
+                else if(commentLikeEntity.getStatus().equals(Status.ACTIVE)){
+                    throw new BaseException(ALREADY_COMMENT_LIKE);
+                }
+                else{
+                    throw new BaseException(DATABASE_ERROR);
+                }
+            }
+            else{
+                throw new BaseException(DATABASE_ERROR);
+            }
+        }
+        else if(status.equals(Status.INACTIVE)){
+            throw new BaseException(DELETED_POST);
+        }
+        else {
+            throw new BaseException(DATABASE_ERROR);
+        }
+    }
+
+
     public void unLikeComment(String username, Long comment_id) throws BaseException{
         Long user_id = communityRepository.findUserIdByUsername(username);
         Long commentLike = communityRepository.countCommentLike(user_id, comment_id);
@@ -570,6 +620,8 @@ public class CommunityService {
         }
 
     }
+
+
 }
 
 

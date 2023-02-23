@@ -259,7 +259,7 @@ public class CommunityController {
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
             Long userId = Long.parseLong(currentUserId);
 
-            communityService.likeComment(userId, comment_id);
+            communityService.likeComment2(userId, comment_id);
 
             return new BaseResponse<>("댓글 좋아요를 했어요");
         }catch (BaseException e){

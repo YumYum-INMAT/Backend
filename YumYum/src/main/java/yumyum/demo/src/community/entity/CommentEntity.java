@@ -44,6 +44,11 @@ public class CommentEntity extends BaseEntity {
     @Column(nullable = false, columnDefinition = "varchar(100)")
     private String contents;
 
+    //좋아요 수 증가
+    public void increaseCountLike(){this.countLike++;}
+    //좋아요 수 감소
+    public void decreaseCountLike(){this.countLike--;}
+
     public void setContents(String contents){
         this.contents = contents;
     }

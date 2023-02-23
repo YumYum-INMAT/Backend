@@ -132,6 +132,7 @@ public enum BaseResponseStatus {
 
     //댓글 관련 오류
     FAILED_TO_UPDATE_COMMENT(false,3510,"댓글 수정에 실패하였습니다."),
+    FAILED_TO_LIKE_COMMENT(false,3520, "댓글 좋아요에 실패하였습니다"),
 
     COMMENT_LIKE_EMPTY(false,3600,"댓글 좋아요를 먼저 해야합니다."),
 
