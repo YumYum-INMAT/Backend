@@ -48,4 +48,12 @@ public class RefreshTokenEntity extends BaseEntity {
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
+
+    public void updateUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+
+    public void updateDeviceIdentifier(String deviceIdentifier) {
+        this.deviceIdentifier = deviceIdentifier;
+    }
 }

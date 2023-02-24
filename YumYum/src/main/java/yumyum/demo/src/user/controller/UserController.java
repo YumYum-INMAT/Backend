@@ -36,10 +36,11 @@ public class UserController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<GetUserProfileDto> getUserProfile() {
         try {
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            return new BaseResponse<>(userService.getUserProfile(currentUsername));
+            return new BaseResponse<>(userService.getUserProfile(userId));
 
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
@@ -58,10 +59,11 @@ public class UserController {
     public BaseResponse<String> updateUserProfile(@Valid @RequestBody UpdateUserProfileDto userProfileDto) {
 
         try {
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            userService.updateUserProfile(currentUsername, userProfileDto);
+            userService.updateUserProfile(userId, userProfileDto);
 
             return new BaseResponse<>("프로필 변경 완료!");
 
@@ -82,10 +84,11 @@ public class UserController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<List<CommunityMainDto>> getPost(){
         try{
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            return new BaseResponse<>(userService.getPost(currentUsername));
+            return new BaseResponse<>(userService.getPost(userId));
         }catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
@@ -102,10 +105,11 @@ public class UserController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<List<MyReviewDto>> getMyReview(){
         try{
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            return new BaseResponse<>(userService.getMyReview(currentUsername));
+            return new BaseResponse<>(userService.getMyReview(userId));
         }catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
@@ -122,10 +126,11 @@ public class UserController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<List<MyHeartRestaurantDto>> getMyHeartRestaurant(){
         try{
-            String currentUsername = SecurityUtil.getCurrentUsername()
+            String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
 
-            return new BaseResponse<>(userService.getMyHeartRestaurant(currentUsername));
+            return new BaseResponse<>(userService.getMyHeartRestaurant(userId));
         }catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }

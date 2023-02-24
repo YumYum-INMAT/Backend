@@ -63,7 +63,7 @@ public class RestaurantJdbcTempRepository {
         );
     }*/
 
-    public List<RestaurantDto> getSearchResult1(String username, String query) {
+    public List<RestaurantDto> getSearchResult1(Long userId, String query) {
     return this.jdbcTemplate.query(
             "select distinct r.restaurant_id, r.profile_img_url, r.restaurant_name, r.address, r.average_star, r.count_review, r.average_price, r.complexity, r.restaurant_type,\n" +
                     "    exists(select h2.heart_id from heart h2 where h2.status='ACTIVE' and h2.restaurant_id = r.restaurant_id and h2.user_id= ?) as user_heart\n" +
@@ -84,11 +84,11 @@ public class RestaurantJdbcTempRepository {
                         rs.getString("r.restaurant_type"),
                         rs.getBoolean("user_heart")
                 );
-            }, findUserIdByUsername(username), query, query
+            }, userId, query, query
     );
     }
 
-    public List<RestaurantDto> getSearchResult2(String username, String query) {
+    public List<RestaurantDto> getSearchResult2(Long userId, String query) {
         return this.jdbcTemplate.query(
                 "select distinct r.restaurant_id, r.profile_img_url, r.restaurant_name, r.address, r.average_star, r.count_review, r.average_price, r.complexity, r.restaurant_type,\n" +
                         "    exists(select h2.heart_id from heart h2 where h2.status='ACTIVE' and h2.restaurant_id = r.restaurant_id and h2.user_id= ?) as user_heart\n" +
@@ -109,11 +109,11 @@ public class RestaurantJdbcTempRepository {
                             rs.getString("r.restaurant_type"),
                             rs.getBoolean("user_heart")
                     );
-                }, findUserIdByUsername(username), query, query
+                }, userId, query, query
         );
     }
 
-    public List<RestaurantDto> getSearchResult3(String username, String query) {
+    public List<RestaurantDto> getSearchResult3(Long userId, String query) {
         return this.jdbcTemplate.query(
                 "select distinct r.restaurant_id, r.profile_img_url, r.restaurant_name, r.address, r.average_star, r.count_review, r.average_price, r.complexity, r.restaurant_type,\n" +
                         "    exists(select h2.heart_id from heart h2 where h2.status='ACTIVE' and h2.restaurant_id = r.restaurant_id and h2.user_id= ?) as user_heart\n" +
@@ -134,11 +134,11 @@ public class RestaurantJdbcTempRepository {
                             rs.getString("r.restaurant_type"),
                             rs.getBoolean("user_heart")
                     );
-                }, findUserIdByUsername(username), query, query
+                }, userId, query, query
         );
     }
 
-    public List<RestaurantDto> getSearchResult4(String username, String query) {
+    public List<RestaurantDto> getSearchResult4(Long userId, String query) {
         return this.jdbcTemplate.query(
                 "select distinct r.restaurant_id, r.profile_img_url, r.restaurant_name, r.address, r.average_star, r.count_review, r.average_price, r.complexity, r.restaurant_type,\n" +
                         "    exists(select h2.heart_id from heart h2 where h2.status='ACTIVE' and h2.restaurant_id = r.restaurant_id and h2.user_id= ?) as user_heart\n" +
@@ -159,11 +159,11 @@ public class RestaurantJdbcTempRepository {
                             rs.getString("r.restaurant_type"),
                             rs.getBoolean("user_heart")
                     );
-                }, findUserIdByUsername(username), query, query
+                }, userId, query, query
         );
     }
 
-    public List<RestaurantDto> getSearchResult5(String username, String query) {
+    public List<RestaurantDto> getSearchResult5(Long userId, String query) {
         return this.jdbcTemplate.query(
                 "select distinct r.restaurant_id, r.profile_img_url, r.restaurant_name, r.address, r.average_star, r.count_review, r.average_price, r.complexity, r.restaurant_type,\n" +
                         "    exists(select h2.heart_id from heart h2 where h2.status='ACTIVE' and h2.restaurant_id = r.restaurant_id and h2.user_id= ?) as user_heart\n" +
@@ -184,7 +184,7 @@ public class RestaurantJdbcTempRepository {
                             rs.getString("r.restaurant_type"),
                             rs.getBoolean("user_heart")
                     );
-                }, findUserIdByUsername(username), query, query
+                }, userId, query, query
         );
     }
 

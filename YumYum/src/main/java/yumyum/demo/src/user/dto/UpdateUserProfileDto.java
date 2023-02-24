@@ -16,8 +16,8 @@ import javax.validation.constraints.Size;
 public class UpdateUserProfileDto {
 
     @Size(min = 1, message = "null 값 또는 URL을 입력해주세요") // NULL값 허용, But "", " " 등 빈칸 허용X
-    @Pattern(regexp = "^((http|https)://)?(www.)?([a-zA-Z0-9]+)\\.[a-z]+([a-zA-Z0-9.?#]+)?", message = "올바른 URL이 아닙니다.")
-    @ApiModelProperty(example = "www.test.test")
+    @Pattern(regexp = "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_\\+.~#()?&//=]*)", message = "올바른 URL이 아닙니다.")
+    @ApiModelProperty(example = "https://test.jpg")
     private String profileImgUrl;
 
     @NotBlank(message = "닉네임을 입력해주세요.")

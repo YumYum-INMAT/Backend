@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import yumyum.demo.config.BaseEntity;
+import yumyum.demo.config.Status;
 import yumyum.demo.src.user.entity.UserEntity;
 
 import javax.persistence.*;
@@ -38,9 +39,29 @@ public class PostEntity extends BaseEntity {
     @Column(nullable = false, columnDefinition = "int default 0")
     private Integer countComment;
 
+    //countParentComment
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private Integer countParentComment;
     /**
      * 비즈니스 로직
      */
+
+
+    public PostEntity(UserEntity userEntity, String imgUrl, String topic, String contents){
+        this.user = userEntity;
+        this.imgUrl = imgUrl;
+        this.topic = topic;
+        this.contents = contents;
+    }
+
+    public void setStatus(Status status){this.status = status;}
+    public void updatePost(String imgUrl, String topic, String contents){
+        this.imgUrl = imgUrl;
+        this.topic = topic;
+        this.contents = contents;
+    }
+    public void increaseCountParentComment(){this.countParentComment++;}
+
 
     //좋아요 수 증가
     public void increaseCountLike() {

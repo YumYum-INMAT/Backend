@@ -72,6 +72,11 @@ public enum BaseResponseStatus {
     COMMENT_EMPTY_CONTENTS(false, 2600, "내용을 입력해주세요."),
     COMMENT_OVER_LENGTH_CONTENTS(false, 2605, "내용은 최대 100자까지 입력해주세요."),
 
+    INVALID_ACCESS_KAKAO(false, 2700, "카카오 로그인에 실패하였습니다."),
+    INVALID_ACCESS_GOOGLE(false, 2701, "구글 로그인에 실패하였습니다."),
+    INVALID_ACCESS_NAVER(false, 2702, "네이버 로그인에 실패하였습니다."),
+    INVALID_ACCESS_APPLE(false, 2703, "애플 로그인에 실패하였습니다."),
+
     /**
      * 3000 : Response 오류
      */
@@ -120,13 +125,19 @@ public enum BaseResponseStatus {
     FAILED_TO_REPORT_POST(false,3210,"게시글 신고에 실패하였습니다."),
     FAILED_TO_REPORT_COMMENT(false,3220,"댓글 신고에 실패하였습니다."),
 
+    NOT_ACTIVATED_POST(false,3230,"유효한 게시글이 아닙니다."),
+    NOT_ACTIVATED_COMMENT(false,3235, "유요한 댓글이 아닙니다."),
+
     INVALID_KAKAO_USER(false,3500,"잘못된 카카오 로그인입니다."),
 
     //댓글 관련 오류
     FAILED_TO_UPDATE_COMMENT(false,3510,"댓글 수정에 실패하였습니다."),
+    FAILED_TO_LIKE_COMMENT(false,3520, "댓글 좋아요에 실패하였습니다"),
 
     COMMENT_LIKE_EMPTY(false,3600,"댓글 좋아요를 먼저 해야합니다."),
+    POST_LIKE_EMPTY(false,3605, "게시글 좋아요를 먼저 해야합니다"),
 
+    DELETED_POST(false, 3700, "삭제된 게시글 입니다"),
     /**
      * 4000 : Database, Server 오류
      */

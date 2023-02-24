@@ -11,8 +11,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import yumyum.demo.jwt.*;
-
-import static org.springframework.security.config.Customizer.withDefaults;
+import yumyum.demo.oauth.CustomOAuth2UserService;
+import yumyum.demo.oauth.OAuth2AuthenticationFailureHandler;
+import yumyum.demo.oauth.OAuth2AuthenticationSuccessHandler;
 
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -22,6 +23,9 @@ public class SecurityConfig {
     private final TokenProvider tokenProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -50,20 +54,33 @@ public class SecurityConfig {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
+
+
                 //토큰이 없어도 사용가능한 URI에 대한 처리
                 .and()
                 .authorizeRequests()
                 .antMatchers("/auth/signup").permitAll()
-                .antMatchers("/auth/login").permitAll()
+                .antMatchers("/auth/login/**").permitAll()
                 .antMatchers("/auth/login-anonymous").permitAll()
                 .antMatchers("/auth/username").permitAll()
                 .antMatchers("/auth/nickname").permitAll()
                 .antMatchers("/auth/issue").permitAll()
+                .antMatchers("/auth/oauth2").permitAll()
                 .antMatchers(HttpMethod.GET,"/swagger-resources/**").permitAll()
                 .antMatchers(HttpMethod.GET,"/swagger-ui/**").permitAll()
                 .antMatchers(HttpMethod.GET,"/v2/api-docs").permitAll()
-                .anyRequest().authenticated();
+                .anyRequest().authenticated()
 
+                .and()
+                .oauth2Login()
+                .authorizationEndpoint()
+                .baseUri("/oauth2/authorize")
+                .and()
+                .userInfoEndpoint().userService(customOAuth2UserService)
+
+                .and()
+                .successHandler(oAuth2AuthenticationSuccessHandler)
+                .failureHandler(oAuth2AuthenticationFailureHandler);
 
         return http.build();
     }

@@ -19,11 +19,9 @@ import lombok.Setter;
 public class GetUserProfileDto {
     private Long userId;
 
-    private String username;
-
     private String email;
 
-    private String phoneNumber;
+    private String profileImgUrl;
 
     private String nickName;
 
