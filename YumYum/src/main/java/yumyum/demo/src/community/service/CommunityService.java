@@ -110,7 +110,7 @@ public class CommunityService {
             } else {
                 throw new BaseException(FAILED_TO_DELETE_POST);
             }
-        }
+    }
 
 
     public String checkPostStatus(Long post_id){
@@ -140,32 +140,23 @@ public class CommunityService {
         UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        PostEntity postEntityByPostId = postRepository.findById(postId)
+        PostEntity postEntityByPostId = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
 
-        Status status = postEntityByPostId.getStatus();
-        if(status.equals(Status.ACTIVE)){
-            CommentEntity commentEntityByUserAndPost = new CommentEntity(
-                    userEntity,
-                    postEntityByPostId,
-                    commentDto.getContents(),
-                    postEntityByPostId.getCountParentComment()+1
-            );
+        CommentEntity commentEntityByUserAndPost = new CommentEntity(
+                userEntity,
+                postEntityByPostId,
+                commentDto.getContents(),
+                postEntityByPostId.getCountParentComment()+1
+        );
 
-            postEntityByPostId.increaseCountParentComment();
-            postEntityByPostId.increaseCountComment();
+        postEntityByPostId.increaseCountParentComment();
+        postEntityByPostId.increaseCountComment();
 
-            postRepository.save(postEntityByPostId);
-            commentRepository.save(commentEntityByUserAndPost);
+        postRepository.save(postEntityByPostId);
+        commentRepository.save(commentEntityByUserAndPost);
 
-            return commentEntityByUserAndPost.getId();
-        }
-        else if(status.equals(Status.INACTIVE)){
-            throw new BaseException(DELETED_POST);
-        }
-        else{
-            throw new BaseException(DATABASE_ERROR);
-        }
+        return commentEntityByUserAndPost.getId();
     }
 
     /*@Transactional
@@ -191,36 +182,28 @@ public class CommunityService {
         UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        PostEntity postEntityByPostId = postRepository.findById(postId)
+        PostEntity postEntityByPostId = postRepository.findPostEntityByIdAndStatus(postId,Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
 
-        Status status = postEntityByPostId.getStatus();
-        if(status.equals(Status.ACTIVE)){
-            CommentEntity commentEntityByUserAndPost = new CommentEntity(
-                    userEntity,
-                    postEntityByPostId,
-                    commentDto.getContents(),
-                    parentId,
-                    1
-            );
+        CommentEntity commentEntityByUserAndPost = new CommentEntity(
+                userEntity,
+                postEntityByPostId,
+                commentDto.getContents(),
+                parentId,
+                1
+        );
 
-            Integer groupNumber = commentRepository.findGroupNumberByParentId(parentId);
-            commentEntityByUserAndPost.setGroupNumber(groupNumber);
+        Integer groupNumber = commentRepository.findGroupNumberByParentId(parentId);
+        commentEntityByUserAndPost.setGroupNumber(groupNumber);
 
-            postEntityByPostId.increaseCountComment();
+        postEntityByPostId.increaseCountComment();
 
-            postRepository.save(postEntityByPostId);
-            commentRepository.save(commentEntityByUserAndPost);
+        postRepository.save(postEntityByPostId);
+        commentRepository.save(commentEntityByUserAndPost);
 
-            return commentEntityByUserAndPost.getId();
-        }
-        else if(status.equals(Status.INACTIVE)){
-            throw new BaseException(DELETED_POST);
-        }
-        else{
-            throw new BaseException(DATABASE_ERROR);
-        }
+        return commentEntityByUserAndPost.getId();
     }
+
 
    /* @Transactional
     public void likePost(String username, Long post_id) throws BaseException {
@@ -267,42 +250,40 @@ public class CommunityService {
         PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
 
-        //삭제된 게시글인지 확인하기
 
-            Long count = postLikeRepository.countPostLikeEntityByUserAndPost(userEntity, postEntity);
-            //전에 좋아요를 했는지 확인하기
-            if(count == 0){
-                PostLikeEntity postLikeEntity = new PostLikeEntity(postEntity, userEntity);
+
+        Long count = postLikeRepository.countPostLikeEntityByUserAndPost(userEntity, postEntity);
+        //전에 좋아요를 했는지 확인하기
+        if(count == 0){
+            PostLikeEntity postLikeEntity = new PostLikeEntity(postEntity, userEntity);
+            postEntity.increaseCountLike();
+
+            postLikeRepository.save(postLikeEntity);
+            postRepository.save(postEntity);
+        }
+        else if(count == 1){
+            PostLikeEntity postLikeEntity = postLikeRepository.findPostLikeEntityByUserAndPost(userEntity, postEntity)
+                    .orElseThrow(() -> new BaseException(DATABASE_ERROR));
+            Status status = postLikeEntity.getStatus();
+
+                //삭제된 좋아요의 status 확인하기
+            if(status.equals(Status.INACTIVE)){
+                postLikeEntity.setStatus(Status.ACTIVE);
                 postEntity.increaseCountLike();
 
                 postLikeRepository.save(postLikeEntity);
                 postRepository.save(postEntity);
             }
-            else if(count == 1){
-                PostLikeEntity postLikeEntity = postLikeRepository.findPostLikeEntityByUserAndPost(userEntity, postEntity)
-                        .orElseThrow(() -> new BaseException(DATABASE_ERROR));
-                Status status = postLikeEntity.getStatus();
-
-                //삭제된 좋아요의 status 확인하기
-                if(status.equals(Status.INACTIVE)){
-                    postLikeEntity.setStatus(Status.ACTIVE);
-                    postEntity.increaseCountLike();
-
-                    postLikeRepository.save(postLikeEntity);
-                    postRepository.save(postEntity);
-                }
-                else if(status.equals(Status.ACTIVE)){
-                    throw new BaseException(ALREADY_POST_LIKE);
-                }
-                else{
-                    throw new BaseException(DATABASE_ERROR);
-                }
+            else if(status.equals(Status.ACTIVE)){
+                throw new BaseException(ALREADY_POST_LIKE);
             }
-            else {
+            else{
                 throw new BaseException(DATABASE_ERROR);
             }
-
-
+        }
+        else {
+            throw new BaseException(DATABASE_ERROR);
+        }
     }
 
    /* @Transactional
@@ -343,37 +324,34 @@ public class CommunityService {
         PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
 
-            Long count = postLikeRepository.countPostLikeEntityByUserAndPost(userEntity, postEntity);
-            //전에 좋아요를 했는지 확인하기
-            if(count == 0){
-                throw new BaseException(POST_LIKE_EMPTY);
+        Long count = postLikeRepository.countPostLikeEntityByUserAndPost(userEntity, postEntity);
+        //전에 좋아요를 했는지 확인하기
+        if(count == 0){
+            throw new BaseException(POST_LIKE_EMPTY);
+        }
+        else if(count == 1) {
+            PostLikeEntity postLikeEntity = postLikeRepository.findPostLikeEntityByUserAndPost(userEntity, postEntity)
+                    .orElseThrow(() -> new BaseException(DATABASE_ERROR));
+            Status status = postLikeEntity.getStatus();
+
+            //삭제된 좋아요의 status 확인하기
+            if(status.equals(Status.INACTIVE)){
+                throw new BaseException(ALREADY_POST_UNLIKE);
             }
-            else if(count == 1) {
-                PostLikeEntity postLikeEntity = postLikeRepository.findPostLikeEntityByUserAndPost(userEntity, postEntity)
-                        .orElseThrow(() -> new BaseException(DATABASE_ERROR));
-                Status status = postLikeEntity.getStatus();
+            else if(status.equals(Status.ACTIVE)){
+                postLikeEntity.setStatus(Status.INACTIVE);
+                postEntity.decreaseCountLike();
 
-                //삭제된 좋아요의 status 확인하기
-                if(status.equals(Status.INACTIVE)){
-                    throw new BaseException(ALREADY_POST_UNLIKE);
-                }
-                else if(status.equals(Status.ACTIVE)){
-                    postLikeEntity.setStatus(Status.INACTIVE);
-                    postEntity.decreaseCountLike();
-
-                    postLikeRepository.save(postLikeEntity);
-                    postRepository.save(postEntity);
-                }
-                else{
-                    throw new BaseException(DATABASE_ERROR);
-                }
+                postLikeRepository.save(postLikeEntity);
+                postRepository.save(postEntity);
             }
-            else {
-                throw new BaseException(DELETED_POST);
+            else{
+                throw new BaseException(DATABASE_ERROR);
             }
-
-
-
+        }
+        else {
+            throw new BaseException(DELETED_POST);
+        }
     }
 
    /* @Transactional
