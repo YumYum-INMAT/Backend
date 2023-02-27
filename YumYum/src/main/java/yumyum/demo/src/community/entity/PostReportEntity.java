@@ -18,7 +18,7 @@ import yumyum.demo.src.user.entity.UserEntity;
 
 @Entity
 @Getter
-@Table(name = "reviewReport")
+@Table(name = "postReport")
 @NoArgsConstructor
 @AllArgsConstructor
 @DynamicInsert
