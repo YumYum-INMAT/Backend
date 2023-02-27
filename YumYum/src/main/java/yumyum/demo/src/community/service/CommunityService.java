@@ -73,15 +73,10 @@ public class CommunityService {
         UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        PostEntity postEntity = postRepository.findById(postId)
+        PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
 
-        Status status = postEntity.getStatus();
-        //삭제된 게시글인지 확인하기
-        if(status.equals(Status.INACTIVE)){
-            throw new BaseException(DELETED_POST);
-        }
-        else if(status.equals(Status.ACTIVE)) {
+
             //게시글 작성자와 내가 동일인물인지 비교하기
             if (postEntity.getUser().equals(userEntity)) {
                 try {
@@ -94,23 +89,16 @@ public class CommunityService {
             } else {
                 throw new BaseException(FAILED_TO_UPDATE_POST);
             }
-        }
-        else{
-            throw new BaseException(DATABASE_ERROR);
-        }
-
     }
+
 
     public void deletePost(Long userId, Long postId) {
         UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        PostEntity postEntity = postRepository.findById(postId)
+        PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(DATABASE_ERROR));
 
-        Status status = postEntity.getStatus();
-
-        if (status.equals(Status.ACTIVE)) {
             if (postEntity.getUser().equals(userEntity)) {
                 try {
                     postEntity.setStatus(Status.INACTIVE);
@@ -123,13 +111,7 @@ public class CommunityService {
                 throw new BaseException(FAILED_TO_DELETE_POST);
             }
         }
-        else if(status.equals(Status.INACTIVE)){
-            throw new BaseException(DELETED_POST);
-        }
-        else {
-            throw new BaseException(DATABASE_ERROR);
-        }
-    }
+
 
     public String checkPostStatus(Long post_id){
         return communityRepository.checkPostStatus(post_id);
@@ -282,11 +264,11 @@ public class CommunityService {
         UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        PostEntity postEntity = postRepository.findById(postId)
+        PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
 
         //삭제된 게시글인지 확인하기
-        if(postEntity.getStatus().equals(Status.ACTIVE)){
+
             Long count = postLikeRepository.countPostLikeEntityByUserAndPost(userEntity, postEntity);
             //전에 좋아요를 했는지 확인하기
             if(count == 0){
@@ -319,10 +301,7 @@ public class CommunityService {
             else {
                 throw new BaseException(DATABASE_ERROR);
             }
-        }
-        else{
-            throw new BaseException(DELETED_POST);
-        }
+
 
     }
 
@@ -361,11 +340,9 @@ public class CommunityService {
         UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        PostEntity postEntity = postRepository.findById(postId)
+        PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
 
-        //삭제된 게시글인지 확인하기
-        if(postEntity.getStatus().equals(Status.ACTIVE)){
             Long count = postLikeRepository.countPostLikeEntityByUserAndPost(userEntity, postEntity);
             //전에 좋아요를 했는지 확인하기
             if(count == 0){
@@ -394,10 +371,7 @@ public class CommunityService {
             else {
                 throw new BaseException(DELETED_POST);
             }
-        }
-        else{
-            throw new BaseException(DELETED_POST);
-        }
+
 
 
     }
