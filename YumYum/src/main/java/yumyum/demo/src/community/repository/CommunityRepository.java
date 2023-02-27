@@ -470,6 +470,41 @@ public class CommunityRepository {
         );
     }
 
+    public List<SearchResultScreenDto> getSearchResult(String query) {
+        return this.jdbcTemplate.query(
+                "select P.post_id, P.topic, P.contents, P.img_url, P.count_like, P.count_comment, U.nick_name,\n" +
+                        "                               (\n" +
+                        "                                   case\n" +
+                        "                                                           when timestampdiff(YEAR, P.created_at, now()) >= 1 then concat(timestampdiff(YEAR, P.created_at, now())  , '년 전')\n" +
+                        "                                                            when timestampdiff(MONTH, P.created_at, now()) >= 1 then concat(timestampdiff(MONTH, P.created_at, now()) , '개월 전')\n" +
+                        "                                                            when timestampdiff(DAY, P.created_at, now()) >=1 then concat(timestampdiff(DAY, P.created_at, now()) , '일 전')\n" +
+                        "                                                            when timestampdiff(HOUR, P.created_at, now()) >=1 then concat(timestampdiff(HOUR, P.created_at, now()) , '시간 전')\n" +
+                        "                                                            when timestampdiff(MINUTE, P.created_at, now()) >= 1 then concat(timestampdiff(MINUTE, P.created_at, now()) , '분 전')\n" +
+                        "                                                            ELSE concat(timestampdiff(SECOND, P.created_at, now()) , '초 전')\n" +
+                        "                                                               END\n" +
+                        "                    \n" +
+                        "                                   ) as created_time\n" +
+                        "                                    from post P\n" +
+                        "                                    inner JOIN user U on U.user_id = P.user_id\n" +
+                        "                                    where P.status = 'ACTIVE' and (P.topic LIKE concat('%', ? ,'%') or P.contents LIKE concat('%', ? ,'%'))\n" +
+                        "                                    ORDER BY P.created_at desc; ",
+                (rs, rowNum) -> {
+                    SearchResultScreenDto searchResultScreenDto = new SearchResultScreenDto(
+                            rs.getString("U.nick_name"),
+                            rs.getLong("P.post_id"),
+                            rs.getString("P.topic"),
+                            rs.getString("P.contents"),
+                            rs.getString("P.img_url"),
+                            rs.getLong("P.count_like"),
+                            rs.getLong("P.count_comment"),
+                            rs.getString("created_time")
+                    );
+
+                    return searchResultScreenDto;
+                }, query, query
+
+        );
+    }
 }
 
 /*

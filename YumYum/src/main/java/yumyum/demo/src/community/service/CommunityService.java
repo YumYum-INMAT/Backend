@@ -1,15 +1,11 @@
 package yumyum.demo.src.community.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.Status;
 import yumyum.demo.src.community.dto.*;
-import yumyum.demo.src.community.entity.CommentEntity;
-import yumyum.demo.src.community.entity.CommentLikeEntity;
-import yumyum.demo.src.community.entity.PostEntity;
-import yumyum.demo.src.community.entity.PostLikeEntity;
+import yumyum.demo.src.community.entity.*;
 import yumyum.demo.src.community.repository.*;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.repository.UserRepository;
@@ -709,10 +705,41 @@ public class CommunityService {
         }
     }
 
-    /*public PostScreenDto getPostScreen(Long postId, Long userId){
 
+    public List<SearchResultScreenDto> getSearchResult(String query) {
+
+        //검색 결과 내보내기
+        return communityRepository.getSearchResult(query);
+    }
+
+
+    /*public List<CommunityScreenDto> getSearchResult(Long userId, String query, Integer sort) {
+        //community_search에 값추가
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        CommunitySearchEntity communitySearchEntity = new CommunitySearchEntity(query, userEntity);
+        communitySearchRepository.save(communitySearchEntity);
+
+        //검색 결과 보내기
+        List<CommunityScreenDto> communityScreenDtoList = new ArrayList<>();
+        
+        List<PostEntity> postEntityList = postRepository.findAllByContentsAndTopicContainingOrderByCreatedAtDesc(query);
+        for(PostEntity postEntity : postEntityList ){
+            CommunityScreenDto communityScreenDto = new CommunityScreenDto(
+                    userEntity.getNickName(),
+                    postEntity.getId(),
+                    postEntity.getTopic(),
+                    postEntity.getContents(),
+                    postEntity.getImgUrl(),
+                    postEntity.getCountLike(),
+                    postEntity.getCountComment(),
+                    postEntity.getCreatedAt()
+            );
+            
+        }
     }*/
-
+    
 }
 
 

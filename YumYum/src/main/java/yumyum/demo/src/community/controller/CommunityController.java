@@ -4,9 +4,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
@@ -15,9 +13,7 @@ import yumyum.demo.src.community.service.CommunityService;
 import yumyum.demo.utils.SecurityUtil;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static yumyum.demo.config.BaseResponseStatus.*;
 
@@ -336,7 +332,23 @@ public class CommunityController {
 
     }
 
-
+    @ApiOperation(value = "음식점 검색창 결과 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 4000, message = "데이터베이스 연결에 실패하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @GetMapping("/search/result")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<List<SearchResultScreenDto>> getSearchResult(@RequestParam(value = "query")String query){
+        try {
+            return new BaseResponse<>(communityService.getSearchResult(query));
+        } catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
 
 
 
