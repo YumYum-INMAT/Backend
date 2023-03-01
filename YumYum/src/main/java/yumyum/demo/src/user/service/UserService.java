@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponseStatus;
+import yumyum.demo.config.LogInType;
 import yumyum.demo.config.Status;
 import yumyum.demo.src.community.dto.CommunityMainDto;
 import yumyum.demo.src.restaurant.entity.ReviewEntity;
@@ -12,7 +13,9 @@ import yumyum.demo.src.restaurant.entity.ReviewImgEntity;
 import yumyum.demo.src.restaurant.repository.ReviewRepository;
 import yumyum.demo.src.user.dto.*;
 import yumyum.demo.src.user.entity.UserEntity;
+import yumyum.demo.src.user.entity.UserReportEntity;
 import yumyum.demo.src.user.repository.UserJdbcTempRepository;
+import yumyum.demo.src.user.repository.UserReportRepository;
 import yumyum.demo.src.user.repository.UserRepository;
 
 import java.util.List;
@@ -26,6 +29,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
+    private final UserReportRepository userReportRepository;
     private final UserJdbcTempRepository userJdbcTempRepository;
 
     public GetUserProfileDto getUserProfile(Long userId) throws BaseException {
@@ -109,5 +113,21 @@ public class UserService {
         }catch (Exception exception){
             throw new BaseException(DATABASE_ERROR);
         }
+    }
+
+    public void reportUser(Long reportingUserId, Long reportedUserId, String contents) throws BaseException {
+        UserEntity reportingUser = userRepository.findUserEntityByIdAndStatus(reportingUserId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        UserEntity reportedUser = userRepository.findUserEntityByIdAndStatus(reportedUserId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        if(reportedUser.getLogInType().equals(LogInType.GUEST)) {
+            throw new BaseException(NOT_ACTIVATED_USER);
+        }
+
+        UserReportEntity userReportEntity = new UserReportEntity(reportingUser, reportedUser, contents);
+
+        userReportRepository.save(userReportEntity);
     }
 }
