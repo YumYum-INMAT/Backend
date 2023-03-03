@@ -33,8 +33,8 @@ public class CommentReportEntity extends BaseEntity {
     private UserEntity reportingUserEntity; // 신고하는 사용자
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reported_user_id", referencedColumnName = "user_id")
-    private UserEntity reportedUserEntity; // 신고 당한 사용자
+    @JoinColumn(name = "comment_id")
+    private CommentEntity commentEntity; // 신고 당한 댓글
 
     @Column(nullable = false)
     private String contents; // 신고 내용
