@@ -9,6 +9,7 @@ import yumyum.demo.config.Status;
 import yumyum.demo.src.community.dto.*;
 import yumyum.demo.src.community.entity.CommentEntity;
 import yumyum.demo.src.community.entity.CommentLikeEntity;
+import yumyum.demo.src.community.entity.CommentReportEntity;
 import yumyum.demo.src.community.entity.PostEntity;
 import yumyum.demo.src.community.entity.PostLikeEntity;
 import yumyum.demo.src.community.entity.PostReportEntity;
@@ -725,6 +726,17 @@ public class CommunityService {
         postReportRepository.save(postReportEntity);
     }
 
+    public void commentReport(Long commentId, Long userId, String contents) {
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        CommentEntity commentEntity = commentRepository.findCommentEntityByIdAndStatus(commentId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_COMMENT));
+
+        CommentReportEntity commentReportEntity = new CommentReportEntity(userEntity, commentEntity, contents);
+
+        commentReportRepository.save(commentReportEntity);
+    }
 }
 
 

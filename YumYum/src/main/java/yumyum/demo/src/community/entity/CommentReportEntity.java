@@ -20,7 +20,6 @@ import yumyum.demo.src.user.entity.UserEntity;
 @Getter
 @Table(name = "commentReport")
 @NoArgsConstructor
-@AllArgsConstructor
 @DynamicInsert
 public class CommentReportEntity extends BaseEntity {
     @Id
@@ -38,4 +37,10 @@ public class CommentReportEntity extends BaseEntity {
 
     @Column(nullable = false)
     private String contents; // 신고 내용
+
+    public CommentReportEntity(UserEntity reportingUserEntity, CommentEntity commentEntity, String contents) {
+        this.reportingUserEntity = reportingUserEntity;
+        this.commentEntity = commentEntity;
+        this.contents = contents;
+    }
 }

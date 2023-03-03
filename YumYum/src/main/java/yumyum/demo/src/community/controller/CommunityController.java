@@ -359,4 +359,28 @@ public class CommunityController {
             return new BaseResponse<>(e.getStatus());
         }
     }
+
+    @ApiOperation(value = "게시글 댓글 신고 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @PostMapping("/{commentId}/report")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<String> commentReport(@PathVariable("commentId") Long commentId,
+                                              @Valid @RequestBody CommentReportDto commentReportDto){
+        try{
+            String currentUserId = SecurityUtil.getCurrentUserId()
+                    .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
+
+            communityService.commentReport(commentId, userId, commentReportDto.getContents());
+
+            return new BaseResponse<>("게시글 신고 성공!");
+        }catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
 }
