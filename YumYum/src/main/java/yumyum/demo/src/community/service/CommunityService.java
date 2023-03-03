@@ -4,12 +4,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import yumyum.demo.config.BaseException;
+import yumyum.demo.config.LogInType;
 import yumyum.demo.config.Status;
 import yumyum.demo.src.community.dto.*;
 import yumyum.demo.src.community.entity.CommentEntity;
 import yumyum.demo.src.community.entity.CommentLikeEntity;
 import yumyum.demo.src.community.entity.PostEntity;
 import yumyum.demo.src.community.entity.PostLikeEntity;
+import yumyum.demo.src.community.entity.PostReportEntity;
 import yumyum.demo.src.community.repository.*;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.repository.UserRepository;
@@ -31,6 +33,8 @@ public class CommunityService {
     private final CommentRepository commentRepository;
     private final PostLikeRepository postLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final PostReportRepository postReportRepository;
+    private final CommentReportRepository commentReportRepository;
 
     /*public void createPost(String username, PostDto postDto) throws BaseException {
        try {
@@ -709,9 +713,17 @@ public class CommunityService {
         }
     }
 
-    /*public PostScreenDto getPostScreen(Long postId, Long userId){
+    public void postReport(Long postId, Long userId, String contents) throws BaseException {
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-    }*/
+        PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
+
+        PostReportEntity postReportEntity = new PostReportEntity(userEntity, postEntity, contents);
+
+        postReportRepository.save(postReportEntity);
+    }
 
 }
 
