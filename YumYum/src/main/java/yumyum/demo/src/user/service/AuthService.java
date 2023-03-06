@@ -157,11 +157,11 @@ public class AuthService {
 
         int guestUserSize = guestUserEntities.size() + 1;
 
-        String guestEmail = "anonymous" + guestUserSize + "@email.com";
+        String guestEmail = "guest" + guestUserSize + "@email.com";
 
         //빌더 패턴의 장점
         Authority authority = Authority.builder()
-                .authorityName("ROLE_ANONYMOUS")
+                .authorityName("ROLE_GUEST")
                 .build();
 
         UserEntity user = UserEntity.builder()
