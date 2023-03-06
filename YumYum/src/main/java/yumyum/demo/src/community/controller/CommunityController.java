@@ -304,7 +304,7 @@ public class CommunityController {
     })
     //커뮤니티 화면 조회
     @GetMapping("")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'GUEST')")
     public BaseResponse<List<CommunityMainDto>> getCommunityScreen(){
         try{
             return new BaseResponse<>(communityService.getCommunityScreen());
@@ -322,7 +322,7 @@ public class CommunityController {
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
     @GetMapping("/{post_id}")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'GUEST')")
     public BaseResponse<PostScreenDto> getPostScreen(@PathVariable("post_id") Long post_id){
         try{
             String currentUserId = SecurityUtil.getCurrentUserId()

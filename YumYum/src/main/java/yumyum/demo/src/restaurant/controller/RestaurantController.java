@@ -38,7 +38,7 @@ public class RestaurantController {
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
     @GetMapping("")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'GUEST')")
     public BaseResponse<GetRestaurantsDto> getRestaurants(@RequestParam(value = "sort", defaultValue = "1") int sortType) {
         try {
             String currentUserId = SecurityUtil.getCurrentUserId()
@@ -125,7 +125,7 @@ public class RestaurantController {
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
     @GetMapping("/{restaurantId}")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'GUEST')")
     public BaseResponse<GetRestaurantDetailDto> getRestaurantDetails(@PathVariable("restaurantId") Long restaurantId) {
         try {
             String currentUserId = SecurityUtil.getCurrentUserId()
@@ -170,7 +170,7 @@ public class RestaurantController {
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
     @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'GUEST')")
     public BaseResponse<List<PopularSearchWordDto>> getSearchWindow(){
         try {
             return new BaseResponse<>(restaurantService.getSearchWindow());
@@ -187,7 +187,7 @@ public class RestaurantController {
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
     @GetMapping("/search/result")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'GUEST')")
     public BaseResponse<List<RestaurantDto>> getSearchResult(@RequestParam(value = "query")String query, @RequestParam(value = "sort", defaultValue = "1")Integer sort){
         try {
             String currentUserId = SecurityUtil.getCurrentUserId()
@@ -208,7 +208,7 @@ public class RestaurantController {
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
     @GetMapping("/{restaurantId}/reviews")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'GUEST')")
     public BaseResponse<List<GetReviewDto>> getReviews(@PathVariable("restaurantId") Long restaurantId) {
         try {
             String currentUserId = SecurityUtil.getCurrentUserId()

@@ -33,7 +33,7 @@ public class UserController {
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
     @GetMapping("/profiles")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'GUEST')")
     public BaseResponse<GetUserProfileDto> getUserProfile() {
         try {
             String currentUserId = SecurityUtil.getCurrentUserId()
