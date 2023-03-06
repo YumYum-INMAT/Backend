@@ -42,7 +42,8 @@ public class UserService {
                 foundUserEntity.getProfileImgUrl(),
                 foundUserEntity.getNickName(),
                 foundUserEntity.getAge(),
-                foundUserEntity.getGender());
+                foundUserEntity.getGender(),
+                foundUserEntity.getLogInType());
     }
 
     public void updateUserProfile(Long userId, UpdateUserProfileDto userProfileDto) throws BaseException {

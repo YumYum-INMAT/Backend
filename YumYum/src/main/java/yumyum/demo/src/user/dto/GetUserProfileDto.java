@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import yumyum.demo.config.LogInType;
 
 @Setter
 @Getter
@@ -28,4 +29,6 @@ public class GetUserProfileDto {
     private Integer age;
 
     private Character gender;
+
+    private LogInType logInType;
 }
