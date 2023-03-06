@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponse;
 import yumyum.demo.jwt.TokenProvider;
+import yumyum.demo.src.user.dto.EmailDto;
 import yumyum.demo.src.user.dto.GuestLoginDto;
 import yumyum.demo.src.user.dto.LoginDto;
 import yumyum.demo.src.user.dto.NickNameDto;
@@ -58,6 +59,22 @@ public class AuthController {
 
             return new BaseResponse<>("회원가입 성공!");
 
+        } catch (BaseException e) {
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    @ApiOperation(value = "이메일 중복 체크 API (회원 가입 시 사용)")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request")
+    })
+    @PostMapping("/email")
+    public BaseResponse<String> checkEmailDuplicate(@Valid @RequestBody EmailDto emailDto) {
+        try {
+            authService.checkEmailDuplicate(emailDto.getEmail());
+
+            return new BaseResponse<>("이메일 사용가능!");
         } catch (BaseException e) {
             return new BaseResponse<>(e.getStatus());
         }
