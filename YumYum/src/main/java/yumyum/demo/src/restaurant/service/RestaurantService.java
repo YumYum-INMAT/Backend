@@ -14,15 +14,7 @@ import org.springframework.stereotype.Service;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.Status;
 import yumyum.demo.src.restaurant.dto.*;
-import yumyum.demo.src.restaurant.entity.BannerEntity;
-import yumyum.demo.src.restaurant.entity.CategoryEntity;
-import yumyum.demo.src.restaurant.entity.HeartEntity;
-import yumyum.demo.src.restaurant.entity.RestaurantEntity;
-import yumyum.demo.src.restaurant.entity.RestaurantImgEntity;
-import yumyum.demo.src.restaurant.entity.RestaurantMenuEntity;
-import yumyum.demo.src.restaurant.entity.ReviewEntity;
-import yumyum.demo.src.restaurant.entity.ReviewImgEntity;
-import yumyum.demo.src.restaurant.entity.TodayRecommendEntity;
+import yumyum.demo.src.restaurant.entity.*;
 import yumyum.demo.src.restaurant.repository.*;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.repository.UserRepository;
@@ -39,6 +31,7 @@ public class RestaurantService {
     private final HeartRepository heartRepository;
     private final BannerRepository bannerRepository;
     private final ReviewRepository reviewRepository;
+    private final SearchRepository searchRepository;
     private final TodayRecommendRepository todayRecommendRepository;
     private final UserRepository userRepository;
 
@@ -274,13 +267,16 @@ public class RestaurantService {
     }
 
     public List<PopularSearchWordDto> getSearchWindow() {
-        //restaurantJdbcTempRepository.postSearch(contents);
-        return restaurantJdbcTempRepository.getPopularSearchWord();
 
+        //return restaurantJdbcTempRepository.getPopularSearchWord();
+        return searchRepository.getPopularSearchWord();
     }
 
     public List<RestaurantDto> getSearchResult(Long userId, String query, Integer sort) throws BaseException{
-        restaurantJdbcTempRepository.postSearch(query);
+        //restaurantJdbcTempRepository.postSearch(query);
+
+        SearchEntity search = new SearchEntity(query);
+        searchRepository.save(search);
 
         if(sort == 1){
            return restaurantJdbcTempRepository.getSearchResult1(userId, query);
@@ -300,6 +296,8 @@ public class RestaurantService {
         else{
            throw new BaseException(DATABASE_ERROR);
         }
+
+
     }
 
     public List<GetReviewDto> getReviews(Long userId, Long restaurantId) throws BaseException {

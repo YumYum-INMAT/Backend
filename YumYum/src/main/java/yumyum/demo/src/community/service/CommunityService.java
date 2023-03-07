@@ -7,6 +7,7 @@ import yumyum.demo.config.Status;
 import yumyum.demo.src.community.dto.*;
 import yumyum.demo.src.community.entity.*;
 import yumyum.demo.src.community.repository.*;
+import yumyum.demo.src.restaurant.dto.ImgUrlDto;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.repository.UserRepository;
 
@@ -43,9 +44,18 @@ public class CommunityService {
 
             PostEntity postEntity = new PostEntity(
                     userEntity,
-                    postDto.getImgUrl(),
                     postDto.getTopic(),
                     postDto.getContents());
+
+            List<PostImgEntity> postImgEntityList = new ArrayList<>();
+
+            for(ImgUrlDto imgUrlDto : postDto.getImgUrlDtoList()){
+
+                PostImgEntity postImgEntity = new PostImgEntity(postEntity, imgUrlDto.getImgUrl());
+                postImgEntityList.add(postImgEntity);
+            }
+
+            postEntity.setPostImgEntities(postImgEntityList);
 
             postRepository.save(postEntity);
         } catch (Exception exception){
@@ -76,19 +86,26 @@ public class CommunityService {
         PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
 
-
             //게시글 작성자와 내가 동일인물인지 비교하기
-            if (postEntity.getUser().equals(userEntity)) {
-                try {
-                    postEntity.updatePost(postDto.getImgUrl(), postDto.getTopic(), postDto.getContents());
-                    postRepository.save(postEntity);
+        if (postEntity.getUser().equals(userEntity)) {
+            try {
+                List<PostImgEntity> postImgEntityList = new ArrayList<>();
 
-                } catch (Exception exception) {
-                    throw new BaseException(DATABASE_ERROR);
+                for(ImgUrlDto imgUrlDto : postDto.getImgUrlDtoList()){
+                    PostImgEntity postImgEntity = new PostImgEntity(postEntity,imgUrlDto.getImgUrl());
+                    postImgEntityList.add(postImgEntity);
                 }
-            } else {
-                throw new BaseException(FAILED_TO_UPDATE_POST);
+
+                postEntity.updatePost(postImgEntityList, postDto.getTopic(), postDto.getContents());
+                postRepository.save(postEntity);
+
+
+            } catch (Exception exception) {
+                throw new BaseException(DATABASE_ERROR);
             }
+        } else {
+            throw new BaseException(FAILED_TO_UPDATE_POST);
+        }
     }
 
 

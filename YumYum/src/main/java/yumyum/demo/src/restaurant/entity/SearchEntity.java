@@ -22,4 +22,8 @@ public class SearchEntity extends BaseEntity {
     @Column(nullable = false, columnDefinition = "varchar(30)")
     private String word;
 
+    public SearchEntity(String word){
+        this.word = word;
+    }
+
 }
