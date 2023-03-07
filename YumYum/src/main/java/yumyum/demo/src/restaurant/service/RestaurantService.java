@@ -22,6 +22,7 @@ import yumyum.demo.src.restaurant.entity.RestaurantImgEntity;
 import yumyum.demo.src.restaurant.entity.RestaurantMenuEntity;
 import yumyum.demo.src.restaurant.entity.ReviewEntity;
 import yumyum.demo.src.restaurant.entity.ReviewImgEntity;
+import yumyum.demo.src.restaurant.entity.ReviewReportEntity;
 import yumyum.demo.src.restaurant.entity.SearchEntity;
 import yumyum.demo.src.restaurant.entity.TodayRecommendEntity;
 import yumyum.demo.src.restaurant.repository.*;
@@ -42,6 +43,7 @@ public class RestaurantService {
     private final ReviewRepository reviewRepository;
     private final TodayRecommendRepository todayRecommendRepository;
     private final SearchRepository searchRepository;
+    private final ReviewReportRepository reviewReportRepository;
     private final UserRepository userRepository;
 
     private final RestaurantJdbcTempRepository restaurantJdbcTempRepository;
@@ -319,5 +321,17 @@ public class RestaurantService {
         }
 
         return result;
+    }
+
+    public void reviewReport(Long userId, Long reviewId, String contents) throws BaseException {
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        ReviewEntity reviewEntity = reviewRepository.findReviewEntityByIdAndStatus(reviewId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_REVIEW));
+
+        ReviewReportEntity reviewReportEntity = new ReviewReportEntity(userEntity, reviewEntity, contents);
+
+        reviewReportRepository.save(reviewReportEntity);
     }
 }
