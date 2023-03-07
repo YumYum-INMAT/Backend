@@ -135,28 +135,4 @@ public class UserController {
             return new BaseResponse<>(e.getStatus());
         }
     }
-
-    @ApiOperation(value = "사용자 신고 API")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
-            @ApiResponse(code = 400, message = "Bad Request"),
-            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
-            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
-    })
-    @PostMapping("/{userId}/report")
-    @PreAuthorize("hasAnyRole('USER')")
-    public BaseResponse<String> reportUser(@PathVariable("userId") Long reportedUserId,
-                                           @Valid @RequestBody UserReportDto userReportDto){
-        try{
-            String currentUserId = SecurityUtil.getCurrentUserId()
-                    .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
-            Long reportingUserId = Long.parseLong(currentUserId);
-
-            userService.reportUser(reportingUserId, reportedUserId, userReportDto.getContents());
-
-            return new BaseResponse<>("사용자 신고 성공");
-        }catch (BaseException e){
-            return new BaseResponse<>(e.getStatus());
-        }
-    }
 }

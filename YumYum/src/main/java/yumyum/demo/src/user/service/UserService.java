@@ -115,20 +115,4 @@ public class UserService {
             throw new BaseException(DATABASE_ERROR);
         }
     }
-
-    public void reportUser(Long reportingUserId, Long reportedUserId, String contents) throws BaseException {
-        UserEntity reportingUser = userRepository.findUserEntityByIdAndStatus(reportingUserId, Status.ACTIVE)
-                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
-
-        UserEntity reportedUser = userRepository.findUserEntityByIdAndStatus(reportedUserId, Status.ACTIVE)
-                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
-
-        if(reportedUser.getLogInType().equals(LogInType.GUEST)) {
-            throw new BaseException(NOT_ACTIVATED_USER);
-        }
-
-        UserReportEntity userReportEntity = new UserReportEntity(reportingUser, reportedUser, contents);
-
-        userReportRepository.save(userReportEntity);
-    }
 }
