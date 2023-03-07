@@ -188,7 +188,7 @@ public class RestaurantController {
     })
     @GetMapping("/search/result")
     @PreAuthorize("hasAnyRole('USER', 'GUEST')")
-    public BaseResponse<List<RestaurantDto>> getSearchResult(@RequestParam(value = "query")String query, @RequestParam(value = "sort", defaultValue = "1")Integer sort){
+    public BaseResponse<List<RestaurantDto>> getSearchResult(@RequestParam(value = "query") String query, @RequestParam(value = "sort", defaultValue = "1")Integer sort){
         try {
             String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));

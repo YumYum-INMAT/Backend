@@ -22,6 +22,7 @@ import yumyum.demo.src.restaurant.entity.RestaurantImgEntity;
 import yumyum.demo.src.restaurant.entity.RestaurantMenuEntity;
 import yumyum.demo.src.restaurant.entity.ReviewEntity;
 import yumyum.demo.src.restaurant.entity.ReviewImgEntity;
+import yumyum.demo.src.restaurant.entity.SearchEntity;
 import yumyum.demo.src.restaurant.entity.TodayRecommendEntity;
 import yumyum.demo.src.restaurant.repository.*;
 import yumyum.demo.src.user.entity.UserEntity;
@@ -40,6 +41,7 @@ public class RestaurantService {
     private final BannerRepository bannerRepository;
     private final ReviewRepository reviewRepository;
     private final TodayRecommendRepository todayRecommendRepository;
+    private final SearchRepository searchRepository;
     private final UserRepository userRepository;
 
     private final RestaurantJdbcTempRepository restaurantJdbcTempRepository;
@@ -280,26 +282,10 @@ public class RestaurantService {
     }
 
     public List<RestaurantDto> getSearchResult(Long userId, String query, Integer sort) throws BaseException{
-        restaurantJdbcTempRepository.postSearch(query);
+        SearchEntity searchEntity = new SearchEntity(query);
+        searchRepository.save(searchEntity);
 
-        if(sort == 1){
-           return restaurantJdbcTempRepository.getSearchResult1(userId, query);
-        }
-        else if(sort == 2){
-           return restaurantJdbcTempRepository.getSearchResult2(userId, query);
-        }
-        else if(sort == 3){
-           return restaurantJdbcTempRepository.getSearchResult3(userId, query);
-        }
-        else if(sort == 4){
-           return restaurantJdbcTempRepository.getSearchResult4(userId, query);
-        }
-        else if(sort == 5){
-           return restaurantJdbcTempRepository.getSearchResult5(userId, query);
-        }
-        else{
-           throw new BaseException(DATABASE_ERROR);
-        }
+        return restaurantDynamicQueryRepository.getSearchRestaurants(userId, query, sort);
     }
 
     public List<GetReviewDto> getReviews(Long userId, Long restaurantId) throws BaseException {
