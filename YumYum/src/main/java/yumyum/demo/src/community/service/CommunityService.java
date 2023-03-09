@@ -10,6 +10,7 @@ import yumyum.demo.src.community.repository.*;
 import yumyum.demo.src.restaurant.dto.ImgUrlDto;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.repository.UserRepository;
+import yumyum.demo.utils.ConvertUtil;
 
 import javax.transaction.Transactional;
 
@@ -640,7 +641,7 @@ public class CommunityService {
     }
 
     public PostScreenDto getPostScreen(Long postId, Long userId) {
-        //Long user_id = communityRepository.findUserIdByUsername(username);
+
         try {
           List<CommentInfoDto> commentInfoDtoList = new ArrayList<>(communityRepository.getCommentInfo(postId, userId));
           List<List<CommentInfoDto>> commentInfoDtoMultiList = new ArrayList<>();
@@ -674,6 +675,69 @@ public class CommunityService {
         }
     }
 
+    /*public PostScreenDto getPostScreen2(Long postId, Long userId){
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
+
+        List<CommentInfoDto> commentInfoDtoList = new ArrayList<>();
+        List<CommentEntity> commentEntities = commentRepository.findCommentEntitiesByPostAndStatusOrderByGroupNumberCreatedAt(postEntity, Status.ACTIVE);
+
+        //commentInfoDto 만들기
+        for(CommentEntity commentEntity : commentEntities){
+           CommentInfoDto commentInfoDto = new CommentInfoDto(
+                   commentEntity.getId(),
+                   commentEntity.getUser().getNickName(),
+                   commentEntity.getUser().getProfileImgUrl(),
+                   commentEntity.getContents(),
+                   commentEntity.getCountLike(),
+                   ConvertUtil.convertCreatedAt(commentEntity.getCreatedAt()),
+                   commentEntity.getGroupNumber(),
+                   commentEntity.getParent_id(),
+                   commentEntity.getCreatedAt().equals(commentEntity.getUpdatedAt()) ? false : true ,
+                   commentLikeRepository.existsByCommentAndUserAndStatus(commentEntity,userEntity,Status.ACTIVE)
+           );
+           commentInfoDtoList.add(commentInfoDto);
+        }
+        //postInfoDto 만들기
+
+        List<List<CommentInfoDto>> commentInfoDtoMultiList = new ArrayList<>();
+        PostInfoDto postInfoDto = new PostInfoDto(
+                postEntity.getUser().getNickName(),
+                postEntity.getUser().getProfileImgUrl(),
+                postEntity.getId(),
+                postEntity.getUser().getId(),
+                postEntity.getTopic(),
+                postEntity.getContents(),
+                po
+        )
+
+        int i = 0;
+
+        List<CommentInfoDto> commentInfoDtoList1 = new ArrayList<>();
+        //댓글이 없을때도 고려하자
+        if(!commentInfoDtoList.isEmpty()) {
+            for (CommentInfoDto commentInfoDto : commentInfoDtoList) {
+                if (commentInfoDto.getGroupNumber() != i) {
+                    i = commentInfoDto.getGroupNumber();
+                    commentInfoDtoMultiList.add(commentInfoDtoList1);
+
+                    commentInfoDtoList1 = new ArrayList<>();
+                    commentInfoDtoList1.add(commentInfoDto);
+                } else if (commentInfoDto.getGroupNumber() == i) {
+                    commentInfoDtoList1.add(commentInfoDto);
+                }
+            }
+
+            commentInfoDtoMultiList.remove(0);
+            commentInfoDtoMultiList.add(commentInfoDtoList1);
+
+        }
+
+
+    }*/
 
     public List<SearchResultScreenDto> getSearchResult(String query) {
 

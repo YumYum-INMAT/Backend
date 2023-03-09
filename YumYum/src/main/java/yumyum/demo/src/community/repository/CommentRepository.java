@@ -18,5 +18,7 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
     Optional<CommentEntity> findCommentEntityByIdAndStatus(Long commentId, Status status);
     @Query("select c.groupNumber from CommentEntity c where c.id = :parentId")
     Integer findGroupNumberByParentId(@Param("parentId") Long parentId);
+    List<CommentEntity> findByPostAndStatusOrderByGroupNumberAscCreatedAtDesc(PostEntity post, Status status);
+    //List<CommentEntity> findCommentEntitiesByPostAndStatusOrderByGroupNumberCreatedAt
 
 }

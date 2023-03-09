@@ -13,6 +13,6 @@ import yumyum.demo.src.restaurant.entity.RestaurantEntity;
 @Repository
 public interface RestaurantRepository extends JpaRepository<RestaurantEntity, Long> {
     Optional<RestaurantEntity> findRestaurantEntityByIdAndStatus(Long restaurantId, Status status);
-    Optional<RestaurantEntity> findAllByRestaurantNameOrRestaurantMenuEntitiesContaining(String query);
+    //Optional<RestaurantEntity> findAllByRestaurantNameOrRestaurantMenuEntitiesContaining(String query);
 
 }

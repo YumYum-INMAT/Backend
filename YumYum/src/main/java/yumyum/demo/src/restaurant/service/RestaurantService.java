@@ -268,8 +268,8 @@ public class RestaurantService {
 
     public List<PopularSearchWordDto> getSearchWindow() {
 
-        //return restaurantJdbcTempRepository.getPopularSearchWord();
-        return searchRepository.getPopularSearchWord();
+        return restaurantJdbcTempRepository.getPopularSearchWord();
+        //return searchRepository.getPopularSearchWord();
     }
 
     public List<RestaurantDto> getSearchResult(Long userId, String query, Integer sort) throws BaseException{

@@ -48,22 +48,22 @@ public class CommunityRepository {
         jdbcTemplate.update(preparedStatementCreator, keyHolder);
         return keyHolder.getKey().longValue();*/
 
-        Object[] params = new Object[]{findUserIdByUsername(username), postDto.getTopic(), postDto.getContents(), postDto.getImgUrl(), "ACTIVE"};
+        /*Object[] params = new Object[]{findUserIdByUsername(username), postDto.getTopic(), postDto.getContents(), postDto.getImgUrl(), "ACTIVE"};
         System.out.println(findUserIdByUsername(username));
         this.jdbcTemplate.update(
                 "insert into post(user_id, topic, contents, img_url, status) values (?,?,?,?,?);",
                 params
-                );
+                );*/
     }
 
-    public Long updatePost(Long post_id, PostDto postDto) {
+    /*public Long updatePost(Long post_id, PostDto postDto) {
         this.jdbcTemplate.update(
                 "update post set topic = ?, contents = ?, img_url= ? where post_id = ? and status = 'ACTIVE';",
                 postDto.getTopic(), postDto.getContents(), postDto.getImgUrl(), post_id
         );
 
         return post_id;
-    }
+    }*/
 
     public String findUsernameByPostId(Long post_id){
         String username = this.jdbcTemplate.queryForObject(
@@ -326,7 +326,7 @@ public class CommunityRepository {
                     commentInfoDto.setProfileImgUrl(rs.getString("U.profile_img_url"));
                     commentInfoDto.setNickName(rs.getString("U.nick_name"));
                     commentInfoDto.setContents(rs.getString("C.contents"));
-                    commentInfoDto.setCountCommentLike(rs.getLong("C.count_like"));
+                    commentInfoDto.setCountCommentLike(rs.getInt("C.count_like"));
                     commentInfoDto.setCreatedAt(rs.getString("created_time"));
                     commentInfoDto.setParentId(rs.getLong("parent_id"));
                     commentInfoDto.setGroupNumber(rs.getInt("C.group_number"));
