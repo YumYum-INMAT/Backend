@@ -640,7 +640,7 @@ public class CommunityService {
 
     }
 
-    public PostScreenDto getPostScreen(Long postId, Long userId) {
+   /* public PostScreenDto getPostScreen(Long postId, Long userId) {
 
         try {
           List<CommentInfoDto> commentInfoDtoList = new ArrayList<>(communityRepository.getCommentInfo(postId, userId));
@@ -673,19 +673,19 @@ public class CommunityService {
         }catch (Exception exception){
             throw new BaseException(DATABASE_ERROR);
         }
-    }
+    }*/
 
-    /*public PostScreenDto getPostScreen2(Long postId, Long userId){
+    public PostScreenDto getPostScreen2(Long postId, Long userId){
         UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
         PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
 
-        List<CommentInfoDto> commentInfoDtoList = new ArrayList<>();
-        List<CommentEntity> commentEntities = commentRepository.findCommentEntitiesByPostAndStatusOrderByGroupNumberCreatedAt(postEntity, Status.ACTIVE);
-
         //commentInfoDto 만들기
+        List<CommentInfoDto> commentInfoDtoList = new ArrayList<>();
+        List<CommentEntity> commentEntities = commentRepository.findByPostAndStatusOrderByGroupNumberAscCreatedAtDesc(postEntity, Status.ACTIVE);
+
         for(CommentEntity commentEntity : commentEntities){
            CommentInfoDto commentInfoDto = new CommentInfoDto(
                    commentEntity.getId(),
@@ -703,7 +703,13 @@ public class CommunityService {
         }
         //postInfoDto 만들기
 
-        List<List<CommentInfoDto>> commentInfoDtoMultiList = new ArrayList<>();
+        List<ImgUrlDto> imgUrlDtoList = new ArrayList<>();
+        for(PostImgEntity postImgEntity : postEntity.getPostImgEntities()){
+            ImgUrlDto imgUrlDto = new ImgUrlDto(postImgEntity.getImgUrl());
+
+            imgUrlDtoList.add(imgUrlDto);
+        }
+
         PostInfoDto postInfoDto = new PostInfoDto(
                 postEntity.getUser().getNickName(),
                 postEntity.getUser().getProfileImgUrl(),
@@ -711,8 +717,14 @@ public class CommunityService {
                 postEntity.getUser().getId(),
                 postEntity.getTopic(),
                 postEntity.getContents(),
-                po
-        )
+                imgUrlDtoList,
+                postEntity.getCountLike(),
+                postEntity.getCountComment(),
+                ConvertUtil.convertCreatedAt(postEntity.getCreatedAt()),
+                postLikeRepository.existsByPostAndUserAndStatus(postEntity, userEntity, Status.ACTIVE)
+        );
+
+        List<List<CommentInfoDto>> commentInfoDtoMultiList = new ArrayList<>();
 
         int i = 0;
 
@@ -733,11 +745,12 @@ public class CommunityService {
 
             commentInfoDtoMultiList.remove(0);
             commentInfoDtoMultiList.add(commentInfoDtoList1);
-
         }
+        PostScreenDto PostScreenDto = new PostScreenDto(postInfoDto, commentInfoDtoMultiList);
 
+        return PostScreenDto;
 
-    }*/
+    }
 
     public List<SearchResultScreenDto> getSearchResult(String query) {
 

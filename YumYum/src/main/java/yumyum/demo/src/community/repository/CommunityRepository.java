@@ -373,7 +373,7 @@ public class CommunityRepository {
         );
     }*/
 
-    public PostInfoDto getPostInfo(Long post_id, Long user_id) {
+    /*public PostInfoDto getPostInfo(Long post_id, Long user_id) {
 
         return this.jdbcTemplate.queryForObject(
                 "select P.post_id, P.user_id, P.topic, P.contents, P.img_url, P.count_comment, P.count_like,P.created_at, U.profile_img_url, U.nick_name,\n" +
@@ -412,7 +412,7 @@ public class CommunityRepository {
                 },user_id, post_id
         );
 
-    }
+    }*/
 
     public Long countGroupNumber(Long post_id){
         return this.jdbcTemplate.queryForObject(

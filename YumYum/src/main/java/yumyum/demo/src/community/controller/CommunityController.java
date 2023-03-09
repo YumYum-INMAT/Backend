@@ -325,7 +325,7 @@ public class CommunityController {
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
             Long userId = Long.parseLong(currentUserId);;
 
-            return new BaseResponse<>(communityService.getPostScreen(post_id, userId));
+            return new BaseResponse<>(communityService.getPostScreen2(post_id, userId));
         }catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
