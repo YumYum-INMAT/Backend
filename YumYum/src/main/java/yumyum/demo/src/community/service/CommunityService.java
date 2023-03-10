@@ -36,6 +36,8 @@ public class CommunityService {
     private final CommentRepository commentRepository;
     private final PostLikeRepository postLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final PostReportRepository postReportRepository;
+    private final CommentReportRepository commentReportRepository;
 
     /*public void createPost(String username, PostDto postDto) throws BaseException {
        try {
@@ -783,6 +785,30 @@ public class CommunityService {
 
         return PostScreenDto;
 
+    }
+
+    public void postReport(Long postId, Long userId, String contents) throws BaseException {
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+    PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
+            .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
+
+    PostReportEntity postReportEntity = new PostReportEntity(userEntity, postEntity, contents);
+
+        postReportRepository.save(postReportEntity);
+    }
+
+    public void commentReport(Long commentId, Long userId, String contents) {
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        CommentEntity commentEntity = commentRepository.findCommentEntityByIdAndStatus(commentId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_COMMENT));
+
+        CommentReportEntity commentReportEntity = new CommentReportEntity(userEntity, commentEntity, contents);
+
+        commentReportRepository.save(commentReportEntity);
     }
 
     public List<SearchResultScreenDto> getSearchResult(String query) {

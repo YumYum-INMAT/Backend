@@ -40,7 +40,6 @@ public class CommunityController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<String> createPost(@RequestBody @Valid PostDto postDto){
         try {
-
             String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
             Long userId = Long.parseLong(currentUserId);
@@ -66,7 +65,7 @@ public class CommunityController {
     })
     @PatchMapping("/{post_id}")
     @PreAuthorize("hasAnyRole('USER')")
-    public BaseResponse<String> updatePost(@PathVariable( "post_id") Long post_id, @RequestBody @Valid PostDto postDto){
+    public BaseResponse<String> updatePost(@PathVariable("post_id") Long post_id, @RequestBody @Valid PostDto postDto){
 
         try {
             String currentUserId = SecurityUtil.getCurrentUserId()
