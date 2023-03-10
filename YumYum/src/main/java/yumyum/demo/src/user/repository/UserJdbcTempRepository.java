@@ -27,7 +27,7 @@ public class UserJdbcTempRepository {
                 Long.class, username);
     }
 
-    public List<CommunityMainDto> getPost(Long user_id) {
+   /* public List<CommunityMainDto> getPost(Long user_id) {
         return this.jdbcTemplate.query(
                 "select U.nick_name,P.post_id, P.topic, P.contents, P.img_url, P.count_like, P.count_comment,\n" +
                         "       (\n" +
@@ -60,7 +60,7 @@ public class UserJdbcTempRepository {
                 }, user_id
 
         );
-    }
+    }*/
 
     public List<MyHeartRestaurantDto> getMyHeartRestaurant(Long user_id) {
     return this.jdbcTemplate.query(

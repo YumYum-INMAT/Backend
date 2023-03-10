@@ -64,13 +64,13 @@ public class UserService {
         }
     }
 
-    public List<CommunityMainDto> getPost(Long userId) throws BaseException {
+    /*public List<CommunityMainDto> getPost(Long userId) throws BaseException {
         try{
             return userJdbcTempRepository.getPost(userId);
         }catch (Exception exception){
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
-    }
+    }*/
 
     public List<MyReviewDto> getMyReview(Long userId) throws BaseException{
         UserEntity foundUserEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)

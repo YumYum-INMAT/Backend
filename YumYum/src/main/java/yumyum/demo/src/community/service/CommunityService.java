@@ -628,7 +628,7 @@ public class CommunityService {
         }
     }
 
-    public List<CommunityMainDto> getCommunityScreen() throws BaseException{
+    /*public List<CommunityMainDto> getCommunityScreen() throws BaseException{
         try{
             List<CommunityMainDto> communityMainDtoList;
             communityMainDtoList = communityRepository.getCommunityScreen();
@@ -638,8 +638,34 @@ public class CommunityService {
             throw new BaseException(DATABASE_ERROR);
         }
 
-    }
+    }*/
 
+    public List<CommunityMainDto> getCommunityScreen2() throws BaseException{
+        List<PostEntity> postEntityList = postRepository.findAll();
+
+        List<CommunityMainDto> communityMainDtoList = new ArrayList<>();
+        for(PostEntity postEntity : postEntityList){
+            List<ImgUrlDto> imgUrlDtoList = new ArrayList<>();
+            for(PostImgEntity postImgEntity : postEntity.getPostImgEntities()){
+                ImgUrlDto imgUrlDto = new ImgUrlDto(postImgEntity.getImgUrl());
+
+                imgUrlDtoList.add(imgUrlDto);
+            }
+
+            CommunityMainDto communityMainDto = new CommunityMainDto(
+                    postEntity.getUser().getNickName(),
+                    postEntity.getId(),
+                    postEntity.getTopic(),
+                    postEntity.getContents(),
+                    imgUrlDtoList,
+                    postEntity.getCountLike(),
+                    postEntity.getCountComment(),
+                    ConvertUtil.convertCreatedAt(postEntity.getCreatedAt())
+            );
+            communityMainDtoList.add(communityMainDto);
+        }
+        return communityMainDtoList;
+    }
    /* public PostScreenDto getPostScreen(Long postId, Long userId) {
 
         try {

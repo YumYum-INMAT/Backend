@@ -303,7 +303,7 @@ public class CommunityController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<List<CommunityMainDto>> getCommunityScreen(){
         try{
-            return new BaseResponse<>(communityService.getCommunityScreen());
+            return new BaseResponse<>(communityService.getCommunityScreen2());
         }catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }

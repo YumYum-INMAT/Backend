@@ -428,7 +428,7 @@ public class CommunityRepository {
         );
     }
 
-    public List<CommunityMainDto> getCommunityScreen() {
+    /*public List<CommunityMainDto> getCommunityScreen() {
         return this.jdbcTemplate.query(
                 "select P.post_id, P.topic, P.contents, P.img_url, P.count_like, P.count_comment, U.nick_name,\n" +
                         "                               (\n" +
@@ -461,7 +461,7 @@ public class CommunityRepository {
                 }
 
         );
-    }
+    }*/
 
     public String checkPostStatus(Long post_id) {
         return this.jdbcTemplate.queryForObject(
