@@ -48,22 +48,22 @@ public class CommunityRepository {
         jdbcTemplate.update(preparedStatementCreator, keyHolder);
         return keyHolder.getKey().longValue();*/
 
-        Object[] params = new Object[]{findUserIdByUsername(username), postDto.getTopic(), postDto.getContents(), postDto.getImgUrl(), "ACTIVE"};
+        /*Object[] params = new Object[]{findUserIdByUsername(username), postDto.getTopic(), postDto.getContents(), postDto.getImgUrl(), "ACTIVE"};
         System.out.println(findUserIdByUsername(username));
         this.jdbcTemplate.update(
                 "insert into post(user_id, topic, contents, img_url, status) values (?,?,?,?,?);",
                 params
-                );
+                );*/
     }
 
-    public Long updatePost(Long post_id, PostDto postDto) {
+    /*public Long updatePost(Long post_id, PostDto postDto) {
         this.jdbcTemplate.update(
                 "update post set topic = ?, contents = ?, img_url= ? where post_id = ? and status = 'ACTIVE';",
                 postDto.getTopic(), postDto.getContents(), postDto.getImgUrl(), post_id
         );
 
         return post_id;
-    }
+    }*/
 
     public String findUsernameByPostId(Long post_id){
         String username = this.jdbcTemplate.queryForObject(
@@ -326,7 +326,7 @@ public class CommunityRepository {
                     commentInfoDto.setProfileImgUrl(rs.getString("U.profile_img_url"));
                     commentInfoDto.setNickName(rs.getString("U.nick_name"));
                     commentInfoDto.setContents(rs.getString("C.contents"));
-                    commentInfoDto.setCountCommentLike(rs.getLong("C.count_like"));
+                    commentInfoDto.setCountCommentLike(rs.getInt("C.count_like"));
                     commentInfoDto.setCreatedAt(rs.getString("created_time"));
                     commentInfoDto.setParentId(rs.getLong("parent_id"));
                     commentInfoDto.setGroupNumber(rs.getInt("C.group_number"));
@@ -373,7 +373,7 @@ public class CommunityRepository {
         );
     }*/
 
-    public PostInfoDto getPostInfo(Long post_id, Long user_id) {
+    /*public PostInfoDto getPostInfo(Long post_id, Long user_id) {
 
         return this.jdbcTemplate.queryForObject(
                 "select P.post_id, P.user_id, P.topic, P.contents, P.img_url, P.count_comment, P.count_like,P.created_at, U.profile_img_url, U.nick_name,\n" +
@@ -412,7 +412,7 @@ public class CommunityRepository {
                 },user_id, post_id
         );
 
-    }
+    }*/
 
     public Long countGroupNumber(Long post_id){
         return this.jdbcTemplate.queryForObject(
@@ -428,7 +428,7 @@ public class CommunityRepository {
         );
     }
 
-    public List<CommunityMainDto> getCommunityScreen() {
+    /*public List<CommunityMainDto> getCommunityScreen() {
         return this.jdbcTemplate.query(
                 "select P.post_id, P.topic, P.contents, P.img_url, P.count_like, P.count_comment, U.nick_name,\n" +
                         "                               (\n" +
@@ -461,7 +461,7 @@ public class CommunityRepository {
                 }
 
         );
-    }
+    }*/
 
     public String checkPostStatus(Long post_id) {
         return this.jdbcTemplate.queryForObject(
@@ -470,6 +470,41 @@ public class CommunityRepository {
         );
     }
 
+    public List<SearchResultScreenDto> getSearchResult(String query) {
+        return this.jdbcTemplate.query(
+                "select P.post_id, P.topic, P.contents, P.img_url, P.count_like, P.count_comment, U.nick_name,\n" +
+                        "                               (\n" +
+                        "                                   case\n" +
+                        "                                                           when timestampdiff(YEAR, P.created_at, now()) >= 1 then concat(timestampdiff(YEAR, P.created_at, now())  , '년 전')\n" +
+                        "                                                            when timestampdiff(MONTH, P.created_at, now()) >= 1 then concat(timestampdiff(MONTH, P.created_at, now()) , '개월 전')\n" +
+                        "                                                            when timestampdiff(DAY, P.created_at, now()) >=1 then concat(timestampdiff(DAY, P.created_at, now()) , '일 전')\n" +
+                        "                                                            when timestampdiff(HOUR, P.created_at, now()) >=1 then concat(timestampdiff(HOUR, P.created_at, now()) , '시간 전')\n" +
+                        "                                                            when timestampdiff(MINUTE, P.created_at, now()) >= 1 then concat(timestampdiff(MINUTE, P.created_at, now()) , '분 전')\n" +
+                        "                                                            ELSE concat(timestampdiff(SECOND, P.created_at, now()) , '초 전')\n" +
+                        "                                                               END\n" +
+                        "                    \n" +
+                        "                                   ) as created_time\n" +
+                        "                                    from post P\n" +
+                        "                                    inner JOIN user U on U.user_id = P.user_id\n" +
+                        "                                    where P.status = 'ACTIVE' and (P.topic LIKE concat('%', ? ,'%') or P.contents LIKE concat('%', ? ,'%'))\n" +
+                        "                                    ORDER BY P.created_at desc; ",
+                (rs, rowNum) -> {
+                    SearchResultScreenDto searchResultScreenDto = new SearchResultScreenDto(
+                            rs.getString("U.nick_name"),
+                            rs.getLong("P.post_id"),
+                            rs.getString("P.topic"),
+                            rs.getString("P.contents"),
+                            rs.getString("P.img_url"),
+                            rs.getLong("P.count_like"),
+                            rs.getLong("P.count_comment"),
+                            rs.getString("created_time")
+                    );
+
+                    return searchResultScreenDto;
+                }, query, query
+
+        );
+    }
 }
 
 /*

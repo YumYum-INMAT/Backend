@@ -18,7 +18,7 @@ public class CommentInfoDto {
     private String nickName;
     private String profileImgUrl;
     private String contents;
-    private Long countCommentLike;
+    private Integer countCommentLike;
     private String createdAt;
     private int groupNumber;
     private Long parentId;

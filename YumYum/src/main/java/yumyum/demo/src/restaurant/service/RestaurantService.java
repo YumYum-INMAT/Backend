@@ -25,6 +25,7 @@ import yumyum.demo.src.restaurant.entity.ReviewImgEntity;
 import yumyum.demo.src.restaurant.entity.ReviewReportEntity;
 import yumyum.demo.src.restaurant.entity.SearchEntity;
 import yumyum.demo.src.restaurant.entity.TodayRecommendEntity;
+import yumyum.demo.src.restaurant.entity.*;
 import yumyum.demo.src.restaurant.repository.*;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.repository.UserRepository;
@@ -278,7 +279,7 @@ public class RestaurantService {
     }
 
     public List<PopularSearchWordDto> getSearchWindow() {
-        //restaurantJdbcTempRepository.postSearch(contents);
+
         return restaurantJdbcTempRepository.getPopularSearchWord();
 
     }

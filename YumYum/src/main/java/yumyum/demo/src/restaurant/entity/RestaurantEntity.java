@@ -153,6 +153,4 @@ public class RestaurantEntity extends BaseEntity {
         this.complexity = level;
     }
 
-
-
 }

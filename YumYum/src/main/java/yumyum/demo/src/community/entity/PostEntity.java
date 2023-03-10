@@ -8,6 +8,8 @@ import yumyum.demo.config.Status;
 import yumyum.demo.src.user.entity.UserEntity;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -25,7 +27,7 @@ public class PostEntity extends BaseEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    private String imgUrl;
+    //private String imgUrl;
 
     @Column(nullable = false, columnDefinition = "varchar(45)")
     private String topic;
@@ -42,21 +44,27 @@ public class PostEntity extends BaseEntity {
     //countParentComment
     @Column(nullable = false, columnDefinition = "int default 0")
     private Integer countParentComment;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<PostImgEntity> postImgEntities = new ArrayList<>();
     /**
      * 비즈니스 로직
      */
 
 
-    public PostEntity(UserEntity userEntity, String imgUrl, String topic, String contents){
+    public PostEntity(UserEntity userEntity, String topic, String contents){
         this.user = userEntity;
-        this.imgUrl = imgUrl;
         this.topic = topic;
         this.contents = contents;
     }
 
     public void setStatus(Status status){this.status = status;}
-    public void updatePost(String imgUrl, String topic, String contents){
-        this.imgUrl = imgUrl;
+
+    public void setPostImgEntities(List<PostImgEntity> postImgEntities){
+        this.postImgEntities = postImgEntities;
+    }
+    public void updatePost(List<PostImgEntity> postImgEntities, String topic, String contents){
+        this.postImgEntities = postImgEntities;
         this.topic = topic;
         this.contents = contents;
     }
