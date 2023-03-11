@@ -40,7 +40,6 @@ public class CommunityController {
     @PreAuthorize("hasAnyRole('USER')")
     public BaseResponse<String> createPost(@RequestBody @Valid PostDto postDto){
         try {
-
             String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
             Long userId = Long.parseLong(currentUserId);
@@ -66,7 +65,7 @@ public class CommunityController {
     })
     @PatchMapping("/{post_id}")
     @PreAuthorize("hasAnyRole('USER')")
-    public BaseResponse<String> updatePost(@PathVariable( "post_id") Long post_id, @RequestBody @Valid PostDto postDto){
+    public BaseResponse<String> updatePost(@PathVariable("post_id") Long post_id, @RequestBody @Valid PostDto postDto){
 
         try {
             String currentUserId = SecurityUtil.getCurrentUserId()
@@ -304,10 +303,10 @@ public class CommunityController {
     })
     //커뮤니티 화면 조회
     @GetMapping("")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'GUEST')")
     public BaseResponse<List<CommunityMainDto>> getCommunityScreen(){
         try{
-            return new BaseResponse<>(communityService.getCommunityScreen());
+            return new BaseResponse<>(communityService.getCommunityScreen2());
         }catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
@@ -322,21 +321,86 @@ public class CommunityController {
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
     @GetMapping("/{post_id}")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'GUEST')")
     public BaseResponse<PostScreenDto> getPostScreen(@PathVariable("post_id") Long post_id){
         try{
             String currentUserId = SecurityUtil.getCurrentUserId()
                     .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
-            Long userId = Long.parseLong(currentUserId);;
+            Long userId = Long.parseLong(currentUserId);
 
-            return new BaseResponse<>(communityService.getPostScreen(post_id, userId));
+            return new BaseResponse<>(communityService.getPostScreen2(post_id, userId));
         }catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
 
     }
 
+    @ApiOperation(value = "음식점 검색창 결과 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 4000, message = "데이터베이스 연결에 실패하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @GetMapping("/search/result")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<List<SearchResultScreenDto>> getSearchResult(@RequestParam(value = "query")String query){
+        try {
+            return new BaseResponse<>(communityService.getSearchResult(query));
+        } catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
 
+    }
+
+    @ApiOperation(value = "게시글 신고 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @PostMapping("/{postId}/report")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<String> postReport(@PathVariable("postId") Long postId,
+                                           @Valid @RequestBody PostReportDto postReportDto){
+        try{
+            String currentUserId = SecurityUtil.getCurrentUserId()
+                    .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
+
+            communityService.postReport(postId, userId, postReportDto.getContents());
+
+            return new BaseResponse<>("게시글 신고 성공!");
+        }catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
+
+    @ApiOperation(value = "게시글 댓글 신고 API")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
+            @ApiResponse(code = 400, message = "Bad Request"),
+            @ApiResponse(code = 401, message = "잘못된 JWT 토큰입니다."),
+            @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
+    })
+    @PostMapping("/{commentId}/report")
+    @PreAuthorize("hasAnyRole('USER')")
+    public BaseResponse<String> commentReport(@PathVariable("commentId") Long commentId,
+                                              @Valid @RequestBody CommentReportDto commentReportDto){
+        try{
+            String currentUserId = SecurityUtil.getCurrentUserId()
+                    .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+            Long userId = Long.parseLong(currentUserId);
+
+            communityService.commentReport(commentId, userId, commentReportDto.getContents());
+
+            return new BaseResponse<>("게시글 신고 성공!");
+        }catch (BaseException e){
+            return new BaseResponse<>(e.getStatus());
+        }
+    }
 
 
 

@@ -2,21 +2,19 @@ package yumyum.demo.src.restaurant.repository;
 
 import static yumyum.demo.src.restaurant.entity.QHeartEntity.heartEntity;
 import static yumyum.demo.src.restaurant.entity.QRestaurantEntity.restaurantEntity;
+import static yumyum.demo.src.restaurant.entity.QRestaurantMenuEntity.restaurantMenuEntity;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import yumyum.demo.config.Status;
 import yumyum.demo.src.restaurant.dto.RestaurantDto;
-import yumyum.demo.src.restaurant.entity.HeartEntity;
-import yumyum.demo.src.restaurant.entity.QRestaurantEntity;
-import yumyum.demo.src.restaurant.entity.RestaurantEntity;
+import yumyum.demo.src.restaurant.entity.QRestaurantMenuEntity;
 
 @Repository
 @RequiredArgsConstructor
@@ -25,6 +23,32 @@ public class RestaurantDynamicQueryRepository {
 
 
     public List<RestaurantDto> findRestaurantsOrderByCreatedAt(Long userId, int sortType) {
+
+        List<Long> heartRestaurantList = getHeartRestaurantsId(userId);
+
+        QRestaurantMenuEntity restaurantMenuEntity;
+
+        return jpaQueryFactory
+                .select(Projections.fields(RestaurantDto.class,
+                        restaurantEntity.id.as("restaurantId"),
+                        restaurantEntity.profileImgUrl.as("profileImgUrl"),
+                        restaurantEntity.restaurantName.as("restaurantName"),
+                        restaurantEntity.address.as("address"),
+                        restaurantEntity.averageStar.as("averageStar"),
+                        restaurantEntity.countReview.as("countReview"),
+                        restaurantEntity.averagePrice.as("averagePrice"),
+                        restaurantEntity.complexity.as("complexity"),
+                        restaurantEntity.restaurantType.as("restaurantType"),
+                        new CaseBuilder().when(restaurantEntity.id.in(heartRestaurantList)).then(true)
+                                .otherwise(false).as("userHeart")))
+                .from(restaurantEntity)
+                .where(eqStatus())
+                .orderBy(sortCondition(sortType))
+                .limit(50)
+                .fetch();
+    }
+
+    public List<RestaurantDto> getSearchRestaurants(Long userId, String query, int sortType) {
 
         List<Long> heartRestaurantList = getHeartRestaurantsId(userId);
 
@@ -42,7 +66,9 @@ public class RestaurantDynamicQueryRepository {
                         new CaseBuilder().when(restaurantEntity.id.in(heartRestaurantList)).then(true)
                                 .otherwise(false).as("userHeart")))
                 .from(restaurantEntity)
+                .innerJoin(restaurantEntity.restaurantMenuEntities, restaurantMenuEntity)
                 .where(eqStatus())
+                .where(restaurantEntity.restaurantName.contains(query).or(restaurantMenuEntity.menuName.contains(query)))
                 .orderBy(sortCondition(sortType))
                 .limit(50)
                 .fetch();

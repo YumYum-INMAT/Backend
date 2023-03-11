@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import yumyum.demo.config.BaseException;
 import yumyum.demo.config.BaseResponseStatus;
+import yumyum.demo.config.LogInType;
 import yumyum.demo.config.Status;
 import yumyum.demo.src.community.dto.CommunityMainDto;
 import yumyum.demo.src.restaurant.entity.ReviewEntity;
@@ -12,7 +13,9 @@ import yumyum.demo.src.restaurant.entity.ReviewImgEntity;
 import yumyum.demo.src.restaurant.repository.ReviewRepository;
 import yumyum.demo.src.user.dto.*;
 import yumyum.demo.src.user.entity.UserEntity;
+import yumyum.demo.src.user.entity.UserReportEntity;
 import yumyum.demo.src.user.repository.UserJdbcTempRepository;
+import yumyum.demo.src.user.repository.UserReportRepository;
 import yumyum.demo.src.user.repository.UserRepository;
 
 import java.util.List;
@@ -26,6 +29,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
+    private final UserReportRepository userReportRepository;
     private final UserJdbcTempRepository userJdbcTempRepository;
 
     public GetUserProfileDto getUserProfile(Long userId) throws BaseException {
@@ -38,7 +42,8 @@ public class UserService {
                 foundUserEntity.getProfileImgUrl(),
                 foundUserEntity.getNickName(),
                 foundUserEntity.getAge(),
-                foundUserEntity.getGender());
+                foundUserEntity.getGender(),
+                foundUserEntity.getLogInType());
     }
 
     public void updateUserProfile(Long userId, UpdateUserProfileDto userProfileDto) throws BaseException {
@@ -64,13 +69,13 @@ public class UserService {
         }
     }
 
-    public List<CommunityMainDto> getPost(Long userId) throws BaseException {
+    /*public List<CommunityMainDto> getPost(Long userId) throws BaseException {
         try{
             return userJdbcTempRepository.getPost(userId);
         }catch (Exception exception){
             throw new BaseException(BaseResponseStatus.DATABASE_ERROR);
         }
-    }
+    }*/
 
     public List<MyReviewDto> getMyReview(Long userId) throws BaseException{
         UserEntity foundUserEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)

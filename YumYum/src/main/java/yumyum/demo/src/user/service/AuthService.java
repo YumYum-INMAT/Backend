@@ -92,6 +92,13 @@ public class AuthService {
         }
     }
 
+    //아이디 존재 여부 체크 -> 로그인에서 사용
+    public void checkEmailDuplicate(String email) throws BaseException {
+        if(userRepository.findUserEntityByEmail(email).isPresent()) {
+            throw new BaseException(DUPLICATED_EMAIL);
+        }
+    }
+
     public void checkPassword(String email, String password) throws BaseException {
         UserEntity user = userRepository.findUserEntityByEmailAndStatus(email, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
@@ -150,11 +157,11 @@ public class AuthService {
 
         int guestUserSize = guestUserEntities.size() + 1;
 
-        String guestEmail = "anonymous" + guestUserSize + "@email.com";
+        String guestEmail = "guest" + guestUserSize + "@email.com";
 
         //빌더 패턴의 장점
         Authority authority = Authority.builder()
-                .authorityName("ROLE_ANONYMOUS")
+                .authorityName("ROLE_GUEST")
                 .build();
 
         UserEntity user = UserEntity.builder()

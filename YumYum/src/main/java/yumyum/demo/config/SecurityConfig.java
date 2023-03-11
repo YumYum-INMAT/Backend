@@ -61,7 +61,7 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .antMatchers("/auth/signup").permitAll()
                 .antMatchers("/auth/login/**").permitAll()
-                .antMatchers("/auth/login-anonymous").permitAll()
+                .antMatchers("/auth/login-guest").permitAll()
                 .antMatchers("/auth/username").permitAll()
                 .antMatchers("/auth/nickname").permitAll()
                 .antMatchers("/auth/issue").permitAll()

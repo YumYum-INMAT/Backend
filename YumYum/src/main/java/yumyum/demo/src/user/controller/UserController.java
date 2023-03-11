@@ -33,7 +33,7 @@ public class UserController {
             @ApiResponse(code = 403, message = "접근에 권한이 없습니다.")
     })
     @GetMapping("/profiles")
-    @PreAuthorize("hasAnyRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'GUEST')")
     public BaseResponse<GetUserProfileDto> getUserProfile() {
         try {
             String currentUserId = SecurityUtil.getCurrentUserId()
@@ -73,7 +73,7 @@ public class UserController {
     }
 
 
-    @ApiOperation(value = "내가 쓴 게시글 조회 API")
+    /*@ApiOperation(value = "내가 쓴 게시글 조회 API")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "요청에 성공하였습니다."),
             @ApiResponse(code = 400, message = "Bad Request"),
@@ -92,7 +92,7 @@ public class UserController {
         }catch (BaseException e){
             return new BaseResponse<>(e.getStatus());
         }
-    }
+    }*/
 
     @ApiOperation(value = "내가 쓴 리뷰 조회 API")
     @ApiResponses(value = {

@@ -1,18 +1,23 @@
 package yumyum.demo.src.community.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import yumyum.demo.config.BaseException;
+import yumyum.demo.config.LogInType;
 import yumyum.demo.config.Status;
 import yumyum.demo.src.community.dto.*;
 import yumyum.demo.src.community.entity.CommentEntity;
 import yumyum.demo.src.community.entity.CommentLikeEntity;
+import yumyum.demo.src.community.entity.CommentReportEntity;
 import yumyum.demo.src.community.entity.PostEntity;
 import yumyum.demo.src.community.entity.PostLikeEntity;
+import yumyum.demo.src.community.entity.PostReportEntity;
+import yumyum.demo.src.community.entity.*;
 import yumyum.demo.src.community.repository.*;
+import yumyum.demo.src.restaurant.dto.ImgUrlDto;
 import yumyum.demo.src.user.entity.UserEntity;
 import yumyum.demo.src.user.repository.UserRepository;
+import yumyum.demo.utils.ConvertUtil;
 
 import javax.transaction.Transactional;
 
@@ -31,6 +36,8 @@ public class CommunityService {
     private final CommentRepository commentRepository;
     private final PostLikeRepository postLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final PostReportRepository postReportRepository;
+    private final CommentReportRepository commentReportRepository;
 
     /*public void createPost(String username, PostDto postDto) throws BaseException {
        try {
@@ -47,9 +54,18 @@ public class CommunityService {
 
             PostEntity postEntity = new PostEntity(
                     userEntity,
-                    postDto.getImgUrl(),
                     postDto.getTopic(),
                     postDto.getContents());
+
+            List<PostImgEntity> postImgEntityList = new ArrayList<>();
+
+            for(ImgUrlDto imgUrlDto : postDto.getImgUrlDtoList()){
+
+                PostImgEntity postImgEntity = new PostImgEntity(postEntity, imgUrlDto.getImgUrl());
+                postImgEntityList.add(postImgEntity);
+            }
+
+            postEntity.setPostImgEntities(postImgEntityList);
 
             postRepository.save(postEntity);
         } catch (Exception exception){
@@ -77,44 +93,39 @@ public class CommunityService {
         UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        PostEntity postEntity = postRepository.findById(postId)
+        PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
 
-        Status status = postEntity.getStatus();
-        //삭제된 게시글인지 확인하기
-        if(status.equals(Status.INACTIVE)){
-            throw new BaseException(DELETED_POST);
-        }
-        else if(status.equals(Status.ACTIVE)) {
             //게시글 작성자와 내가 동일인물인지 비교하기
-            if (postEntity.getUser().equals(userEntity)) {
-                try {
-                    postEntity.updatePost(postDto.getImgUrl(), postDto.getTopic(), postDto.getContents());
-                    postRepository.save(postEntity);
+        if (postEntity.getUser().equals(userEntity)) {
+            try {
+                List<PostImgEntity> postImgEntityList = new ArrayList<>();
 
-                } catch (Exception exception) {
-                    throw new BaseException(DATABASE_ERROR);
+                for(ImgUrlDto imgUrlDto : postDto.getImgUrlDtoList()){
+                    PostImgEntity postImgEntity = new PostImgEntity(postEntity,imgUrlDto.getImgUrl());
+                    postImgEntityList.add(postImgEntity);
                 }
-            } else {
-                throw new BaseException(FAILED_TO_UPDATE_POST);
-            }
-        }
-        else{
-            throw new BaseException(DATABASE_ERROR);
-        }
 
+                postEntity.updatePost(postImgEntityList, postDto.getTopic(), postDto.getContents());
+                postRepository.save(postEntity);
+
+
+            } catch (Exception exception) {
+                throw new BaseException(DATABASE_ERROR);
+            }
+        } else {
+            throw new BaseException(FAILED_TO_UPDATE_POST);
+        }
     }
+
 
     public void deletePost(Long userId, Long postId) {
         UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        PostEntity postEntity = postRepository.findById(postId)
+        PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(DATABASE_ERROR));
 
-        Status status = postEntity.getStatus();
-
-        if (status.equals(Status.ACTIVE)) {
             if (postEntity.getUser().equals(userEntity)) {
                 try {
                     postEntity.setStatus(Status.INACTIVE);
@@ -126,14 +137,8 @@ public class CommunityService {
             } else {
                 throw new BaseException(FAILED_TO_DELETE_POST);
             }
-        }
-        else if(status.equals(Status.INACTIVE)){
-            throw new BaseException(DELETED_POST);
-        }
-        else {
-            throw new BaseException(DATABASE_ERROR);
-        }
     }
+
 
     public String checkPostStatus(Long post_id){
         return communityRepository.checkPostStatus(post_id);
@@ -162,32 +167,23 @@ public class CommunityService {
         UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        PostEntity postEntityByPostId = postRepository.findById(postId)
+        PostEntity postEntityByPostId = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
 
-        Status status = postEntityByPostId.getStatus();
-        if(status.equals(Status.ACTIVE)){
-            CommentEntity commentEntityByUserAndPost = new CommentEntity(
-                    userEntity,
-                    postEntityByPostId,
-                    commentDto.getContents(),
-                    postEntityByPostId.getCountParentComment()+1
-            );
+        CommentEntity commentEntityByUserAndPost = new CommentEntity(
+                userEntity,
+                postEntityByPostId,
+                commentDto.getContents(),
+                postEntityByPostId.getCountParentComment()+1
+        );
 
-            postEntityByPostId.increaseCountParentComment();
-            postEntityByPostId.increaseCountComment();
+        postEntityByPostId.increaseCountParentComment();
+        postEntityByPostId.increaseCountComment();
 
-            postRepository.save(postEntityByPostId);
-            commentRepository.save(commentEntityByUserAndPost);
+        postRepository.save(postEntityByPostId);
+        commentRepository.save(commentEntityByUserAndPost);
 
-            return commentEntityByUserAndPost.getId();
-        }
-        else if(status.equals(Status.INACTIVE)){
-            throw new BaseException(DELETED_POST);
-        }
-        else{
-            throw new BaseException(DATABASE_ERROR);
-        }
+        return commentEntityByUserAndPost.getId();
     }
 
     /*@Transactional
@@ -213,36 +209,28 @@ public class CommunityService {
         UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        PostEntity postEntityByPostId = postRepository.findById(postId)
+        PostEntity postEntityByPostId = postRepository.findPostEntityByIdAndStatus(postId,Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
 
-        Status status = postEntityByPostId.getStatus();
-        if(status.equals(Status.ACTIVE)){
-            CommentEntity commentEntityByUserAndPost = new CommentEntity(
-                    userEntity,
-                    postEntityByPostId,
-                    commentDto.getContents(),
-                    parentId,
-                    1
-            );
+        CommentEntity commentEntityByUserAndPost = new CommentEntity(
+                userEntity,
+                postEntityByPostId,
+                commentDto.getContents(),
+                parentId,
+                1
+        );
 
-            Integer groupNumber = commentRepository.findGroupNumberByParentId(parentId);
-            commentEntityByUserAndPost.setGroupNumber(groupNumber);
+        Integer groupNumber = commentRepository.findGroupNumberByParentId(parentId);
+        commentEntityByUserAndPost.setGroupNumber(groupNumber);
 
-            postEntityByPostId.increaseCountComment();
+        postEntityByPostId.increaseCountComment();
 
-            postRepository.save(postEntityByPostId);
-            commentRepository.save(commentEntityByUserAndPost);
+        postRepository.save(postEntityByPostId);
+        commentRepository.save(commentEntityByUserAndPost);
 
-            return commentEntityByUserAndPost.getId();
-        }
-        else if(status.equals(Status.INACTIVE)){
-            throw new BaseException(DELETED_POST);
-        }
-        else{
-            throw new BaseException(DATABASE_ERROR);
-        }
+        return commentEntityByUserAndPost.getId();
     }
+
 
    /* @Transactional
     public void likePost(String username, Long post_id) throws BaseException {
@@ -286,48 +274,43 @@ public class CommunityService {
         UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        PostEntity postEntity = postRepository.findById(postId)
+        PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
 
-        //삭제된 게시글인지 확인하기
-        if(postEntity.getStatus().equals(Status.ACTIVE)){
-            Long count = postLikeRepository.countPostLikeEntityByUserAndPost(userEntity, postEntity);
-            //전에 좋아요를 했는지 확인하기
-            if(count == 0){
-                PostLikeEntity postLikeEntity = new PostLikeEntity(postEntity, userEntity);
+
+
+        Long count = postLikeRepository.countPostLikeEntityByUserAndPost(userEntity, postEntity);
+        //전에 좋아요를 했는지 확인하기
+        if(count == 0){
+            PostLikeEntity postLikeEntity = new PostLikeEntity(postEntity, userEntity);
+            postEntity.increaseCountLike();
+
+            postLikeRepository.save(postLikeEntity);
+            postRepository.save(postEntity);
+        }
+        else if(count == 1){
+            PostLikeEntity postLikeEntity = postLikeRepository.findPostLikeEntityByUserAndPost(userEntity, postEntity)
+                    .orElseThrow(() -> new BaseException(DATABASE_ERROR));
+            Status status = postLikeEntity.getStatus();
+
+                //삭제된 좋아요의 status 확인하기
+            if(status.equals(Status.INACTIVE)){
+                postLikeEntity.setStatus(Status.ACTIVE);
                 postEntity.increaseCountLike();
 
                 postLikeRepository.save(postLikeEntity);
                 postRepository.save(postEntity);
             }
-            else if(count == 1){
-                PostLikeEntity postLikeEntity = postLikeRepository.findPostLikeEntityByUserAndPost(userEntity, postEntity)
-                        .orElseThrow(() -> new BaseException(DATABASE_ERROR));
-                Status status = postLikeEntity.getStatus();
-
-                //삭제된 좋아요의 status 확인하기
-                if(status.equals(Status.INACTIVE)){
-                    postLikeEntity.setStatus(Status.ACTIVE);
-                    postEntity.increaseCountLike();
-
-                    postLikeRepository.save(postLikeEntity);
-                    postRepository.save(postEntity);
-                }
-                else if(status.equals(Status.ACTIVE)){
-                    throw new BaseException(ALREADY_POST_LIKE);
-                }
-                else{
-                    throw new BaseException(DATABASE_ERROR);
-                }
+            else if(status.equals(Status.ACTIVE)){
+                throw new BaseException(ALREADY_POST_LIKE);
             }
-            else {
+            else{
                 throw new BaseException(DATABASE_ERROR);
             }
         }
-        else{
-            throw new BaseException(DELETED_POST);
+        else {
+            throw new BaseException(DATABASE_ERROR);
         }
-
     }
 
    /* @Transactional
@@ -365,45 +348,37 @@ public class CommunityService {
         UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
-        PostEntity postEntity = postRepository.findById(postId)
+        PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
                 .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
 
-        //삭제된 게시글인지 확인하기
-        if(postEntity.getStatus().equals(Status.ACTIVE)){
-            Long count = postLikeRepository.countPostLikeEntityByUserAndPost(userEntity, postEntity);
-            //전에 좋아요를 했는지 확인하기
-            if(count == 0){
-                throw new BaseException(POST_LIKE_EMPTY);
-            }
-            else if(count == 1) {
-                PostLikeEntity postLikeEntity = postLikeRepository.findPostLikeEntityByUserAndPost(userEntity, postEntity)
-                        .orElseThrow(() -> new BaseException(DATABASE_ERROR));
-                Status status = postLikeEntity.getStatus();
+        Long count = postLikeRepository.countPostLikeEntityByUserAndPost(userEntity, postEntity);
+        //전에 좋아요를 했는지 확인하기
+        if(count == 0){
+            throw new BaseException(POST_LIKE_EMPTY);
+        }
+        else if(count == 1) {
+            PostLikeEntity postLikeEntity = postLikeRepository.findPostLikeEntityByUserAndPost(userEntity, postEntity)
+                    .orElseThrow(() -> new BaseException(DATABASE_ERROR));
+            Status status = postLikeEntity.getStatus();
 
-                //삭제된 좋아요의 status 확인하기
-                if(status.equals(Status.INACTIVE)){
-                    throw new BaseException(ALREADY_POST_UNLIKE);
-                }
-                else if(status.equals(Status.ACTIVE)){
-                    postLikeEntity.setStatus(Status.INACTIVE);
-                    postEntity.decreaseCountLike();
-
-                    postLikeRepository.save(postLikeEntity);
-                    postRepository.save(postEntity);
-                }
-                else{
-                    throw new BaseException(DATABASE_ERROR);
-                }
+            //삭제된 좋아요의 status 확인하기
+            if(status.equals(Status.INACTIVE)){
+                throw new BaseException(ALREADY_POST_UNLIKE);
             }
-            else {
-                throw new BaseException(DELETED_POST);
+            else if(status.equals(Status.ACTIVE)){
+                postLikeEntity.setStatus(Status.INACTIVE);
+                postEntity.decreaseCountLike();
+
+                postLikeRepository.save(postLikeEntity);
+                postRepository.save(postEntity);
+            }
+            else{
+                throw new BaseException(DATABASE_ERROR);
             }
         }
-        else{
+        else {
             throw new BaseException(DELETED_POST);
         }
-
-
     }
 
    /* @Transactional
@@ -662,7 +637,7 @@ public class CommunityService {
         }
     }
 
-    public List<CommunityMainDto> getCommunityScreen() throws BaseException{
+    /*public List<CommunityMainDto> getCommunityScreen() throws BaseException{
         try{
             List<CommunityMainDto> communityMainDtoList;
             communityMainDtoList = communityRepository.getCommunityScreen();
@@ -672,10 +647,36 @@ public class CommunityService {
             throw new BaseException(DATABASE_ERROR);
         }
 
-    }
+    }*/
 
-    public PostScreenDto getPostScreen(Long postId, Long userId) {
-        //Long user_id = communityRepository.findUserIdByUsername(username);
+    public List<CommunityMainDto> getCommunityScreen2() throws BaseException{
+        List<PostEntity> postEntityList = postRepository.findAll();
+
+        List<CommunityMainDto> communityMainDtoList = new ArrayList<>();
+        for(PostEntity postEntity : postEntityList){
+            List<ImgUrlDto> imgUrlDtoList = new ArrayList<>();
+            for(PostImgEntity postImgEntity : postEntity.getPostImgEntities()){
+                ImgUrlDto imgUrlDto = new ImgUrlDto(postImgEntity.getImgUrl());
+
+                imgUrlDtoList.add(imgUrlDto);
+            }
+
+            CommunityMainDto communityMainDto = new CommunityMainDto(
+                    postEntity.getUser().getNickName(),
+                    postEntity.getId(),
+                    postEntity.getTopic(),
+                    postEntity.getContents(),
+                    imgUrlDtoList,
+                    postEntity.getCountLike(),
+                    postEntity.getCountComment(),
+                    ConvertUtil.convertCreatedAt(postEntity.getCreatedAt())
+            );
+            communityMainDtoList.add(communityMainDto);
+        }
+        return communityMainDtoList;
+    }
+   /* public PostScreenDto getPostScreen(Long postId, Long userId) {
+
         try {
           List<CommentInfoDto> commentInfoDtoList = new ArrayList<>(communityRepository.getCommentInfo(postId, userId));
           List<List<CommentInfoDto>> commentInfoDtoMultiList = new ArrayList<>();
@@ -707,10 +708,141 @@ public class CommunityService {
         }catch (Exception exception){
             throw new BaseException(DATABASE_ERROR);
         }
+    }*/
+
+    public PostScreenDto getPostScreen2(Long postId, Long userId){
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
+
+        //commentInfoDto 만들기
+        List<CommentInfoDto> commentInfoDtoList = new ArrayList<>();
+        List<CommentEntity> commentEntities = commentRepository.findByPostAndStatusOrderByGroupNumberAscCreatedAtDesc(postEntity, Status.ACTIVE);
+
+        for(CommentEntity commentEntity : commentEntities){
+           CommentInfoDto commentInfoDto = new CommentInfoDto(
+                   commentEntity.getId(),
+                   commentEntity.getUser().getNickName(),
+                   commentEntity.getUser().getProfileImgUrl(),
+                   commentEntity.getContents(),
+                   commentEntity.getCountLike(),
+                   ConvertUtil.convertCreatedAt(commentEntity.getCreatedAt()),
+                   commentEntity.getGroupNumber(),
+                   commentEntity.getParent_id(),
+                   commentEntity.getCreatedAt().equals(commentEntity.getUpdatedAt()) ? false : true ,
+                   commentLikeRepository.existsByCommentAndUserAndStatus(commentEntity,userEntity,Status.ACTIVE)
+           );
+           commentInfoDtoList.add(commentInfoDto);
+        }
+        //postInfoDto 만들기
+
+        List<ImgUrlDto> imgUrlDtoList = new ArrayList<>();
+        for(PostImgEntity postImgEntity : postEntity.getPostImgEntities()){
+            ImgUrlDto imgUrlDto = new ImgUrlDto(postImgEntity.getImgUrl());
+
+            imgUrlDtoList.add(imgUrlDto);
+        }
+
+        PostInfoDto postInfoDto = new PostInfoDto(
+                postEntity.getUser().getNickName(),
+                postEntity.getUser().getProfileImgUrl(),
+                postEntity.getId(),
+                postEntity.getUser().getId(),
+                postEntity.getTopic(),
+                postEntity.getContents(),
+                imgUrlDtoList,
+                postEntity.getCountLike(),
+                postEntity.getCountComment(),
+                ConvertUtil.convertCreatedAt(postEntity.getCreatedAt()),
+                postLikeRepository.existsByPostAndUserAndStatus(postEntity, userEntity, Status.ACTIVE)
+        );
+
+        List<List<CommentInfoDto>> commentInfoDtoMultiList = new ArrayList<>();
+
+        int i = 0;
+
+        List<CommentInfoDto> commentInfoDtoList1 = new ArrayList<>();
+        //댓글이 없을때도 고려하자
+        if(!commentInfoDtoList.isEmpty()) {
+            for (CommentInfoDto commentInfoDto : commentInfoDtoList) {
+                if (commentInfoDto.getGroupNumber() != i) {
+                    i = commentInfoDto.getGroupNumber();
+                    commentInfoDtoMultiList.add(commentInfoDtoList1);
+
+                    commentInfoDtoList1 = new ArrayList<>();
+                    commentInfoDtoList1.add(commentInfoDto);
+                } else if (commentInfoDto.getGroupNumber() == i) {
+                    commentInfoDtoList1.add(commentInfoDto);
+                }
+            }
+
+            commentInfoDtoMultiList.remove(0);
+            commentInfoDtoMultiList.add(commentInfoDtoList1);
+        }
+        PostScreenDto PostScreenDto = new PostScreenDto(postInfoDto, commentInfoDtoMultiList);
+
+        return PostScreenDto;
+
     }
 
-    /*public PostScreenDto getPostScreen(Long postId, Long userId){
+    public void postReport(Long postId, Long userId, String contents) throws BaseException {
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
 
+    PostEntity postEntity = postRepository.findPostEntityByIdAndStatus(postId, Status.ACTIVE)
+            .orElseThrow(() -> new BaseException(NOT_ACTIVATED_POST));
+
+    PostReportEntity postReportEntity = new PostReportEntity(userEntity, postEntity, contents);
+
+        postReportRepository.save(postReportEntity);
+    }
+
+    public void commentReport(Long commentId, Long userId, String contents) {
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        CommentEntity commentEntity = commentRepository.findCommentEntityByIdAndStatus(commentId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_COMMENT));
+
+        CommentReportEntity commentReportEntity = new CommentReportEntity(userEntity, commentEntity, contents);
+
+        commentReportRepository.save(commentReportEntity);
+    }
+
+    public List<SearchResultScreenDto> getSearchResult(String query) {
+
+        //검색 결과 내보내기
+        return communityRepository.getSearchResult(query);
+    }
+
+
+    /*public List<CommunityScreenDto> getSearchResult(Long userId, String query, Integer sort) {
+        //community_search에 값추가
+        UserEntity userEntity = userRepository.findUserEntityByIdAndStatus(userId, Status.ACTIVE)
+                .orElseThrow(() -> new BaseException(NOT_ACTIVATED_USER));
+
+        CommunitySearchEntity communitySearchEntity = new CommunitySearchEntity(query, userEntity);
+        communitySearchRepository.save(communitySearchEntity);
+
+        //검색 결과 보내기
+        List<CommunityScreenDto> communityScreenDtoList = new ArrayList<>();
+
+        List<PostEntity> postEntityList = postRepository.findAllByContentsAndTopicContainingOrderByCreatedAtDesc(query);
+        for(PostEntity postEntity : postEntityList ){
+            CommunityScreenDto communityScreenDto = new CommunityScreenDto(
+                    userEntity.getNickName(),
+                    postEntity.getId(),
+                    postEntity.getTopic(),
+                    postEntity.getContents(),
+                    postEntity.getImgUrl(),
+                    postEntity.getCountLike(),
+                    postEntity.getCountComment(),
+                    postEntity.getCreatedAt()
+            );
+
+        }
     }*/
 
 }

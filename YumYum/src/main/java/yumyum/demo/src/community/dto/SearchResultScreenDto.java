@@ -4,16 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import yumyum.demo.src.restaurant.dto.ImgUrlDto;
-
-import java.util.List;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 
-public class CommunityMainDto {
+public class SearchResultScreenDto {
     //작성자
     private String nickName;
 
@@ -21,11 +18,12 @@ public class CommunityMainDto {
     private Long postId;
     private String topic;
     private String contents;
-    private List<ImgUrlDto> imgUrlDtoList;
-    private Integer countPostLike;
-    private Integer countComment;
+    private String imgUrl;
+    private Long countPostLike;
+    private Long countComment;
 
     //그 외
     private String createdAt;
+
 
 }

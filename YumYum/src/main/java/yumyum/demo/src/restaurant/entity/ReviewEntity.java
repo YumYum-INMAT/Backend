@@ -34,7 +34,7 @@ public class ReviewEntity extends BaseEntity {
     @Column(nullable = false, columnDefinition = "int default 1")
     private Integer ratingStar;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 200)
     private String contents;
 
     @OneToMany(mappedBy = "review", cascade = CascadeType.ALL)
